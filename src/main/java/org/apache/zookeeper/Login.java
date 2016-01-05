@@ -33,9 +33,11 @@ import javax.security.auth.login.LoginException;
 import javax.security.auth.callback.CallbackHandler;
 
 import org.apache.log4j.Logger;
-import org.apache.zookeeper.client.ZooKeeperSaslClient;
+import org.lab.mars.onem2m.client.ZooKeeperSaslClient;
+
 import javax.security.auth.kerberos.KerberosTicket;
 import javax.security.auth.Subject;
+
 import java.util.Date;
 import java.util.Random;
 import java.util.Set;

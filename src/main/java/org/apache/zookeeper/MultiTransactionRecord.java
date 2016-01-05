@@ -17,15 +17,19 @@
 
 package org.apache.zookeeper;
 
-import org.apache.jute.InputArchive;
-import org.apache.jute.OutputArchive;
-import org.apache.jute.Record;
-import org.apache.zookeeper.proto.*;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import org.lab.mars.onem2m.jute.InputArchive;
+import org.lab.mars.onem2m.jute.OutputArchive;
+import org.lab.mars.onem2m.jute.Record;
+import org.lab.mars.onem2m.proto.CheckVersionRequest;
+import org.lab.mars.onem2m.proto.CreateRequest;
+import org.lab.mars.onem2m.proto.DeleteRequest;
+import org.lab.mars.onem2m.proto.MultiHeader;
+import org.lab.mars.onem2m.proto.SetDataRequest;
 
 /**
  * Encodes a composite transaction.  In the wire format, each transaction

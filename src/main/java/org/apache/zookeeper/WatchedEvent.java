@@ -17,9 +17,9 @@
  */
 package org.apache.zookeeper;
 
-import org.apache.zookeeper.proto.WatcherEvent;
 import org.apache.zookeeper.Watcher.Event.EventType;
 import org.apache.zookeeper.Watcher.Event.KeeperState;
+import org.lab.mars.onem2m.proto.WatcherEvent;
 
 /**
  *  A WatchedEvent represents a change on the ZooKeeper that a Watcher

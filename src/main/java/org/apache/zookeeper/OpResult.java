@@ -18,7 +18,7 @@
 package org.apache.zookeeper;
 
 
-import org.apache.zookeeper.data.Stat;
+import org.lab.mars.onem2m.data.Stat;
 
 /**
  * Encodes the result of a single part of a multiple operation commit.
