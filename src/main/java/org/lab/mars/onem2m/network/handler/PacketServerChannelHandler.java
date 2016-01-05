@@ -24,11 +24,12 @@ public class PacketServerChannelHandler extends
 	private static Logger LOG = LoggerFactory
 			.getLogger(PacketServerChannelHandler.class);
 	private ServerCnxnFactory serverCnxnFactory;
-	private ConcurrentHashMap<String,Channel> ipAndChannels=new ConcurrentHashMap<>();
+	private ConcurrentHashMap<String, Channel> ipAndChannels = new ConcurrentHashMap<>();
 	private String self;
+
 	public PacketServerChannelHandler(ServerCnxnFactory serverCnxnFactory) {
-//		this.serverCnxnFactory = serverCnxnFactory;
-//		self=serverCnxnFactory.getMyIp();
+	   this.serverCnxnFactory = serverCnxnFactory;
+	   self=serverCnxnFactory.getMyIp();
 	}
 
 	@SuppressWarnings("deprecation")
@@ -37,22 +38,21 @@ public class PacketServerChannelHandler extends
 
 	@Override
 	public void channelRead0(ChannelHandlerContext ctx, Object msg) {
-		System.out.println(msg.toString());
-//		M2mPacket m2mPacket = (M2mPacket) msg;
-//		if (preProcessPacket(m2mPacket)) {
-//			NettyServerCnxn nettyServerCnxn = ctx.attr(STATE).get();
-//			nettyServerCnxn.receiveMessage(ctx, m2mPacket);
-//		} else {
-//			return;
-//		}
+		M2mPacket m2mPacket = (M2mPacket) msg;
+		if (preProcessPacket(m2mPacket)) {
+			NettyServerCnxn nettyServerCnxn = ctx.attr(STATE).get();
+			nettyServerCnxn.receiveMessage(ctx, m2mPacket);
+		} else {
+			return;
+		}
 	}
 
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        
-//		ctx.attr(STATE).set(
-//				new NettyServerCnxn(ctx.channel(), serverCnxnFactory
-//						.getZkServer(), serverCnxnFactory));
+
+		ctx.attr(STATE).set(
+				new NettyServerCnxn(ctx.channel(), serverCnxnFactory
+						.getZkServer(), serverCnxnFactory));
 		ctx.fireChannelRegistered();
 	};
 
@@ -68,28 +68,29 @@ public class PacketServerChannelHandler extends
 		}
 		ctx.close();
 	}
+
 	/**
 	 * 对数据包进行处理
+	 * 
 	 * @param m2mPacket
 	 * @return
 	 */
 	public boolean preProcessPacket(M2mPacket m2mPacket) {
 
 		String key = m2mPacket.getM2mRequestHeader().getKey();
-		NetworkPool networkPool=new NetworkPool();
-		String server=networkPool.getSock(key);
-		if(server.equals(self)){
+		NetworkPool networkPool = new NetworkPool();
+		String server = networkPool.getSock(key);//把server
+		if (server.equals(self)) {
 			return true;
 		}
-		if(ipAndChannels.containsKey(server)){
+		if (ipAndChannels.containsKey(server)) {
 			ipAndChannels.get(server).writeAndFlush(m2mPacket);
-		}
-		else{
-			TcpClient tcpClient=new TcpClient();
+		} else {
+			TcpClient tcpClient = new TcpClient();
 			tcpClient.connectionOne(server, 11);
 			ipAndChannels.put(server, tcpClient.getChannel());
 			tcpClient.write(m2mPacket);
-			
+
 		}
 		return false;
 	}

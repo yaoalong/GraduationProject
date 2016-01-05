@@ -7,7 +7,6 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
 import org.lab.mars.onem2m.network.intialize.PacketClientChannelInitializer;
-import org.lab.mars.onem2m.test.Test;
 
 /**
  * Created by Administrator on 2015/12/21.
