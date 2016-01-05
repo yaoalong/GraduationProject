@@ -54,7 +54,6 @@ import org.lab.mars.onem2m.server.DataTree.ProcessTxnResult;
 import org.lab.mars.onem2m.server.RequestProcessor.RequestProcessorException;
 import org.lab.mars.onem2m.server.SessionTracker.Session;
 import org.lab.mars.onem2m.server.SessionTracker.SessionExpirer;
-import org.lab.mars.onem2m.server.quorum.ReadOnlyZooKeeperServer;
 import org.lab.mars.onem2m.txn.M2mTxnHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -590,10 +589,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
             BinaryOutputArchive bos = BinaryOutputArchive.getArchive(baos);
             bos.writeInt(-1, "len");
             rsp.serialize(bos, "connect");
-            if (!cnxn.isOldClient) {
-                bos.writeBool(
-                        this instanceof ReadOnlyZooKeeperServer, "readOnly");
-            }
+          
             baos.close();
             ByteBuffer bb = ByteBuffer.wrap(baos.toByteArray());
             bb.putInt(bb.remaining() - 4).rewind();

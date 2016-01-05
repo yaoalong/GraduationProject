@@ -4,6 +4,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.AttributeKey;
 
+import org.lab.mars.onem2m.consistent.hash.NetworkPool;
 import org.lab.mars.onem2m.proto.M2mPacket;
 import org.lab.mars.onem2m.server.NettyServerCnxn;
 import org.lab.mars.onem2m.server.ServerCnxnFactory;
@@ -59,11 +60,16 @@ public class PacketServerChannelHandler extends
 		}
 		ctx.close();
 	}
-
+	/**
+	 * 对数据包进行处理
+	 * @param m2mPacket
+	 * @return
+	 */
 	public boolean preProcessPacket(M2mPacket m2mPacket) {
 
 		String key = m2mPacket.getM2mRequestHeader().getKey();
-
+		NetworkPool networkPool=new NetworkPool();
+		String server=networkPool.getSock(key);
 		return false;
 	}
 }

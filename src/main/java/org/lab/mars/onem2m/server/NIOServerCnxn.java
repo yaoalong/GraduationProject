@@ -46,7 +46,6 @@ import org.lab.mars.onem2m.proto.RequestHeader;
 import org.lab.mars.onem2m.proto.WatcherEvent;
 import org.lab.mars.onem2m.server.quorum.Leader;
 import org.lab.mars.onem2m.server.quorum.LeaderZooKeeperServer;
-import org.lab.mars.onem2m.server.quorum.ReadOnlyZooKeeperServer;
 import org.lab.mars.onem2m.server.util.OSMXBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -655,10 +654,6 @@ public class NIOServerCnxn extends ServerCnxn {
             else {   
                 pw.print("Zookeeper version: ");
                 pw.println(Version.getFullVersion());
-                if (zkServer instanceof ReadOnlyZooKeeperServer) {
-                    pw.println("READ-ONLY mode; serving only " +
-                               "read-only clients");
-                }
                 if (len == statCmd) {
                     LOG.info("Stat command output");
                     pw.println("Clients:");
@@ -806,8 +801,6 @@ public class NIOServerCnxn extends ServerCnxn {
         public void commandRun() {
             if (zkServer == null) {
                 pw.print("null");
-            } else if (zkServer instanceof ReadOnlyZooKeeperServer) {
-                pw.print("ro");
             } else {
                 pw.print("rw");
             }
