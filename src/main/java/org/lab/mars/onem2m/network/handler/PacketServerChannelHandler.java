@@ -8,13 +8,13 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.AttributeKey;
 
 import org.lab.mars.onem2m.consistent.hash.NetworkPool;
-import org.lab.mars.onem2m.network.Tcp;
 import org.lab.mars.onem2m.network.TcpClient;
 import org.lab.mars.onem2m.proto.M2mPacket;
 import org.lab.mars.onem2m.server.NettyServerCnxn;
 import org.lab.mars.onem2m.server.ServerCnxnFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+;
 
 /**
  * Created by Administrator on 2015/12/21.
@@ -87,11 +87,19 @@ public class PacketServerChannelHandler extends
 			ipAndChannels.get(server).writeAndFlush(m2mPacket);
 		} else {
 			TcpClient tcpClient = new TcpClient();
-			tcpClient.connectionOne(server, 11);
+			String[] splitStrings=spilitString(server);
+			tcpClient.connectionOne(splitStrings[0], Integer.valueOf(splitStrings[1]));
 			ipAndChannels.put(server, tcpClient.getChannel());
 			tcpClient.write(m2mPacket);
 
 		}
 		return false;
+	}
+	/*
+	 * 将server拆分为ip以及port
+	 */
+	private  String[] spilitString(String ip){
+		String[] splitMessage=ip.split(":");
+		return splitMessage;
 	}
 }
