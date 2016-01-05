@@ -22,96 +22,108 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 
 import org.lab.mars.onem2m.network.TcpServer;
+import org.lab.mars.onem2m.server.quorum.QuorumPeer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class NettyServerCnxnFactory extends ServerCnxnFactory {
-    private static final Logger LOG = LoggerFactory.getLogger(NettyServerCnxnFactory.class);
-    private Integer clientPort;
-    private TcpServer tcpServer;
+	private static final Logger LOG = LoggerFactory
+			.getLogger(NettyServerCnxnFactory.class);
+	private Integer clientPort;
+	private TcpServer tcpServer;
+	/*
+	 * 获取本机的ip地址
+	 */
+	private String myIp;
+	@Override
+	public int getLocalPort() {
+		return 0;
+	}
 
-    @Override
-    public int getLocalPort() {
-        return 0;
-    }
+	@Override
+	public Iterable<ServerCnxn> getConnections() {
+		return null;
+	}
 
-    @Override
-    public Iterable<ServerCnxn> getConnections() {
-        return null;
-    }
+	@Override
+	public void closeSession(long sessionId) {
 
-    @Override
-    public void closeSession(long sessionId) {
+	}
 
-    }
+	public void configure(Integer clientPort, int maxClientCnxns)
+			throws IOException {
+		this.clientPort = clientPort;
+		tcpServer = new TcpServer(this);
 
-    public void configure(Integer clientPort, int maxClientCnxns) throws IOException {
-        this.clientPort = clientPort;
-        tcpServer=new TcpServer(this);
+	}
 
-    }
+	@Override
+	public int getMaxClientCnxnsPerHost() {
+		return 0;
+	}
 
-    @Override
-    public int getMaxClientCnxnsPerHost() {
-        return 0;
-    }
+	@Override
+	public void setMaxClientCnxnsPerHost(int max) {
 
-    @Override
-    public void setMaxClientCnxnsPerHost(int max) {
-    	
+	}
 
-    }
+	public void startup() throws IOException, InterruptedException {
+		start();
+		// m2MServer.startdata();
+		// m2MServer.startup();
+		// setM2MServer(m2MServer);
+	}
 
+	@Override
+	public void join() throws InterruptedException {
 
-    public void startup() throws IOException, InterruptedException {
-        start();
-     // m2MServer.startdata();
-       // m2MServer.startup();
-       // setM2MServer(m2MServer);
-    }
+	}
 
-    @Override
-    public void join() throws InterruptedException {
+	@Override
+	public void shutdown() {
 
-    }
+	}
 
-    @Override
-    public void shutdown() {
+	@Override
+	public void start() {
 
-    }
-@Override
-    public void start() {
-	
-        LOG.info("binding to port: " + clientPort);
-        try {
-            tcpServer.bind("localhost", clientPort);
+		LOG.info("binding to port: " + clientPort);
+		try {
+			tcpServer.bind("localhost", clientPort);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
- 
-    }
 
-    @Override
-    public void closeAll() {
+	}
 
-    }
+	@Override
+	public void closeAll() {
 
-    @Override
-    public InetSocketAddress getLocalAddress() {
-        return null;
-    }
+	}
+
+	@Override
+	public InetSocketAddress getLocalAddress() {
+		return null;
+	}
 
 	@Override
 	public void configure(InetSocketAddress addr, int maxClientCnxns)
 			throws IOException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void startup(ZooKeeperServer zkServer) throws IOException,
 			InterruptedException {
-		// TODO Auto-generated method stub
-		
+
+	}
+
+	public String getMyIp() {
+		return myIp;
+	}
+
+	public void setMyIp(String myIp) {
+		this.myIp = myIp;
 	}
 }

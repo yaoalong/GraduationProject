@@ -306,4 +306,10 @@ public class NIOServerCnxnFactory extends ServerCnxnFactory implements Runnable 
     public Iterable<ServerCnxn> getConnections() {
         return cnxns;
     }
+
+	@Override
+	public String getMyIp() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

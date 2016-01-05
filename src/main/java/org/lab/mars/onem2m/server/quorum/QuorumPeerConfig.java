@@ -65,6 +65,7 @@ public class QuorumPeerConfig {
         new HashMap<Long, QuorumServer>();
 
     protected long serverId;
+    protected String myIp;
     protected HashMap<Long, Long> serverWeight = new HashMap<Long, Long>();
     protected HashMap<Long, Long> serverGroup = new HashMap<Long, Long>();
     protected int numGroups = 0;
@@ -364,7 +365,7 @@ public class QuorumPeerConfig {
                         + " is not a number");
             }
             
-            // Warn about inconsistent peer type
+            myIp=servers.get(serverId).addr.getHostName();
             LearnerType roleByServersList = observers.containsKey(serverId) ? LearnerType.OBSERVER
                     : LearnerType.PARTICIPANT;
             if (roleByServersList != peerType) {
@@ -421,4 +422,13 @@ public class QuorumPeerConfig {
     public Boolean getQuorumListenOnAllIPs() {
         return quorumListenOnAllIPs;
     }
+
+	public String getMyIp() {
+		return myIp;
+	}
+
+	public void setMyIp(String myIp) {
+		this.myIp = myIp;
+	}
+    
 }

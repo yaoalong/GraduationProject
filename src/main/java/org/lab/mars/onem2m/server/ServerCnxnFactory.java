@@ -85,7 +85,7 @@ public abstract class ServerCnxnFactory {
     public abstract void shutdown();
 
     public abstract void start() ;
-
+   public abstract String getMyIp();
     protected ZooKeeperServer zkServer;
     final public void setZooKeeperServer(ZooKeeperServer zk) {
         this.zkServer = zk;

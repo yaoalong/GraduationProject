@@ -1,10 +1,15 @@
 package org.lab.mars.onem2m.network.handler;
 
+import java.util.concurrent.ConcurrentHashMap;
+
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.AttributeKey;
 
 import org.lab.mars.onem2m.consistent.hash.NetworkPool;
+import org.lab.mars.onem2m.network.Tcp;
+import org.lab.mars.onem2m.network.TcpClient;
 import org.lab.mars.onem2m.proto.M2mPacket;
 import org.lab.mars.onem2m.server.NettyServerCnxn;
 import org.lab.mars.onem2m.server.ServerCnxnFactory;
@@ -19,9 +24,11 @@ public class PacketServerChannelHandler extends
 	private static Logger LOG = LoggerFactory
 			.getLogger(PacketServerChannelHandler.class);
 	private ServerCnxnFactory serverCnxnFactory;
-
+	private ConcurrentHashMap<String,Channel> ipAndChannels=new ConcurrentHashMap<>();
+	private String self;
 	public PacketServerChannelHandler(ServerCnxnFactory serverCnxnFactory) {
-		this.serverCnxnFactory = serverCnxnFactory;
+//		this.serverCnxnFactory = serverCnxnFactory;
+//		self=serverCnxnFactory.getMyIp();
 	}
 
 	@SuppressWarnings("deprecation")
@@ -30,21 +37,22 @@ public class PacketServerChannelHandler extends
 
 	@Override
 	public void channelRead0(ChannelHandlerContext ctx, Object msg) {
-		M2mPacket m2mPacket = (M2mPacket) msg;
-		if (preProcessPacket(m2mPacket)) {
-
-		} else {
-			NettyServerCnxn nettyServerCnxn = ctx.attr(STATE).get();
-			nettyServerCnxn.receiveMessage(ctx, m2mPacket);
-		}
+		System.out.println(msg.toString());
+//		M2mPacket m2mPacket = (M2mPacket) msg;
+//		if (preProcessPacket(m2mPacket)) {
+//			NettyServerCnxn nettyServerCnxn = ctx.attr(STATE).get();
+//			nettyServerCnxn.receiveMessage(ctx, m2mPacket);
+//		} else {
+//			return;
+//		}
 	}
 
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
-
-		ctx.attr(STATE).set(
-				new NettyServerCnxn(ctx.channel(), serverCnxnFactory
-						.getZkServer(), serverCnxnFactory));
+        
+//		ctx.attr(STATE).set(
+//				new NettyServerCnxn(ctx.channel(), serverCnxnFactory
+//						.getZkServer(), serverCnxnFactory));
 		ctx.fireChannelRegistered();
 	};
 
@@ -70,6 +78,19 @@ public class PacketServerChannelHandler extends
 		String key = m2mPacket.getM2mRequestHeader().getKey();
 		NetworkPool networkPool=new NetworkPool();
 		String server=networkPool.getSock(key);
+		if(server.equals(self)){
+			return true;
+		}
+		if(ipAndChannels.containsKey(server)){
+			ipAndChannels.get(server).writeAndFlush(m2mPacket);
+		}
+		else{
+			TcpClient tcpClient=new TcpClient();
+			tcpClient.connectionOne(server, 11);
+			ipAndChannels.put(server, tcpClient.getChannel());
+			tcpClient.write(m2mPacket);
+			
+		}
 		return false;
 	}
 }

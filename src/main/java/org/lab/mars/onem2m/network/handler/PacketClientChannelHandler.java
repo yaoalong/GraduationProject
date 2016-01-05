@@ -14,7 +14,7 @@ import org.lab.mars.onem2m.test.Test;
 public class PacketClientChannelHandler extends
 		SimpleChannelInboundHandler<Object> {
 	private M2mPacket m2mPacket;
-
+   
 	/**
 	 * Creates a client-side handler.
 	 */
@@ -27,7 +27,6 @@ public class PacketClientChannelHandler extends
 	public void channelActive(ChannelHandlerContext ctx) {
 		// Send the first message if this handler is a client-side handler.
 		ctx.writeAndFlush(m2mPacket);
-		System.out.println("放了");
 	}
 
 	@Override

@@ -131,7 +131,7 @@ public class QuorumPeerMain {
 //                                config.getMaxClientCnxns());
           NettyServerCnxnFactory cnxnFactory=new NettyServerCnxnFactory();
           cnxnFactory.configure(config.getClientPortAddress().getPort(), 5);
-  
+         cnxnFactory.setMyIp(config.getMyIp());
           quorumPeer = new QuorumPeer();
           quorumPeer.setClientPortAddress(config.getClientPortAddress());
           quorumPeer.setTxnFactory(new FileTxnSnapLog(
