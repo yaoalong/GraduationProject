@@ -336,11 +336,8 @@ public class ZKDatabase {
      * m2m内存数据库处理事务请求
      */
     public  ProcessTxnResult processTxn(M2mTxnHeader hdr,M2mRecord txn){
-    	return new ProcessTxnResult();
+    	return m2mDataBase.processTxn(hdr, txn);
     	
-    }
-    public ProcessTxnResult processTxn(TxnHeader hdr, Record txn) {
-        return dataTree.processTxn(hdr, txn);
     }
 
     /**
@@ -374,20 +371,6 @@ public class ZKDatabase {
         return dataTree.convertLong(aclL);
     }
     
-
-//    /**
-//     * get data and stat for a path 
-//     * @param path the path being queried
-//     * @param stat the stat for this path
-//     * @param watcher the watcher function
-//     * @return
-//     * @throws KeeperException.NoNodeException
-//     */
-//    public byte[] getData(String path, Stat stat, Watcher watcher) 
-//    throws KeeperException.NoNodeException {
-//        return dataTree.getData(path, stat, watcher);
-//    }
-     
     public Object getNode(String key){
     	return m2mDataBase.retrieve(key);
     }
