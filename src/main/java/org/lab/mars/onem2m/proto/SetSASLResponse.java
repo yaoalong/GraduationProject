@@ -76,7 +76,6 @@ public class SetSASLResponse implements Record {
     if (!(peer_ instanceof SetSASLResponse)) {
       throw new ClassCastException("Comparing different types of records.");
     }
-    SetSASLResponse peer = (SetSASLResponse) peer_;
     int ret = 0;
     if (ret != 0) return ret;
      return ret;
@@ -88,7 +87,6 @@ public class SetSASLResponse implements Record {
     if (peer_ == this) {
       return true;
     }
-    SetSASLResponse peer = (SetSASLResponse) peer_;
     boolean ret = false;
     if (!ret) return ret;
      return ret;

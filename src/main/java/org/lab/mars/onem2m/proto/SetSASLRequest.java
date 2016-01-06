@@ -76,7 +76,6 @@ public class SetSASLRequest implements Record {
     if (!(peer_ instanceof SetSASLRequest)) {
       throw new ClassCastException("Comparing different types of records.");
     }
-    SetSASLRequest peer = (SetSASLRequest) peer_;
     int ret = 0;
     if (ret != 0) return ret;
      return ret;
@@ -88,7 +87,6 @@ public class SetSASLRequest implements Record {
     if (peer_ == this) {
       return true;
     }
-    SetSASLRequest peer = (SetSASLRequest) peer_;
     boolean ret = false;
     if (!ret) return ret;
      return ret;

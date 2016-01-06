@@ -39,16 +39,12 @@ public class ConnectionBean implements ConnectionMXBean, ZKMBeanInfo {
     private final ServerCnxn connection;
     private final Stats stats;
 
-    private final ZooKeeperServer zk;
-    
     private final String remoteIP;
     private final long sessionId;
 
     public ConnectionBean(ServerCnxn connection,ZooKeeperServer zk){
         this.connection = connection;
         this.stats = connection;
-        this.zk = zk;
-        
         InetSocketAddress sockAddr = connection.getRemoteSocketAddress();
         if (sockAddr == null) {
             remoteIP = "Unknown";

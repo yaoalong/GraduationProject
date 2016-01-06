@@ -694,11 +694,6 @@ public class AuthFastLeaderElection implements Election {
             }
         }
 
-        public boolean queueEmpty() {
-            return (sendqueue.isEmpty() || ackset.isEmpty() || recvqueue
-                    .isEmpty());
-        }
-
         Messenger(int threads, DatagramSocket s) {
             mySocket = s;
             ackset =  Collections.<Long>newSetFromMap(new ConcurrentHashMap<Long, Boolean>());
