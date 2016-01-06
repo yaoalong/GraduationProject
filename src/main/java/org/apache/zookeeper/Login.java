@@ -65,8 +65,6 @@ public class Login {
     private Thread t = null;
     private boolean isKrbTicket = false;
     private boolean isUsingTicketCache = false;
-    private boolean isUsingKeytab = false;
-
     /** Random number generator */
     private static Random rng = new Random();
 
@@ -107,7 +105,6 @@ public class Login {
             }
             if (entry.getOptions().get("keyTab") != null) {
                 keytabFile = (String)entry.getOptions().get("keyTab");
-                isUsingKeytab = true;
             }
             if (entry.getOptions().get("principal") != null) {
                 principal = (String)entry.getOptions().get("principal");
