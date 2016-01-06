@@ -35,18 +35,13 @@ import org.lab.mars.onem2m.data.Stat;
 import org.lab.mars.onem2m.jute.InputArchive;
 import org.lab.mars.onem2m.jute.M2mRecord;
 import org.lab.mars.onem2m.jute.OutputArchive;
-import org.lab.mars.onem2m.jute.Record;
 import org.lab.mars.onem2m.persistence.FileTxnSnapLog;
-import org.lab.mars.onem2m.persistence.FileTxnSnapLog.PlayBackListener;
 import org.lab.mars.onem2m.reflection.ResourceReflection;
 import org.lab.mars.onem2m.server.DataTree.ProcessTxnResult;
 import org.lab.mars.onem2m.server.cassandra.interface4.M2MDataBase;
 import org.lab.mars.onem2m.server.quorum.Leader.Proposal;
 import org.lab.mars.onem2m.server.util.SerializeUtils;
 import org.lab.mars.onem2m.txn.M2mTxnHeader;
-import org.lab.mars.onem2m.txn.TxnHeader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This class maintains the in memory database of zookeeper
@@ -55,8 +50,6 @@ import org.slf4j.LoggerFactory;
  * and snapshots from the disk.
  */
 public class ZKDatabase {
-    
-    private static final Logger LOG = LoggerFactory.getLogger(ZKDatabase.class);
     
     private M2MDataBase m2mDataBase;
     
@@ -89,7 +82,6 @@ public class ZKDatabase {
     public ZKDatabase(FileTxnSnapLog snapLog) {
         dataTree = new DataTree();
         sessionsWithTimeouts = new ConcurrentHashMap<Long, Integer>();
-      //  this.snapLog = snapLog;
     }
     
     /**
@@ -215,19 +207,7 @@ public class ZKDatabase {
      * @throws IOException
      */
     public long loadDataBase() throws IOException {
-        PlayBackListener listener=new PlayBackListener(){
-            public void onTxnLoaded(TxnHeader hdr,Record txn){
-                Request r = new Request(null, 0, hdr.getCxid(),hdr.getType(),
-                        null);
-                r.txn = txn;
-                r.hdr = hdr;
-                r.zxid = hdr.getZxid();
-              //  addCommittedProposal(r);
-            }
-        };
-        
-     //   long zxid = snapLog.restore(dataTree,sessionsWithTimeouts,listener);
-        long zxid=0;//TODO 修改為從cassandra裡面獲取
+        long zxid=m2mDataBase.getLastProcessZxid();
         initialized = true;
         return zxid;
     }
