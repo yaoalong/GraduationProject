@@ -27,6 +27,7 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.Statement;
+import com.datastax.driver.core.querybuilder.Delete;
 import com.datastax.driver.core.querybuilder.Insert;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
@@ -137,7 +138,7 @@ public class M2MDataBaseImpl implements M2MDataBase {
 	public Long update(String key, Map<String, Object> updated) {
 		try {
 			Update update = query().update(keyspace, table);
-			update.where(eq("key", key));
+			update.where(eq("zxid", key));
 			updated.forEach((k, value) -> {
 				update.with(set(k, value));
 			});
@@ -233,13 +234,36 @@ public class M2MDataBaseImpl implements M2MDataBase {
 	@Override
 	public boolean truncate(Long zxid) {
 		try {
-			Statement delete = query().delete().from(keyspace, table)
-					.where(gte("zxid", zxid));
-			session.execute(delete);
+			Select.Selection selection = query().select();
+			Select select = selection.from(keyspace, table);
+			select.where(gte("zxid",zxid ));
+			select.allowFiltering();
+			ResultSet resultSet = session.execute(select);
+			if (resultSet == null) {
+				return true;
+			}
+	
+
+			for (Row row : resultSet.all()) {
+				System.out.println("执行");
+				ColumnDefinitions columnDefinitions = resultSet
+						.getColumnDefinitions();
+				columnDefinitions.forEach(d -> {
+					String name = d.getName();
+					
+					if(name.equals("zxid")){
+						Delete deletion=query().delete().from(keyspace, table);
+						Statement delete =deletion
+								.where(eq("label", 0)).and(eq("zxid", row.getObject(name)));
+						session.execute(delete);
+					}
+				});
+			}
+
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			return false;
 		}
-		return true;
+	return true;
 	}
 }

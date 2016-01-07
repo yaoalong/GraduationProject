@@ -9,6 +9,6 @@ public class M2mDataBaseTest {
 	public void test(){
 		M2MDataBaseImpl m2mDataBase=new M2MDataBaseImpl(false,"tests","student","192.168.10.139");
 		System.out.println(m2mDataBase.getLastProcessZxid());
-		
+		m2mDataBase.truncate((long) 4);
 	}
 }
