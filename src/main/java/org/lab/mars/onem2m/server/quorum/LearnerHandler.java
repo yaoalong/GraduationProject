@@ -419,7 +419,7 @@ public class LearnerHandler extends Thread {
 										// send a trunc message before sending
 										// the diff
 										packetToSend = Leader.TRUNC;
-										zxidToSend = prevProposalZxid;
+										zxidToSend = prevProposalZxid;//确认前面的不需要进行处理
 										updates = zxidToSend;
 									}
 								}

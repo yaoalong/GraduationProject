@@ -27,15 +27,11 @@ import javax.management.ObjectName;
 
 import org.lab.mars.onem2m.jmx.MBeanRegistry;
 import org.lab.mars.onem2m.jmx.ZKMBeanInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of connection MBean interface.
  */
 public class ConnectionBean implements ConnectionMXBean, ZKMBeanInfo {
-    private static final Logger LOG = LoggerFactory.getLogger(ConnectionBean.class);
-
     private final ServerCnxn connection;
     private final Stats stats;
 

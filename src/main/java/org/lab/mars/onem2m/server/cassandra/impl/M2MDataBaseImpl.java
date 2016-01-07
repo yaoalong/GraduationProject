@@ -2,6 +2,7 @@ package org.lab.mars.onem2m.server.cassandra.impl;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.set;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.gte;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -228,5 +229,17 @@ public class M2MDataBaseImpl implements M2MDataBase {
 			ex.printStackTrace();
 		}
 		return result;
+	}
+	@Override
+	public boolean truncate(Long zxid) {
+		try {
+			Statement delete = query().delete().from(keyspace, table)
+					.where(gte("zxid", zxid));
+			session.execute(delete);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return false;
+		}
+		return true;
 	}
 }

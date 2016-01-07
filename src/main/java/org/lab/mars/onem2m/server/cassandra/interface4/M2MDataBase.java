@@ -18,6 +18,8 @@ public interface M2MDataBase {
 	Long delete(String key);
 
 	Long update(String key, Map<String, Object> updated);
+	
+	boolean truncate(Long zxid);
 
 	void close();
 
