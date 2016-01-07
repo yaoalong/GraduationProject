@@ -18,7 +18,7 @@
 
 package org.lab.mars.onem2m.server.auth;
 
-import org.apache.zookeeper.KeeperException;
+import org.lab.mars.onem2m.KeeperException;
 import org.lab.mars.onem2m.server.ServerCnxn;
 
 public class SASLAuthenticationProvider implements AuthenticationProvider {

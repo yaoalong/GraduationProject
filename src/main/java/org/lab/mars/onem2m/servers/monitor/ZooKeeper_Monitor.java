@@ -4,12 +4,12 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.WatchedEvent;
-import org.apache.zookeeper.Watcher;
-import org.apache.zookeeper.Watcher.Event.EventType;
-import org.apache.zookeeper.Watcher.Event.KeeperState;
-import org.apache.zookeeper.ZooKeeper;
+import org.lab.mars.onem2m.KeeperException;
+import org.lab.mars.onem2m.WatchedEvent;
+import org.lab.mars.onem2m.Watcher;
+import org.lab.mars.onem2m.ZooKeeper;
+import org.lab.mars.onem2m.Watcher.Event.EventType;
+import org.lab.mars.onem2m.Watcher.Event.KeeperState;
 import org.lab.mars.onem2m.consistent.hash.NetworkPool;
 
 /*

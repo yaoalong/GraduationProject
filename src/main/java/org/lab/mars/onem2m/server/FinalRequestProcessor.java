@@ -22,10 +22,10 @@ import io.netty.channel.ChannelHandlerContext;
 
 import java.nio.ByteBuffer;
 
-import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.KeeperException.Code;
-import org.apache.zookeeper.KeeperException.SessionMovedException;
-import org.apache.zookeeper.ZooDefs.OpCode;
+import org.lab.mars.onem2m.KeeperException;
+import org.lab.mars.onem2m.KeeperException.Code;
+import org.lab.mars.onem2m.KeeperException.SessionMovedException;
+import org.lab.mars.onem2m.ZooDefs.OpCode;
 import org.lab.mars.onem2m.jute.M2mRecord;
 import org.lab.mars.onem2m.proto.GetDataRequest;
 import org.lab.mars.onem2m.proto.M2mCreateResponse;

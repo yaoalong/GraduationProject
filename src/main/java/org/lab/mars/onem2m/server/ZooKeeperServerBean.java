@@ -22,7 +22,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
 
-import org.apache.zookeeper.Version;
+import org.lab.mars.onem2m.Version;
 import org.lab.mars.onem2m.jmx.ZKMBeanInfo;
 
 /**

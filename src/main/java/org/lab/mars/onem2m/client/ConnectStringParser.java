@@ -31,7 +31,7 @@ import org.lab.mars.onem2m.common.PathUtils;
  * The chrootPath member should be replaced by a Path object in issue
  * ZOOKEEPER-849.
  * 
- * @see org.apache.zookeeper.ZooKeeper
+ * @see org.lab.mars.onem2m.ZooKeeper
  */
 public final class ConnectStringParser {
     private static final int DEFAULT_PORT = 2181;

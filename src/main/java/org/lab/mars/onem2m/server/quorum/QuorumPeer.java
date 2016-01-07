@@ -593,7 +593,6 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 		if (!zkDb.isInitialized()) {
 			loadDataBase();
 		}
-		System.out.println("我的zxid是:"+m2mDataBase.getLastProcessZxid());
 		return m2mDataBase.getLastProcessZxid();
 	}
 

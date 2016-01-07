@@ -33,8 +33,8 @@ import java.util.Random;
 
 import javax.security.sasl.SaslException;
 
-import org.apache.zookeeper.Environment;
-import org.apache.zookeeper.KeeperException.SessionExpiredException;
+import org.lab.mars.onem2m.Environment;
+import org.lab.mars.onem2m.KeeperException.SessionExpiredException;
 import org.lab.mars.onem2m.data.ACL;
 import org.lab.mars.onem2m.data.Id;
 import org.lab.mars.onem2m.data.StatPersisted;

@@ -3,7 +3,7 @@ package org.lab.mars.onem2m.network.handler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
-import org.apache.zookeeper.KeeperException;
+import org.lab.mars.onem2m.KeeperException;
 import org.lab.mars.onem2m.proto.M2mPacket;
 import org.lab.mars.onem2m.test.Test;
 

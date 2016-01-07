@@ -34,9 +34,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.apache.zookeeper.Environment;
-import org.apache.zookeeper.Version;
-import org.apache.zookeeper.WatchedEvent;
+import org.lab.mars.onem2m.Environment;
+import org.lab.mars.onem2m.Version;
+import org.lab.mars.onem2m.WatchedEvent;
 import org.lab.mars.onem2m.data.Id;
 import org.lab.mars.onem2m.jute.BinaryInputArchive;
 import org.lab.mars.onem2m.jute.BinaryOutputArchive;

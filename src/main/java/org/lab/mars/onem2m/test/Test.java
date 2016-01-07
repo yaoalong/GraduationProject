@@ -1,6 +1,6 @@
 package org.lab.mars.onem2m.test;
 
-import org.apache.zookeeper.ZooDefs;
+import org.lab.mars.onem2m.ZooDefs;
 import org.lab.mars.onem2m.proto.M2mCreateRequest;
 import org.lab.mars.onem2m.proto.M2mCreateResponse;
 import org.lab.mars.onem2m.proto.M2mPacket;

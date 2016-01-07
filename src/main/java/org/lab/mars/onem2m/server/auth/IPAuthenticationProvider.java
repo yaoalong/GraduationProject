@@ -18,7 +18,7 @@
 
 package org.lab.mars.onem2m.server.auth;
 
-import org.apache.zookeeper.KeeperException;
+import org.lab.mars.onem2m.KeeperException;
 import org.lab.mars.onem2m.data.Id;
 import org.lab.mars.onem2m.server.ServerCnxn;
 

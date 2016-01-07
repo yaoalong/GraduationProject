@@ -20,9 +20,9 @@ package org.lab.mars.onem2m.server;
 
 import java.io.PrintWriter;
 
-import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.KeeperException.SessionExpiredException;
-import org.apache.zookeeper.KeeperException.SessionMovedException;
+import org.lab.mars.onem2m.KeeperException;
+import org.lab.mars.onem2m.KeeperException.SessionExpiredException;
+import org.lab.mars.onem2m.KeeperException.SessionMovedException;
 
 /**
  * This is the basic interface that ZooKeeperServer uses to track sessions. The

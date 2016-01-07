@@ -17,12 +17,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.apache.zookeeper.Environment;
-import org.apache.zookeeper.Version;
-import org.apache.zookeeper.WatchedEvent;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.MessageEvent;
+import org.lab.mars.onem2m.Environment;
+import org.lab.mars.onem2m.Version;
+import org.lab.mars.onem2m.WatchedEvent;
 import org.lab.mars.onem2m.jute.BinaryOutputArchive;
 import org.lab.mars.onem2m.jute.Record;
 import org.lab.mars.onem2m.proto.M2mPacket;

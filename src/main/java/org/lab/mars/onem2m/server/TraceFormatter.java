@@ -25,7 +25,7 @@ import java.nio.channels.FileChannel;
 import java.text.DateFormat;
 import java.util.Date;
 
-import org.apache.zookeeper.ZooDefs.OpCode;
+import org.lab.mars.onem2m.ZooDefs.OpCode;
 
 public class TraceFormatter {
 

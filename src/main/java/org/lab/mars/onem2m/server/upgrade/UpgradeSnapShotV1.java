@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.zookeeper.ZooDefs.OpCode;
+import org.lab.mars.onem2m.ZooDefs.OpCode;
 import org.lab.mars.onem2m.data.StatPersisted;
 import org.lab.mars.onem2m.data.StatPersistedV1;
 import org.lab.mars.onem2m.jute.BinaryInputArchive;

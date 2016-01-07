@@ -27,11 +27,11 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.KeeperException.Code;
-import org.apache.zookeeper.MultiTransactionRecord;
-import org.apache.zookeeper.Op;
-import org.apache.zookeeper.ZooDefs.OpCode;
+import org.lab.mars.onem2m.KeeperException;
+import org.lab.mars.onem2m.MultiTransactionRecord;
+import org.lab.mars.onem2m.Op;
+import org.lab.mars.onem2m.KeeperException.Code;
+import org.lab.mars.onem2m.ZooDefs.OpCode;
 import org.lab.mars.onem2m.data.ACL;
 import org.lab.mars.onem2m.data.Id;
 import org.lab.mars.onem2m.jute.M2mRecord;

@@ -21,7 +21,7 @@ package org.lab.mars.onem2m.server.quorum;
 import java.io.Flushable;
 import java.io.IOException;
 
-import org.apache.zookeeper.ZooDefs.OpCode;
+import org.lab.mars.onem2m.ZooDefs.OpCode;
 import org.lab.mars.onem2m.server.M2mRequest;
 import org.lab.mars.onem2m.server.RequestProcessor;
 import org.slf4j.Logger;

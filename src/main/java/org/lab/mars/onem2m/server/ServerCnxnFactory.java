@@ -30,8 +30,8 @@ import javax.security.auth.login.AppConfigurationEntry;
 import javax.security.auth.login.Configuration;
 import javax.security.auth.login.LoginException;
 
-import org.apache.zookeeper.Environment;
-import org.apache.zookeeper.Login;
+import org.lab.mars.onem2m.Environment;
+import org.lab.mars.onem2m.Login;
 import org.lab.mars.onem2m.jmx.MBeanRegistry;
 import org.lab.mars.onem2m.server.auth.SaslServerCallbackHandler;
 import org.slf4j.Logger;

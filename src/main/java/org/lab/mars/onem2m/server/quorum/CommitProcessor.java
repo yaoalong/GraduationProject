@@ -21,7 +21,7 @@ package org.lab.mars.onem2m.server.quorum;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-import org.apache.zookeeper.ZooDefs.OpCode;
+import org.lab.mars.onem2m.ZooDefs.OpCode;
 import org.lab.mars.onem2m.server.M2mRequest;
 import org.lab.mars.onem2m.server.RequestProcessor;
 import org.slf4j.Logger;

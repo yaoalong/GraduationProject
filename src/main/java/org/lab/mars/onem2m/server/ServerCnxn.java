@@ -30,8 +30,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.apache.zookeeper.WatchedEvent;
-import org.apache.zookeeper.Watcher;
+import org.lab.mars.onem2m.WatchedEvent;
+import org.lab.mars.onem2m.Watcher;
 import org.lab.mars.onem2m.data.Id;
 import org.lab.mars.onem2m.jute.Record;
 import org.lab.mars.onem2m.proto.ReplyHeader;

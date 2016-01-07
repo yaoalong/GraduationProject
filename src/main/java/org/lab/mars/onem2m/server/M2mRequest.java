@@ -3,8 +3,8 @@ import io.netty.channel.ChannelHandlerContext;
 
 import java.nio.ByteBuffer;
 
-import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.ZooDefs.OpCode;
+import org.lab.mars.onem2m.KeeperException;
+import org.lab.mars.onem2m.ZooDefs.OpCode;
 import org.lab.mars.onem2m.jute.M2mRecord;
 import org.lab.mars.onem2m.txn.M2mTxnHeader;
 import org.slf4j.Logger;

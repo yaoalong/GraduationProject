@@ -605,6 +605,17 @@ public class FastLeaderElection implements Election {
      * @param id    Server identifier
      * @param zxid  Last zxid observed by the issuer of this vote
      */
+    /**
+     * 首先判断周期、然后是zxid、然后是id
+     * 
+     * @param newId
+     * @param newZxid
+     * @param newEpoch
+     * @param curId
+     * @param curZxid
+     * @param curEpoch
+     * @return
+     */
     protected boolean totalOrderPredicate(long newId, long newZxid, long newEpoch, long curId, long curZxid, long curEpoch) {
         LOG.debug("id: " + newId + ", proposed id: " + curId + ", zxid: 0x" +
                 Long.toHexString(newZxid) + ", proposed zxid: 0x" + Long.toHexString(curZxid));

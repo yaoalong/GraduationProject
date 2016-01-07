@@ -24,12 +24,12 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import org.lab.mars.onem2m.WatchedEvent;
+import org.lab.mars.onem2m.Watcher;
+import org.lab.mars.onem2m.Watcher.Event.EventType;
+import org.lab.mars.onem2m.Watcher.Event.KeeperState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.zookeeper.WatchedEvent;
-import org.apache.zookeeper.Watcher;
-import org.apache.zookeeper.Watcher.Event.EventType;
-import org.apache.zookeeper.Watcher.Event.KeeperState;
 
 /**
  * This class manages watches. It allows watches to be associated with a string

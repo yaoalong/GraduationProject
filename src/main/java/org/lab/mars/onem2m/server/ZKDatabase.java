@@ -27,10 +27,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.KeeperException.NoNodeException;
-import org.apache.zookeeper.Watcher;
 import org.lab.mars.cassandra.test.M2mDataBaseTest;
+import org.lab.mars.onem2m.KeeperException;
+import org.lab.mars.onem2m.Watcher;
+import org.lab.mars.onem2m.KeeperException.NoNodeException;
 import org.lab.mars.onem2m.data.ACL;
 import org.lab.mars.onem2m.data.Stat;
 import org.lab.mars.onem2m.jute.InputArchive;
@@ -512,6 +512,12 @@ public class ZKDatabase {
 	}
 	public void setCommittedLog(LinkedList<Proposal> committedLog) {
 		this.committedLog = committedLog;
+	}
+	public M2MDataBase getM2mDataBase() {
+		return m2mDataBase;
+	}
+	public void setM2mDataBase(M2MDataBase m2mDataBase) {
+		this.m2mDataBase = m2mDataBase;
 	}
 
     

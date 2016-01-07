@@ -32,7 +32,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 
-import org.apache.zookeeper.ZooDefs.OpCode;
+import org.lab.mars.onem2m.ZooDefs.OpCode;
 import org.lab.mars.onem2m.jute.BinaryInputArchive;
 import org.lab.mars.onem2m.jute.BinaryOutputArchive;
 import org.lab.mars.onem2m.jute.Record;
@@ -190,28 +190,17 @@ public class LearnerHandler extends Thread {
      * 不断去发送消息
      */
     private void sendPackets() throws InterruptedException {
-        long traceMask = ZooTrace.SERVER_PACKET_TRACE_MASK;
         while (true) {
             try {
                 QuorumPacket p;
                 p = queuedPackets.poll();
                 if (p == null) {
                     bufferedOutput.flush();
-                    p = queuedPackets.take();
+                    p = queuedPackets.take();//如果为空则进行阻塞
                 }
                 if (p == proposalOfDeath) {
-                    // Packet of death!
                     break;
                 }
-//                if (p.getType() == Leader.PING) {
-//                    traceMask = ZooTrace.SERVER_PING_TRACE_MASK;
-//                }
-//                if (p.getType() == Leader.PROPOSAL) {
-//                    syncLimitCheck.updateProposal(p.getZxid(), System.nanoTime());
-//                }
-//                if (LOG.isTraceEnabled()) {
-//                    ZooTrace.logQuorumPacket(LOG, traceMask, 'o', p);
-//                }
                 
                 oa.writeRecord(p, "packet");
             } catch (IOException e) {
@@ -452,7 +441,7 @@ public class LearnerHandler extends Thread {
 					} else {
 						LOG.warn( "Unhandled proposal scenario" );
 					}
-				} else if (peerLastZxid == leader.zk.getZKDatabase().getDataTreeLastProcessedZxid()) {// 如果follower和Leader保持同步，那么只需要发送一个DIFF包
+				} else if (peerLastZxid == leader.zk.getZKDatabase().getM2mDataBase().getLastProcessZxid()){// 如果follower和Leader保持同步，那么只需要发送一个DIFF包
 					// The leader may recently take a snapshot, so the
 					// committedLog
 					// is empty. We don't need to send snapshot if the follow
@@ -465,7 +454,7 @@ public class LearnerHandler extends Thread {
 					LOG.debug( "proposals is empty" );
 				}
 
-				LOG.info( "Sending " + Leader.getPacketType( packetToSend ) );
+				LOG.info( "Sending " + Leader.getPacketType( packetToSend ) );//发送的类型
 				leaderLastZxid = leader.startForwarding( this, updates );
 
 			} finally {
@@ -561,7 +550,6 @@ public class LearnerHandler extends Thread {
 
 
                 ByteBuffer bb;
-                long sessionId;
                 int cxid;
                 int type;
 
@@ -617,7 +605,7 @@ public class LearnerHandler extends Thread {
                     break;
                 case Leader.REQUEST:                    
                     bb = ByteBuffer.wrap(qp.getData());
-                    sessionId = bb.getLong();
+                    bb.getLong();
                     cxid = bb.getInt();
                     type = bb.getInt();
                     bb = bb.slice();

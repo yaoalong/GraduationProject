@@ -24,9 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.KeeperException.Code;
-import org.apache.zookeeper.ZooDefs.OpCode;
+import org.lab.mars.onem2m.KeeperException;
+import org.lab.mars.onem2m.KeeperException.Code;
+import org.lab.mars.onem2m.ZooDefs.OpCode;
 import org.lab.mars.onem2m.jute.Record;
 import org.lab.mars.onem2m.persistence.TxnLog.TxnIterator;
 import org.lab.mars.onem2m.server.DataTree;

@@ -21,7 +21,7 @@ package org.lab.mars.onem2m.server.auth;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import org.apache.zookeeper.KeeperException;
+import org.lab.mars.onem2m.KeeperException;
 import org.lab.mars.onem2m.data.Id;
 import org.lab.mars.onem2m.server.ServerCnxn;
 import org.slf4j.Logger;

@@ -22,8 +22,8 @@ import io.netty.channel.ChannelHandlerContext;
 
 import java.nio.ByteBuffer;
 
-import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.ZooDefs.OpCode;
+import org.lab.mars.onem2m.KeeperException;
+import org.lab.mars.onem2m.ZooDefs.OpCode;
 import org.lab.mars.onem2m.jute.Record;
 import org.lab.mars.onem2m.txn.TxnHeader;
 import org.slf4j.Logger;
