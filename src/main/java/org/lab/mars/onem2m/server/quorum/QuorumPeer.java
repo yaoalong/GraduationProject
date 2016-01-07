@@ -422,7 +422,7 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 		this.syncLimit = syncLimit;
 		this.quorumListenOnAllIPs = quorumListenOnAllIPs;
 		this.logFactory = new FileTxnSnapLog(dataLogDir, dataDir);
-		this.zkDb = new ZKDatabase(this.logFactory);
+		this.zkDb = new ZKDatabase(this.logFactory,m2mDataBase);
 		this.m2mDataBase = new M2MDataBaseImpl();
 		if (quorumConfig == null)
 			this.quorumConfig = new QuorumMaj(countParticipants(quorumPeers));
@@ -1176,6 +1176,14 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 					currentVote.getElectionEpoch(), newEpoch,
 					currentVote.getState()));
 		}
+	}
+
+	public M2MDataBase getM2mDataBase() {
+		return m2mDataBase;
+	}
+
+	public void setM2mDataBase(M2MDataBase m2mDataBase) {
+		this.m2mDataBase = m2mDataBase;
 	}
 
 }

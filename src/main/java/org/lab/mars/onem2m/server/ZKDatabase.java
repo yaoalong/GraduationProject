@@ -30,6 +30,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.KeeperException.NoNodeException;
 import org.apache.zookeeper.Watcher;
+import org.lab.mars.cassandra.test.M2mDataBaseTest;
 import org.lab.mars.onem2m.data.ACL;
 import org.lab.mars.onem2m.data.Stat;
 import org.lab.mars.onem2m.jute.InputArchive;
@@ -79,7 +80,8 @@ public class ZKDatabase {
          sessionsWithTimeouts = new ConcurrentHashMap<Long, Integer>();
     	this.m2mDataBase=m2mDataBase;
     }
-    public ZKDatabase(FileTxnSnapLog snapLog) {
+    public ZKDatabase(FileTxnSnapLog snapLog,M2MDataBase m2mDataBase) {
+    	this.m2mDataBase=m2mDataBase;
         dataTree = new DataTree();
         sessionsWithTimeouts = new ConcurrentHashMap<Long, Integer>();
     }

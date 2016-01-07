@@ -32,6 +32,8 @@ import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.lab.mars.onem2m.server.ZooKeeperServer;
+import org.lab.mars.onem2m.server.cassandra.impl.M2MDataBaseImpl;
+import org.lab.mars.onem2m.server.cassandra.interface4.M2MDataBase;
 import org.lab.mars.onem2m.server.quorum.QuorumPeer.LearnerType;
 import org.lab.mars.onem2m.server.quorum.QuorumPeer.QuorumServer;
 import org.lab.mars.onem2m.server.quorum.flexible.QuorumHierarchical;
@@ -75,6 +77,13 @@ public class QuorumPeerConfig {
     protected boolean syncEnabled = true;
 
     protected LearnerType peerType = LearnerType.PARTICIPANT;
+    
+    protected M2MDataBase m2mDataBase;
+    
+    protected Boolean cleaned=false;
+    protected String node="127.0.0.1";
+    protected String keySpace="tests";
+    protected String table="student";
     
     /**
      * Minimum snapshot retain count.
@@ -229,7 +238,20 @@ public class QuorumPeerConfig {
                 int dot = key.indexOf('.');
                 long sid = Long.parseLong(key.substring(dot + 1));
                 serverWeight.put(sid, Long.parseLong(value));
-            } else {
+            }
+            else if(key.equals("cassandra.node")){
+            	node=value;
+            }
+            else if(key.equals("cassandra.keyspace")){
+            	keySpace=value;
+            }
+            else if(key.equals("cassandra.table")){
+            	table=value;
+            }
+            else if(key.equals("cassandra.cleaned")){
+            	cleaned=Boolean.valueOf(value);
+            }
+            else {
                 System.setProperty("zookeeper." + key, value);
             }
         }
@@ -344,6 +366,7 @@ public class QuorumPeerConfig {
             // Now add observers to servers, once the quorums have been
             // figured out
             servers.putAll(observers);
+            m2mDataBase=new M2MDataBaseImpl(cleaned, keySpace,table , node);
     
             File myIdFile = new File(dataDir, "myid");
             if (!myIdFile.exists()) {

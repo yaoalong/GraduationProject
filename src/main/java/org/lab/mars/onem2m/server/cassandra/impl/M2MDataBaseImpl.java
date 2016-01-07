@@ -204,7 +204,6 @@ public class M2MDataBaseImpl implements M2MDataBase {
 
 			Select.Selection selection = query().select();
 			Select select = selection.from(keyspace, table);
-			select.where(eq("id", 5)).orderBy(QueryBuilder.desc("value"));
 			select.limit(1);
 			ResultSet resultSet = session.execute(select);
 			if (resultSet == null) {
@@ -216,7 +215,7 @@ public class M2MDataBaseImpl implements M2MDataBase {
 						.getColumnDefinitions();
 				columnDefinitions.forEach(d -> {
 					String name = d.getName();
-					if (name.equals("value")) {
+					if (name.equals("zxid")) {
 						longs.add(Long.valueOf(row.getObject(name) + ""));
 					}
 				});

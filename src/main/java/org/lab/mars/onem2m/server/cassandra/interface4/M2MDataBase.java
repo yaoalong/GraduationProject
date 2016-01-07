@@ -7,6 +7,8 @@ import org.lab.mars.onem2m.server.DataTree.ProcessTxnResult;
 import org.lab.mars.onem2m.txn.M2mTxnHeader;
 
 public interface M2MDataBase {
+	
+	 
 	public Long getLastProcessZxid();
 
 	byte[] retrieve(String key);

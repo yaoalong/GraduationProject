@@ -126,9 +126,6 @@ public class QuorumPeerMain {
   
       LOG.info("Starting quorum peer");
       try {
-//          ServerCnxnFactory cnxnFactory = ServerCnxnFactory.createFactory();
-//          cnxnFactory.configure(config.getClientPortAddress(),
-//                                config.getMaxClientCnxns());
           NettyServerCnxnFactory cnxnFactory=new NettyServerCnxnFactory();
           cnxnFactory.configure(config.getClientPortAddress().getPort(), 5);
          cnxnFactory.setMyIp(config.getMyIp());
@@ -147,11 +144,11 @@ public class QuorumPeerMain {
           quorumPeer.setSyncLimit(config.getSyncLimit());
           quorumPeer.setQuorumVerifier(config.getQuorumVerifier());
           quorumPeer.setCnxnFactory(cnxnFactory);
-          quorumPeer.setZKDatabase(new ZKDatabase(quorumPeer.getTxnFactory()));
+          quorumPeer.setM2mDataBase(config.m2mDataBase);
+          quorumPeer.setZKDatabase(new ZKDatabase(quorumPeer.getTxnFactory(),quorumPeer.m2mDataBase));
           quorumPeer.setLearnerType(config.getPeerType());
           quorumPeer.setSyncEnabled(config.getSyncEnabled());
           quorumPeer.setQuorumListenOnAllIPs(config.getQuorumListenOnAllIPs());
-  
           quorumPeer.start();
           quorumPeer.join();
       } catch (InterruptedException e) {
