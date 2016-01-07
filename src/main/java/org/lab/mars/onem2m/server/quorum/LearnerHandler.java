@@ -214,7 +214,6 @@ public class LearnerHandler extends Thread {
 //                }
                 
                 oa.writeRecord(p, "packet");
-                LOG.info("发送完毕:"+p.toString()+"类型:"+p.getType());
             } catch (IOException e) {
                 if (!sock.isClosed()) {
                     LOG.warn("Unexpected exception at " + this, e);
@@ -573,7 +572,6 @@ public class LearnerHandler extends Thread {
                             LOG.debug("Received ACK from Observer  " + this.sid);
                         }
                     }
-                    System.out.println("收到了ACK包");
                     syncLimitCheck.updateAck(qp.getZxid());
                     leader.processAck(this.sid, qp.getZxid(), sock.getLocalSocketAddress());
                     break;
@@ -709,7 +707,6 @@ public class LearnerHandler extends Thread {
      * 每一个handler对应一个列表
      */
     void queuePacket(QuorumPacket p) {
-    	System.out.println(p.getZxid()+"dfdsfs"+p.getType());
         queuedPackets.add(p);
     }
 
