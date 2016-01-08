@@ -140,14 +140,10 @@ public class M2MDataBaseImpl implements M2MDataBase {
 	@Override
 	public Long update(String key, Map<String, Object> updated) {
 		try {
+			M2mDataNode m2mDataNode=retrieve(key);
 			Update update = query().update(keyspace, table);
-		
-			
-//			updated.forEach((k, value) -> {
-//				update.with(set(k, value));
-//			});
 			update.with(set("data", updated.get("data")));
-			update.where(eq("id", Integer.valueOf(key))).and(eq("zxid", 112)).and(eq("label", 0));
+			update.where(eq("id", Integer.valueOf(key))).and(eq("zxid", m2mDataNode.getZxid())).and(eq("label", m2mDataNode.getLabel()));
 			session.execute(update);
 		} catch (Exception ex) {
 			ex.printStackTrace();

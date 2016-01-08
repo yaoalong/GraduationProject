@@ -50,9 +50,7 @@ public class M2mDataBaseTest {
 	@Test
 	public void testUpdate(){
 		Map<String,Object> map=new HashMap<String,Object>();
-		//map.put("id", 54);
-		//map.put("zxid", 222);
-		map.put("data", 10);
+		map.put("data", 100);
 		m2mDataBase.update("51634", map);
 	}
 }
