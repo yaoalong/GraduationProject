@@ -10,6 +10,8 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
 
+import org.lab.mars.onem2m.server.M2mDataNode;
+
 /**
  * Author:yaoalong.
  * Date:2015/12/29.
@@ -28,7 +30,7 @@ public class KryoConfiguration {
         resolvedClz = new TreeSet<>((o1, o2) -> o1.getName().compareTo(o2.getName()));
         fieldAccessMap = new HashMap<>();
         Set<Class> seedClz = new HashSet<>();
-        seedClz.add(Person.class);
+        seedClz.add(M2mDataNode.class);
         for (Class clz : seedClz) {
             fieldAccessMap.put(clz, new ClassAccess(clz));
         }

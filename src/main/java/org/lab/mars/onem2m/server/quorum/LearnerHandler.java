@@ -470,7 +470,7 @@ public class LearnerHandler extends Thread {
             bufferedOutput.flush();
             //Need to set the zxidToSend to the latest zxid
             if (packetToSend == Leader.SNAP) {
-                zxidToSend = leader.zk.getZKDatabase().getDataTreeLastProcessedZxid();
+                zxidToSend = leader.zk.getZKDatabase().getM2mDataBase().getLastProcessZxid();//获取对应的zxid
             }
             oa.writeRecord(new QuorumPacket(packetToSend, zxidToSend, null), "packet");
             bufferedOutput.flush();

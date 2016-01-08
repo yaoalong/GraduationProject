@@ -3,7 +3,7 @@ package org.lab.mars.onem2m.server.cassandra.impl;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.set;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.gte;
-
+import static com.datastax.driver.core.querybuilder.QueryBuilder.gt;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +13,7 @@ import org.lab.mars.onem2m.ZooDefs.OpCode;
 import org.lab.mars.onem2m.jute.M2mRecord;
 import org.lab.mars.onem2m.reflection.ResourceReflection;
 import org.lab.mars.onem2m.server.DataTree.ProcessTxnResult;
+import org.lab.mars.onem2m.server.M2mDataNode;
 import org.lab.mars.onem2m.server.cassandra.interface4.M2MDataBase;
 import org.lab.mars.onem2m.txn.M2mCreateTxn;
 import org.lab.mars.onem2m.txn.M2mDeleteTxn;
@@ -40,9 +41,11 @@ public class M2MDataBaseImpl implements M2MDataBase {
 	private Cluster cluster;
 	private Session session;
 	private boolean clean = false;
-	public M2MDataBaseImpl(){
+
+	public M2MDataBaseImpl() {
 		this(false, "mars", "onem2m", "127.0.0.1");
 	}
+
 	public M2MDataBaseImpl(boolean clean, String keyspace, String table,
 			String node) {
 		this.clean = clean;
@@ -69,14 +72,15 @@ public class M2MDataBaseImpl implements M2MDataBase {
 	}
 
 	/**
-	 * 检索
+	 * 检索特定的key
 	 */
 	@Override
-	public byte[] retrieve(String key) {
+	public M2mDataNode retrieve(String key) {
 		try {
 			Select.Selection selection = query().select();
 			Select select = selection.from(keyspace, table);
-			select.where(eq("key", key));
+			select.where(eq("id", Integer.valueOf(key)));
+			select.allowFiltering();
 			ResultSet resultSet = session.execute(select);
 			if (resultSet == null) {
 				return null;
@@ -89,14 +93,13 @@ public class M2MDataBaseImpl implements M2MDataBase {
 				columnDefinitions.forEach(d -> {
 					String name = d.getName();
 					Object object = row.getObject(name);
-					if (object == null) {
-						return;
-					}
 					result.put(name, object);
 				});
 			}
-			byte[] bytes = new byte[10];
-			return bytes;
+
+			M2mDataNode m2mDataNode = ResourceReflection.deserialize(
+					M2mDataNode.class, result);
+			return m2mDataNode;
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -125,7 +128,7 @@ public class M2MDataBaseImpl implements M2MDataBase {
 	public Long delete(String key) {
 		try {
 			Statement delete = query().delete().from(keyspace, table)
-					.where(eq("key", key));
+					.where(eq("id", Integer.valueOf(key)));
 			session.execute(delete);
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -138,10 +141,14 @@ public class M2MDataBaseImpl implements M2MDataBase {
 	public Long update(String key, Map<String, Object> updated) {
 		try {
 			Update update = query().update(keyspace, table);
-			update.where(eq("zxid", key));
-			updated.forEach((k, value) -> {
-				update.with(set(k, value));
-			});
+		
+			
+//			updated.forEach((k, value) -> {
+//				update.with(set(k, value));
+//			});
+			update.with(set("data", updated.get("data")));
+			update.where(eq("id", Integer.valueOf(key))).and(eq("zxid", 112)).and(eq("label", 0));
+			session.execute(update);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			return Long.valueOf(0);
@@ -231,39 +238,68 @@ public class M2MDataBaseImpl implements M2MDataBase {
 		}
 		return result;
 	}
+
 	@Override
 	public boolean truncate(Long zxid) {
 		try {
 			Select.Selection selection = query().select();
 			Select select = selection.from(keyspace, table);
-			select.where(gte("zxid",zxid ));
+			select.where(gte("zxid", zxid));
 			select.allowFiltering();
 			ResultSet resultSet = session.execute(select);
 			if (resultSet == null) {
 				return true;
 			}
-	
-
 			for (Row row : resultSet.all()) {
-				System.out.println("执行");
-				ColumnDefinitions columnDefinitions = resultSet
-						.getColumnDefinitions();
-				columnDefinitions.forEach(d -> {
-					String name = d.getName();
-					
-					if(name.equals("zxid")){
-						Delete deletion=query().delete().from(keyspace, table);
-						Statement delete =deletion
-								.where(eq("label", 0)).and(eq("zxid", row.getObject(name)));
-						session.execute(delete);
-					}
-				});
+				final Integer idValue = (Integer) row.getObject("id");
+				;
+				Integer zxidValue = (Integer) row.getObject("zxid");
+				Delete deletion = query().delete().from(keyspace, table);
+				Statement delete = deletion.where(eq("id", idValue))
+						.and(eq("label", 0)).and(eq("zxid", zxidValue));
+				session.execute(delete);
 			}
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			return false;
 		}
-	return true;
+		return true;
+	}
+
+	@Override
+	public List<M2mDataNode> retrieve(Integer key) {
+		List<M2mDataNode> m2mList=new ArrayList<>();
+ 		try {
+			Select.Selection selection = query().select();
+			Select select = selection.from(keyspace, table);
+			select.where(gt("zxid", Integer.valueOf(key)));
+			select.allowFiltering();
+			ResultSet resultSet = session.execute(select);
+			if (resultSet == null) {
+				return m2mList;
+			}
+
+			Map<String, Object> result = new HashMap<String, Object>();
+			for (Row row : resultSet.all()) {
+				ColumnDefinitions columnDefinitions = resultSet
+						.getColumnDefinitions();
+				columnDefinitions.forEach(d -> {
+					String name = d.getName();
+					Object object = row.getObject(name);
+					result.put(name, object);
+					
+				});
+				m2mList.add(ResourceReflection.deserialize(
+						M2mDataNode.class, result));
+				result.clear();
+			}
+
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return m2mList;
+		}
+ 		return m2mList;
 	}
 }
