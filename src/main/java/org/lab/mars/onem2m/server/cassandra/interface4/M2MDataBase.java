@@ -26,5 +26,8 @@ public interface M2MDataBase {
 	void close();
 
 	public ProcessTxnResult processTxn(M2mTxnHeader header, M2mRecord m2mRecord);
+	
+	
+	
 
 }

@@ -45,8 +45,11 @@ public class M2mDataNode  implements M2mRecord{
 			throws IOException {
 		archive.startRecord(this, tag);
 		archive.writeInt(label,"label");
+		System.out.println("Label:"+label);
 		archive.writeInt(zxid, "zxid");
+		System.out.println("zxid:"+zxid);
 		archive.writeInt(id, "id");
+		System.out.println("id:"+id);
 		archive.endRecord(this, tag);
 		
 	}
@@ -56,8 +59,11 @@ public class M2mDataNode  implements M2mRecord{
 			throws IOException {
 		archive.startRecord("node");
 		label=archive.readInt("label");
+		System.out.println("Label:"+label);
 		zxid=archive.readInt("zxid");
+		System.out.println("zxid:"+zxid);
 		id=archive.readInt("id");
+		System.out.println("id:"+id);
 		archive.endRecord(tag);
 		
 	}

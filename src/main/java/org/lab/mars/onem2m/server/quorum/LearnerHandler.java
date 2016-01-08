@@ -33,8 +33,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 
 import org.lab.mars.onem2m.ZooDefs.OpCode;
-import org.lab.mars.onem2m.jute.BinaryInputArchive;
-import org.lab.mars.onem2m.jute.BinaryOutputArchive;
 import org.lab.mars.onem2m.jute.M2mBinaryInputArchive;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.jute.Record;

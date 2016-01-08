@@ -96,6 +96,12 @@ public class ZKDatabase {
 		this.m2mDataBase = m2mDataBase;
 		m2mData = new M2mData();
 		sessionsWithTimeouts = new ConcurrentHashMap<Long, Integer>();
+		List<M2mDataNode> m2mDataNodes=m2mDataBase.retrieve(1);
+		for(M2mDataNode node:m2mDataNodes){
+			m2mData.addM2mDataNode(node.getId(), node);
+			
+		}
+		
 	}
 
 	/**
