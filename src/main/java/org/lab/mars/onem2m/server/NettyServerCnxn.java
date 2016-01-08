@@ -414,7 +414,7 @@ public class NettyServerCnxn extends ServerCnxn {
                 pw.println("SessionTracker dump:");
                 zkServer.sessionTracker.dumpSessions(pw);
                 pw.println("ephemeral nodes dump:");
-                zkServer.dumpEphemerals(pw);
+              //  zkServer.dumpEphemerals(pw);
             }
         }
     }
@@ -494,14 +494,8 @@ public class NettyServerCnxn extends ServerCnxn {
             if (zkServer == null) {
                 pw.println(ZK_NOT_SERVING);
             } else {
-                DataTree dt = zkServer.getZKDatabase().getDataTree();
-                if (len == wchsCmd) {
-                    dt.dumpWatchesSummary(pw);
-                } else if (len == wchpCmd) {
-                    dt.dumpWatches(pw, true);
-                } else {
-                    dt.dumpWatches(pw, false);
-                }
+                M2mData dt = zkServer.getZKDatabase().getM2mData();
+             
                 pw.println();
             }
         }
@@ -536,10 +530,6 @@ public class NettyServerCnxn extends ServerCnxn {
 
             print("server_state", stats.getServerState());
             print("znode_count", zkdb.getNodeCount());
-
-            print("watch_count", zkdb.getDataTree().getWatchCount());
-            print("ephemerals_count", zkdb.getDataTree().getEphemeralsCount());
-            print("approximate_data_size", zkdb.getDataTree().approximateDataSize());
 
             OSMXBean osMbean = new OSMXBean();
             if (osMbean != null && osMbean.getUnix() == true) {

@@ -37,6 +37,8 @@ import org.lab.mars.onem2m.data.ACL;
 import org.lab.mars.onem2m.data.Stat;
 import org.lab.mars.onem2m.jute.InputArchive;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
+import org.lab.mars.onem2m.jute.M2mInputArchive;
+import org.lab.mars.onem2m.jute.M2mOutputArchive;
 import org.lab.mars.onem2m.jute.M2mRecord;
 import org.lab.mars.onem2m.jute.OutputArchive;
 import org.lab.mars.onem2m.persistence.FileTxnSnapLog;
@@ -56,6 +58,9 @@ import org.slf4j.LoggerFactory;
  * includes the sessions, datatree and the committed logs. It is booted up after
  * reading the logs and snapshots from the disk.
  */
+/*
+ * 连接数据库以及内存数据
+ */
 public class ZKDatabase {
 
 	private M2MDataBase m2mDataBase;
@@ -63,7 +68,8 @@ public class ZKDatabase {
 	/**
 	 * make sure on a clear you take care of all these members.
 	 */
-	protected DataTree dataTree;
+	//protected DataTree dataTree;
+	protected M2mData m2mData;
 	protected ConcurrentHashMap<Long, Integer> sessionsWithTimeouts;
 	// protected FileTxnSnapLog snapLog;
 	protected long minCommittedLog, maxCommittedLog;
@@ -81,14 +87,14 @@ public class ZKDatabase {
 	 */
 
 	public ZKDatabase(M2MDataBase m2mDataBase) {
-		dataTree = new DataTree();
+		m2mData = new M2mData();
 		sessionsWithTimeouts = new ConcurrentHashMap<Long, Integer>();
 		this.m2mDataBase = m2mDataBase;
 	}
 
 	public ZKDatabase(FileTxnSnapLog snapLog, M2MDataBase m2mDataBase) {
 		this.m2mDataBase = m2mDataBase;
-		dataTree = new DataTree();
+		m2mData = new M2mData();
 		sessionsWithTimeouts = new ConcurrentHashMap<Long, Integer>();
 	}
 
@@ -111,7 +117,7 @@ public class ZKDatabase {
 		/*
 		 * to be safe we just create a new datatree.
 		 */
-		dataTree = new DataTree();
+		m2mData = new M2mData();
 		sessionsWithTimeouts.clear();
 		WriteLock lock = logLock.writeLock();
 		try {
@@ -128,8 +134,8 @@ public class ZKDatabase {
 	 * 
 	 * @return the datatree for this zkdatabase
 	 */
-	public DataTree getDataTree() {
-		return this.dataTree;
+	public M2mData getM2mData() {
+		return this.m2mData;
 	}
 
 	/**
@@ -163,9 +169,6 @@ public class ZKDatabase {
 	 * 
 	 * @return the last processed zxid of a datatree
 	 */
-	public long getDataTreeLastProcessedZxid() {
-		return dataTree.lastProcessedZxid;
-	}
 
 	/**
 	 * set the datatree initialized or not
@@ -173,18 +176,11 @@ public class ZKDatabase {
 	 * @param b
 	 *            set the datatree initialized to b
 	 */
-	public void setDataTreeInit(boolean b) {
-		dataTree.initialized = b;
+	public void setM2mDataInit(boolean b) {
+		m2mData.initialized = b;
 	}
 
-	/**
-	 * return the sessions in the datatree
-	 * 
-	 * @return the data tree sessions
-	 */
-	public Collection<Long> getSessions() {
-		return dataTree.getSessions();
-	}
+	
 
 	/**
 	 * get sessions with timeouts
@@ -252,37 +248,12 @@ public class ZKDatabase {
 		}
 	}
 
-	/**
-	 * remove a cnxn from the datatree
-	 * 
-	 * @param cnxn
-	 *            the cnxn to remove from the datatree
-	 */
-	public void removeCnxn(ServerCnxn cnxn) {
-		dataTree.removeCnxn(cnxn);
-	}
 
-	/**
-	 * kill a given session in the datatree
-	 * 
-	 * @param sessionId
-	 *            the session id to be killed
-	 * @param zxid
-	 *            the zxid of kill session transaction
-	 */
-	public void killSession(long sessionId, long zxid) {
-		dataTree.killSession(sessionId, zxid);
-	}
 
-	/**
-	 * write a text dump of all the ephemerals in the datatree
-	 * 
-	 * @param pwriter
-	 *            the output to write to
-	 */
-	public void dumpEphemerals(PrintWriter pwriter) {
-		dataTree.dumpEphemerals(pwriter);
-	}
+
+
+
+
 
 	/**
 	 * the node count of the datatree
@@ -290,30 +261,10 @@ public class ZKDatabase {
 	 * @return the node count of datatree
 	 */
 	public int getNodeCount() {
-		return dataTree.getNodeCount();
+		return m2mData.getNodeCount();
 	}
 
-	/**
-	 * the paths for ephemeral session id
-	 * 
-	 * @param sessionId
-	 *            the session id for which paths match to
-	 * @return the paths for a session id
-	 */
-	// public HashSet<String> getEphemerals(long sessionId) {
-	// return dataTree.getEphemerals(sessionId);
-	// }
-
-	/**
-	 * the last processed zxid in the datatree
-	 * 
-	 * @param zxid
-	 *            the last processed zxid in the datatree
-	 */
-	public void setlastProcessedZxid(long zxid) {
-		dataTree.lastProcessedZxid = zxid;
-	}
-
+	
 	/**
 	 * the process txn on the data
 	 * 
@@ -332,42 +283,6 @@ public class ZKDatabase {
 
 	}
 
-	/**
-	 * stat the path
-	 * 
-	 * @param path
-	 *            the path for which stat is to be done
-	 * @param serverCnxn
-	 *            the servercnxn attached to this request
-	 * @return the stat of this node
-	 * @throws KeeperException.NoNodeException
-	 */
-	public Stat statNode(String path, ServerCnxn serverCnxn)
-			throws KeeperException.NoNodeException {
-		return dataTree.statNode(path, serverCnxn);
-	}
-
-	/**
-	 * get the datanode for this path
-	 * 
-	 * @param path
-	 *            the path to lookup
-	 * @return the datanode for getting the path
-	 */
-	// public DataNode getNode(String path) {
-	// return dataTree.getNode(path);
-	// }
-
-	/**
-	 * convert from long to the acl entry
-	 * 
-	 * @param aclL
-	 *            the long for which to get the acl
-	 * @return the acl corresponding to this long entry
-	 */
-	public List<ACL> convertLong(Long aclL) {
-		return dataTree.convertLong(aclL);
-	}
 
 	public Object getNode(String key) {
 		return m2mDataBase.retrieve(key);
@@ -391,56 +306,9 @@ public class ZKDatabase {
 		return m2mDataBase.update(key, updated);
 	}
 
-	/**
-	 * get acl for a path
-	 * 
-	 * @param path
-	 *            the path to query for acl
-	 * @param stat
-	 *            the stat for the node
-	 * @return the acl list for this path
-	 * @throws NoNodeException
-	 */
-	public List<ACL> getACL(String path, Stat stat) throws NoNodeException {
-		return dataTree.getACL(path, stat);
-	}
 
-	/**
-	 * get children list for this path
-	 * 
-	 * @param path
-	 *            the path of the node
-	 * @param stat
-	 *            the stat of the node
-	 * @param watcher
-	 *            the watcher function for this path
-	 * @return the list of children for this path
-	 * @throws KeeperException.NoNodeException
-	 */
-	public List<String> getChildren(String path, Stat stat, Watcher watcher)
-			throws KeeperException.NoNodeException {
-		return dataTree.getChildren(path, stat, watcher);
-	}
 
-	/**
-	 * check if the path is special or not
-	 * 
-	 * @param path
-	 *            the input path
-	 * @return true if path is special and false if not
-	 */
-	public boolean isSpecialPath(String path) {
-		return dataTree.isSpecialPath(path);
-	}
 
-	/**
-	 * get the acl size of the datatree
-	 * 
-	 * @return the acl size of the datatree
-	 */
-	public int getAclSize() {
-		return dataTree.longKeyMap.size();
-	}
 
 	// /**
 	// * Truncate the ZKDatabase to the specified zxid
@@ -467,9 +335,9 @@ public class ZKDatabase {
 	 *            the input archive you want to deserialize from
 	 * @throws IOException
 	 */
-	public void deserializeSnapshot(InputArchive ia) throws IOException {
+	public void deserializeSnapshot(M2mInputArchive ia) throws IOException {
 		clear();
-		SerializeUtils.deserializeSnapshot(getDataTree(), ia,
+		SerializeUtils.deserializeSnapshot(getM2mData(), ia,
 				getSessionWithTimeOuts());
 		initialized = true;
 	}
@@ -483,9 +351,9 @@ public class ZKDatabase {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	public void serializeSnapshot(OutputArchive oa) throws IOException,
+	public void serializeSnapshot(M2mOutputArchive oa) throws IOException,
 			InterruptedException {
-		SerializeUtils.serializeSnapshot(getDataTree(), oa,
+		SerializeUtils.serializeSnapshot(getM2mData(), oa,
 				getSessionWithTimeOuts());
 	}
 
@@ -554,6 +422,13 @@ public class ZKDatabase {
 
 	public void setM2mDataBase(M2MDataBase m2mDataBase) {
 		this.m2mDataBase = m2mDataBase;
+	}
+
+	public void setM2mData(M2mData m2mData) {
+		this.m2mData = m2mData;
+	}
+	public void setlastProcessedZxid(long zxid){
+		
 	}
 
 }

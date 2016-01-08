@@ -28,9 +28,12 @@ import java.util.Map.Entry;
 import org.lab.mars.onem2m.ZooDefs.OpCode;
 import org.lab.mars.onem2m.jute.BinaryInputArchive;
 import org.lab.mars.onem2m.jute.InputArchive;
+import org.lab.mars.onem2m.jute.M2mInputArchive;
+import org.lab.mars.onem2m.jute.M2mOutputArchive;
 import org.lab.mars.onem2m.jute.OutputArchive;
 import org.lab.mars.onem2m.jute.Record;
 import org.lab.mars.onem2m.server.DataTree;
+import org.lab.mars.onem2m.server.M2mData;
 import org.lab.mars.onem2m.server.ZooTrace;
 import org.lab.mars.onem2m.txn.CreateSessionTxn;
 import org.lab.mars.onem2m.txn.CreateTxn;
@@ -130,6 +133,29 @@ public class SerializeUtils {
 			oa.writeInt( entry.getValue().intValue(), "timeout" );
 		}
 		dt.serialize( oa, "tree" );
+	}
+	public static void deserializeSnapshot(M2mData m2mData, M2mInputArchive ia, Map<Long, Integer> sessions) throws IOException {
+		int count = ia.readInt( "count" );
+		while (count > 0) {
+			long id = ia.readLong( "id" );
+			int to = ia.readInt( "timeout" );
+			sessions.put( id, to );
+			if (LOG.isTraceEnabled()) {
+				ZooTrace.logTraceMessage( LOG, ZooTrace.SESSION_TRACE_MASK, "loadData --- session in archive: " + id + " with timeout: " + to );
+			}
+			count--;
+		}
+		m2mData.deserialize( ia, "m2mData" );
+	}
+
+	public static void serializeSnapshot(M2mData m2mData, M2mOutputArchive oa, Map<Long, Integer> sessions) throws IOException {
+		HashMap<Long, Integer> sessSnap = new HashMap<Long, Integer>( sessions );
+		oa.writeInt( sessSnap.size(), "count" );
+		for (Entry<Long, Integer> entry : sessSnap.entrySet()) {
+			oa.writeLong( entry.getKey().longValue(), "id" );
+			oa.writeInt( entry.getValue().intValue(), "timeout" );
+		}
+		m2mData.serialize( oa, "m2mData" );
 	}
 
 }

@@ -1,7 +1,17 @@
 package org.lab.mars.onem2m.server;
 
-public class M2mDataNode {
+import java.io.IOException;
 
+import org.lab.mars.onem2m.jute.M2mInputArchive;
+import org.lab.mars.onem2m.jute.M2mOutputArchive;
+import org.lab.mars.onem2m.jute.M2mRecord;
+
+public class M2mDataNode  implements M2mRecord{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3291328270207258803L;
 	public Integer label;
 	public  Integer zxid;
 	public Integer id;
@@ -28,6 +38,28 @@ public class M2mDataNode {
 
 	public void setId(Integer id) {
 		this.id = id;
+	}
+
+	@Override
+	public void serialize(M2mOutputArchive archive, String tag)
+			throws IOException {
+		archive.startRecord(this, tag);
+		archive.writeInt(label,"label");
+		archive.writeInt(zxid, "zxid");
+		archive.writeInt(id, "id");
+		archive.endRecord(this, tag);
+		
+	}
+
+	@Override
+	public void deserialize(M2mInputArchive archive, String tag)
+			throws IOException {
+		archive.startRecord("node");
+		label=archive.readInt("label");
+		zxid=archive.readInt("zxid");
+		id=archive.readInt("id");
+		archive.endRecord(tag);
+		
 	}
 
 }

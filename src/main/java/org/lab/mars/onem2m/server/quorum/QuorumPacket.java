@@ -23,9 +23,15 @@ import org.lab.mars.onem2m.jute.BinaryInputArchive;
 import org.lab.mars.onem2m.jute.BinaryOutputArchive;
 import org.lab.mars.onem2m.jute.CsvOutputArchive;
 import org.lab.mars.onem2m.jute.InputArchive;
+import org.lab.mars.onem2m.jute.M2mBinaryInputArchive;
+import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
+import org.lab.mars.onem2m.jute.M2mCsvOutputArchive;
+import org.lab.mars.onem2m.jute.M2mInputArchive;
+import org.lab.mars.onem2m.jute.M2mOutputArchive;
+import org.lab.mars.onem2m.jute.M2mRecord;
 import org.lab.mars.onem2m.jute.OutputArchive;
 import org.lab.mars.onem2m.jute.Record;
-public class QuorumPacket implements Record {
+public class QuorumPacket implements M2mRecord {
   private int type;
   private long zxid;
   private byte[] data;
@@ -58,14 +64,14 @@ public class QuorumPacket implements Record {
     data=m_;
   }
 
-  public void serialize(OutputArchive a_, String tag) throws java.io.IOException {
+  public void serialize(M2mOutputArchive a_, String tag) throws java.io.IOException {
     a_.startRecord(this,tag);
     a_.writeInt(type,"type");
     a_.writeLong(zxid,"zxid");
     a_.writeBuffer(data,"data");
     a_.endRecord(this,tag);
   }
-  public void deserialize(InputArchive a_, String tag) throws java.io.IOException {
+  public void deserialize(M2mInputArchive a_, String tag) throws java.io.IOException {
     a_.startRecord(tag);
     type=a_.readInt("type");
     zxid=a_.readLong("zxid");
@@ -76,8 +82,8 @@ public class QuorumPacket implements Record {
     try {
       java.io.ByteArrayOutputStream s =
         new java.io.ByteArrayOutputStream();
-      CsvOutputArchive a_ = 
-        new CsvOutputArchive(s);
+      M2mCsvOutputArchive a_ = 
+        new M2mCsvOutputArchive(s);
       a_.startRecord(this,"");
     a_.writeInt(type,"type");
     a_.writeLong(zxid,"zxid");
@@ -90,11 +96,11 @@ public class QuorumPacket implements Record {
     return "ERROR";
   }
   public void write(java.io.DataOutput out) throws java.io.IOException {
-    BinaryOutputArchive archive = new BinaryOutputArchive(out);
+	  M2mBinaryOutputArchive archive = new M2mBinaryOutputArchive(out);
     serialize(archive, "");
   }
   public void readFields(java.io.DataInput in) throws java.io.IOException {
-    BinaryInputArchive archive = new BinaryInputArchive(in);
+	  M2mBinaryInputArchive archive = new M2mBinaryInputArchive(in);
     deserialize(archive, "");
   }
   public int compareTo (Object peer_) throws ClassCastException {

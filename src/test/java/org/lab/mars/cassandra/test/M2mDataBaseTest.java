@@ -21,7 +21,7 @@ public class M2mDataBaseTest {
 	@Test
 	public void testRetrieve() {
 
-		M2mDataNode m2mDataNode = m2mDataBase.retrieve("14");
+		M2mDataNode m2mDataNode = m2mDataBase.retrieve("11");
 		System.out.println(m2mDataNode.getId());
 		System.out.println(m2mDataNode.getLabel());
 		System.out.println(m2mDataNode.getZxid());

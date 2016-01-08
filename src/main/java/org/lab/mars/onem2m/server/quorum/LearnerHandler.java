@@ -35,6 +35,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import org.lab.mars.onem2m.ZooDefs.OpCode;
 import org.lab.mars.onem2m.jute.BinaryInputArchive;
 import org.lab.mars.onem2m.jute.BinaryOutputArchive;
+import org.lab.mars.onem2m.jute.M2mBinaryInputArchive;
+import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.jute.Record;
 import org.lab.mars.onem2m.server.ByteBufferInputStream;
 import org.lab.mars.onem2m.server.M2mRequest;
@@ -147,9 +149,9 @@ public class LearnerHandler extends Thread {
 
     private SyncLimitCheck syncLimitCheck = new SyncLimitCheck();
 
-    private BinaryInputArchive ia;
+    private M2mBinaryInputArchive ia;
 
-    private BinaryOutputArchive oa;
+    private M2mBinaryOutputArchive oa;
 
     private BufferedOutputStream bufferedOutput;
 
@@ -291,10 +293,10 @@ public class LearnerHandler extends Thread {
             tickOfNextAckDeadline = leader.self.tick
                     + leader.self.initLimit + leader.self.syncLimit;
 
-            ia = BinaryInputArchive.getArchive(new BufferedInputStream(sock
+            ia = M2mBinaryInputArchive.getArchive(new BufferedInputStream(sock
                     .getInputStream()));
             bufferedOutput = new BufferedOutputStream(sock.getOutputStream());
-            oa = BinaryOutputArchive.getArchive(bufferedOutput);
+            oa = M2mBinaryOutputArchive.getArchive(bufferedOutput);
 
             QuorumPacket qp = new QuorumPacket();
             ia.readRecord(qp, "packet");

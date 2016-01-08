@@ -87,13 +87,13 @@ public abstract class LearnerZooKeeperServer extends QuorumZooKeeperServer {
     @Override
     protected void registerJMX() {
         // register with JMX
-        try {
-            jmxDataTreeBean = new DataTreeBean(getZKDatabase().getDataTree());
-            MBeanRegistry.getInstance().register(jmxDataTreeBean, jmxServerBean);
-        } catch (Exception e) {
-            LOG.warn("Failed to register with JMX", e);
-            jmxDataTreeBean = null;
-        }
+//        try {
+//            jmxDataTreeBean = new DataTreeBean(getZKDatabase().getDataTree());
+//            MBeanRegistry.getInstance().register(jmxDataTreeBean, jmxServerBean);
+//        } catch (Exception e) {
+//            LOG.warn("Failed to register with JMX", e);
+//            jmxDataTreeBean = null;
+//        }
     }
 
     public void registerJMX(ZooKeeperServerBean serverBean,

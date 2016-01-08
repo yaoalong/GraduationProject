@@ -449,7 +449,7 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 			zkDb.loadDataBase();
 
 			// load the epochs
-			long lastProcessedZxid = zkDb.getDataTree().lastProcessedZxid;
+			long lastProcessedZxid = zkDb.getM2mDataBase().getLastProcessZxid();
 			long epochOfZxid = ZxidUtils.getEpochFromZxid(lastProcessedZxid);
 			try {
 				currentEpoch = readLongFromFile(CURRENT_EPOCH_FILENAME);

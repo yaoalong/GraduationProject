@@ -120,10 +120,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
 
     private final ServerStats serverStats;
 
-    void removeCnxn(ServerCnxn cnxn) {
-        zkDb.removeCnxn(cnxn);
-    }
- 
+   
     /**
      * Creates a ZooKeeperServer instance. Nothing is setup, use the setX
      * methods to prepare the instance (eg datadir, datalogdir, ticktime, 
@@ -258,7 +255,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
          * See ZOOKEEPER-1642 for more detail.
          */
         if(zkDb.isInitialized()){
-            setZxid(zkDb.getDataTreeLastProcessedZxid());
+            setZxid(zkDb.getM2mDataBase().getLastProcessZxid());
         }
         else {
             setZxid(zkDb.loadDataBase());
@@ -266,28 +263,28 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
         
         // Clean up dead sessions
         LinkedList<Long> deadSessions = new LinkedList<Long>();
-        for (Long session : zkDb.getSessions()) {
-            if (zkDb.getSessionWithTimeOuts().get(session) == null) {
-                deadSessions.add(session);
-            }
-        }
-        zkDb.setDataTreeInit(true);
-        for (long session : deadSessions) {
-            // XXX: Is lastProcessedZxid really the best thing to use?
-            killSession(session, zkDb.getDataTreeLastProcessedZxid());
-        }
+//        for (Long session : zkDb.getSessions()) {
+//            if (zkDb.getSessionWithTimeOuts().get(session) == null) {
+//                deadSessions.add(session);
+//            }
+        //}
+        zkDb.setM2mDataInit(true);
+//        for (long session : deadSessions) {
+//            // XXX: Is lastProcessedZxid really the best thing to use?
+//            killSession(session, zkDb.getDataTreeLastProcessedZxid());
+//        }
     }
 
     public void takeSnapshot(){
 
-        try {
-            txnLogFactory.save(zkDb.getDataTree(), zkDb.getSessionWithTimeOuts());
-        } catch (IOException e) {
-            LOG.error("Severe unrecoverable error, exiting", e);
-            // This is a severe error that we cannot recover from,
-            // so we need to exit
-            System.exit(10);
-        }
+//        try {
+//            txnLogFactory.save(zkDb.getDataTree(), zkDb.getSessionWithTimeOuts());
+//        } catch (IOException e) {
+//            LOG.error("Severe unrecoverable error, exiting", e);
+//            // This is a severe error that we cannot recover from,
+//            // so we need to exit
+//            System.exit(10);
+//        }
     }
 
   
@@ -323,15 +320,15 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
 //    }
 
     protected void killSession(long sessionId, long zxid) {
-        zkDb.killSession(sessionId, zxid);
-        if (LOG.isTraceEnabled()) {
-            ZooTrace.logTraceMessage(LOG, ZooTrace.SESSION_TRACE_MASK,
-                                         "ZooKeeperServer --- killSession: 0x"
-                    + Long.toHexString(sessionId));
-        }
-        if (sessionTracker != null) {
-            sessionTracker.removeSession(sessionId);
-        }
+//        zkDb.killSession(sessionId, zxid);
+//        if (LOG.isTraceEnabled()) {
+//            ZooTrace.logTraceMessage(LOG, ZooTrace.SESSION_TRACE_MASK,
+//                                         "ZooKeeperServer --- killSession: 0x"
+//                    + Long.toHexString(sessionId));
+//        }
+//        if (sessionTracker != null) {
+//            sessionTracker.removeSession(sessionId);
+//        }
     }
 
 //    public void expire(Session session) {
@@ -364,21 +361,21 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
 
     protected void registerJMX() {
         // register with JMX
-        try {
-            jmxServerBean = new ZooKeeperServerBean(this);
-            MBeanRegistry.getInstance().register(jmxServerBean, null);
-            
-            try {
-                jmxDataTreeBean = new DataTreeBean(zkDb.getDataTree());
-                MBeanRegistry.getInstance().register(jmxDataTreeBean, jmxServerBean);
-            } catch (Exception e) {
-                LOG.warn("Failed to register with JMX", e);
-                jmxDataTreeBean = null;
-            }
-        } catch (Exception e) {
-            LOG.warn("Failed to register with JMX", e);
-            jmxServerBean = null;
-        }
+//        try {
+//            jmxServerBean = new ZooKeeperServerBean(this);
+//            MBeanRegistry.getInstance().register(jmxServerBean, null);
+//            
+//            try {
+//                jmxDataTreeBean = new DataTreeBean(zkDb.getM2mData());
+//                MBeanRegistry.getInstance().register(jmxDataTreeBean, jmxServerBean);
+//            } catch (Exception e) {
+//                LOG.warn("Failed to register with JMX", e);
+//                jmxDataTreeBean = null;
+//            }
+//        } catch (Exception e) {
+//            LOG.warn("Failed to register with JMX", e);
+//            jmxServerBean = null;
+//        }
     }
     
     public void startdata() 
@@ -705,7 +702,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
      * datatree
      */
     public long getLastProcessedZxid() {
-        return zkDb.getDataTreeLastProcessedZxid();
+        return zkDb.getM2mDataBase().getLastProcessZxid();
     }
 
     /**
@@ -774,9 +771,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
         return "standalone";
     }
 
-    public void dumpEphemerals(PrintWriter pwriter) {
-    	zkDb.dumpEphemerals(pwriter);
-    }
+ 
     
     /**
      * return the total number of client connections that are alive

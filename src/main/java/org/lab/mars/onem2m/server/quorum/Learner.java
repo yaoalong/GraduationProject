@@ -37,6 +37,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.lab.mars.onem2m.jute.BinaryInputArchive;
 import org.lab.mars.onem2m.jute.BinaryOutputArchive;
 import org.lab.mars.onem2m.jute.InputArchive;
+import org.lab.mars.onem2m.jute.M2mBinaryInputArchive;
+import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
+import org.lab.mars.onem2m.jute.M2mInputArchive;
+import org.lab.mars.onem2m.jute.M2mOutputArchive;
 import org.lab.mars.onem2m.jute.M2mRecord;
 import org.lab.mars.onem2m.jute.OutputArchive;
 import org.lab.mars.onem2m.server.M2mRequest;
@@ -74,8 +78,8 @@ public class Learner {
         return sock;
     }
     
-    protected InputArchive leaderIs;
-    protected OutputArchive leaderOs;  
+    protected M2mInputArchive leaderIs;
+    protected M2mOutputArchive leaderOs;  
     /** the protocol version of the leader */
     protected int leaderProtocolVersion = 0x01;
     
@@ -240,10 +244,10 @@ public class Learner {
             }
             Thread.sleep(1000);
         }
-        leaderIs = BinaryInputArchive.getArchive(new BufferedInputStream(
+        leaderIs = M2mBinaryInputArchive.getArchive(new BufferedInputStream(
                 sock.getInputStream()));
         bufferedOutput = new BufferedOutputStream(sock.getOutputStream());
-        leaderOs = BinaryOutputArchive.getArchive(bufferedOutput);
+        leaderOs = M2mBinaryOutputArchive.getArchive(bufferedOutput);
     }   
     
     /**
