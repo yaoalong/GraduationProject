@@ -196,7 +196,6 @@ public class M2MDataBaseImpl implements M2MDataBase {
 			try {
 				m2mDataNode.deserialize(inboa, "m2mData");
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 				break;
 			}
@@ -210,8 +209,12 @@ public class M2MDataBaseImpl implements M2MDataBase {
 		case OpCode.setData:
 			M2mSetDataTxn m2mSetDataTxn = (M2mSetDataTxn) m2mRecord;
 			processTxnResult.path = m2mSetDataTxn.getPath();
-			Object object = ResourceReflection.deserializeKryo(m2mSetDataTxn
+			
+			M2mDataNode object = (M2mDataNode) ResourceReflection.deserializeKryo(m2mSetDataTxn
 					.getData());
+			System.out.println("要更新的是"+m2mSetDataTxn.getPath());
+			System.out.println(m2mSetDataTxn.getData().length);
+			System.out.println("是否为空:"+(object==null));
 			update(m2mSetDataTxn.getPath(),
 					ResourceReflection.serialize(object));
 			break;

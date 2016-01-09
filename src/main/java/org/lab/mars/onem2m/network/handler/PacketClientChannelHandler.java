@@ -23,7 +23,7 @@ public class PacketClientChannelHandler extends
 	public PacketClientChannelHandler() throws KeeperException,
 			InterruptedException {
 		try {
-			m2mPacket=Test.createM2mDeletePacket();
+			m2mPacket=Test.createM2mSetDataPacket();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
