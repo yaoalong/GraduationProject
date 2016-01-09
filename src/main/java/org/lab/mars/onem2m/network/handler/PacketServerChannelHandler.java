@@ -39,12 +39,12 @@ public class PacketServerChannelHandler extends
 	@Override
 	public void channelRead0(ChannelHandlerContext ctx, Object msg) {
 		M2mPacket m2mPacket = (M2mPacket) msg;
-		if (preProcessPacket(m2mPacket)) {
+		//if (preProcessPacket(m2mPacket)) {
 			NettyServerCnxn nettyServerCnxn = ctx.attr(STATE).get();
 			nettyServerCnxn.receiveMessage(ctx, m2mPacket);
-		} else {
+		//} else {
 			return;
-		}
+	//	}
 	}
 
 	@Override

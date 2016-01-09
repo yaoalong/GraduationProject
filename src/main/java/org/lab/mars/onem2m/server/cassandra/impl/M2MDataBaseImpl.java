@@ -4,12 +4,19 @@ import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.set;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.gte;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.gt;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.lab.mars.onem2m.ZooDefs.OpCode;
+import org.lab.mars.onem2m.jute.M2mBinaryInputArchive;
+import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.jute.M2mRecord;
 import org.lab.mars.onem2m.reflection.ResourceReflection;
 import org.lab.mars.onem2m.server.DataTree.ProcessTxnResult;
@@ -35,6 +42,8 @@ import com.datastax.driver.core.querybuilder.Select;
 import com.datastax.driver.core.querybuilder.Update;
 
 public class M2MDataBaseImpl implements M2MDataBase {
+	static ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	static M2mBinaryOutputArchive boa = M2mBinaryOutputArchive.getArchive(baos);
 	private String keyspace;
 	private String table;
 	private String node;
@@ -180,7 +189,18 @@ public class M2MDataBaseImpl implements M2MDataBase {
 		case OpCode.create:
 			M2mCreateTxn createTxn = (M2mCreateTxn) m2mRecord;
 			processTxnResult.path = createTxn.getPath();
-			retrieve(createTxn.getPath());
+			ByteArrayInputStream inbaos = new ByteArrayInputStream(createTxn.getData());
+			DataInputStream dis = new DataInputStream( inbaos );
+			M2mBinaryInputArchive inboa = M2mBinaryInputArchive.getArchive(dis);
+			M2mDataNode m2mDataNode=new M2mDataNode();
+			try {
+				m2mDataNode.deserialize(inboa, "m2mData");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				break;
+			}
+			create(m2mDataNode);
 			break;
 		case OpCode.delete:
 			M2mDeleteTxn deleteTxn = (M2mDeleteTxn) m2mRecord;

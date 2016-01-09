@@ -1,5 +1,7 @@
 package org.lab.mars.onem2m.network.handler;
 
+import java.io.IOException;
+
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -20,7 +22,12 @@ public class PacketClientChannelHandler extends
 	 */
 	public PacketClientChannelHandler() throws KeeperException,
 			InterruptedException {
-		m2mPacket=Test.createM2mPacket();
+		try {
+			m2mPacket=Test.createM2mPacket();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -33,7 +40,7 @@ public class PacketClientChannelHandler extends
 	public void channelRead0(ChannelHandlerContext ctx, Object msg) {
 		// Echo back the received object to the server.
 		System.out.println("接收到了消息");
-		ctx.channel().writeAndFlush(m2mPacket);
+		//ctx.channel().writeAndFlush(m2mPacket);
 	}
 
 	@Override
