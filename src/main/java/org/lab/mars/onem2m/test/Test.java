@@ -7,13 +7,14 @@ import org.lab.mars.onem2m.ZooDefs;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.proto.M2mCreateRequest;
 import org.lab.mars.onem2m.proto.M2mCreateResponse;
+import org.lab.mars.onem2m.proto.M2mDeleteRequest;
 import org.lab.mars.onem2m.proto.M2mPacket;
 import org.lab.mars.onem2m.proto.M2mReplyHeader;
 import org.lab.mars.onem2m.proto.M2mRequestHeader;
 import org.lab.mars.onem2m.server.M2mDataNode;
 
 public class Test {
-	public static M2mPacket createM2mPacket() throws IOException {
+	public static M2mPacket createM2mCreatePacket() throws IOException {
 		M2mRequestHeader m2mRequestHeader = new M2mRequestHeader();
 		m2mRequestHeader.setType(ZooDefs.OpCode.create);
 		M2mCreateRequest m2mCreateRequest = new M2mCreateRequest();
@@ -32,6 +33,17 @@ public class Test {
 		m2mCreateRequest.setData(bytes);
 		M2mPacket m2mPacket = new M2mPacket(m2mRequestHeader, m2mReplyHeader,
 				m2mCreateRequest, m2mCreateResponse);
+		return m2mPacket;
+	}
+	public static M2mPacket createM2mDeletePacket() throws IOException {
+		M2mRequestHeader m2mRequestHeader = new M2mRequestHeader();
+		m2mRequestHeader.setType(ZooDefs.OpCode.delete);
+	M2mDeleteRequest m2mDeleteRequest = new M2mDeleteRequest("1");
+		M2mReplyHeader m2mReplyHeader = new M2mReplyHeader();
+		 ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		 M2mBinaryOutputArchive boa = M2mBinaryOutputArchive.getArchive(baos);
+		M2mPacket m2mPacket = new M2mPacket(m2mRequestHeader, m2mReplyHeader,
+				m2mDeleteRequest, new M2mCreateResponse());
 		return m2mPacket;
 	}
 

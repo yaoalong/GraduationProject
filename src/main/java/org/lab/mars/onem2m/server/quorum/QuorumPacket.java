@@ -19,20 +19,18 @@
 
 package org.lab.mars.onem2m.server.quorum;
 
-import org.lab.mars.onem2m.jute.BinaryInputArchive;
-import org.lab.mars.onem2m.jute.BinaryOutputArchive;
-import org.lab.mars.onem2m.jute.CsvOutputArchive;
-import org.lab.mars.onem2m.jute.InputArchive;
 import org.lab.mars.onem2m.jute.M2mBinaryInputArchive;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.jute.M2mCsvOutputArchive;
 import org.lab.mars.onem2m.jute.M2mInputArchive;
 import org.lab.mars.onem2m.jute.M2mOutputArchive;
 import org.lab.mars.onem2m.jute.M2mRecord;
-import org.lab.mars.onem2m.jute.OutputArchive;
-import org.lab.mars.onem2m.jute.Record;
 public class QuorumPacket implements M2mRecord {
-  private int type;
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = -6647589866116191846L;
+private int type;
   private long zxid;
   private byte[] data;
   public QuorumPacket() {

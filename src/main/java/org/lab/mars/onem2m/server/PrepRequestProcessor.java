@@ -41,6 +41,7 @@ import org.lab.mars.onem2m.proto.M2mSetDataRequest;
 import org.lab.mars.onem2m.server.ZooKeeperServer.ChangeRecord;
 import org.lab.mars.onem2m.server.quorum.Leader.XidRolloverException;
 import org.lab.mars.onem2m.txn.M2mCreateTxn;
+import org.lab.mars.onem2m.txn.M2mDeleteTxn;
 import org.lab.mars.onem2m.txn.M2mErrorTxn;
 import org.lab.mars.onem2m.txn.M2mSetDataTxn;
 import org.lab.mars.onem2m.txn.M2mTxnHeader;
@@ -278,6 +279,7 @@ public class PrepRequestProcessor extends Thread implements RequestProcessor {
 			if (deserialize)
 				M2mByteBufferInputStream.byteBuffer2Record(request.request,
 						deleteRequest);
+			request.txn=new M2mDeleteTxn(deleteRequest.getKey());
 			break;
 		case OpCode.setData:
 			M2mSetDataRequest setDataRequest = (M2mSetDataRequest) record;

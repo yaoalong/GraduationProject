@@ -5,7 +5,6 @@ import java.io.IOException;
 import org.lab.mars.onem2m.jute.M2mInputArchive;
 import org.lab.mars.onem2m.jute.M2mOutputArchive;
 import org.lab.mars.onem2m.jute.M2mRecord;
-import org.lab.mars.onem2m.server.M2mDataNode;
 
 public class M2mCreateRequest implements M2mRecord {
 
