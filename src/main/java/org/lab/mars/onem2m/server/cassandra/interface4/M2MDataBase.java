@@ -15,7 +15,7 @@ public interface M2MDataBase {
 
 	M2mDataNode retrieve(String key);
     List<M2mDataNode> retrieve( Integer key);
-	Long create(Map<String, Object> map);
+	Long create(Object object);
 
 	Long delete(String key);
 

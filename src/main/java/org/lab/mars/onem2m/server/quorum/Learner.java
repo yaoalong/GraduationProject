@@ -339,6 +339,7 @@ public class Learner {
                     LOG.error("Missing signature. Got " + signature);
                     throw new IOException("Missing signature");                   
                 }
+                zk.getZKDatabase().commit();
             } else if (qp.getType() == Leader.TRUNC) {
                 //we need to truncate the log to the lastzxid of the leader
                 LOG.warn("Truncating log to get in sync with the leader 0x"

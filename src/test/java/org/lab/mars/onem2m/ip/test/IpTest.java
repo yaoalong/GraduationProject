@@ -1,12 +1,8 @@
 package org.lab.mars.onem2m.ip.test;
 
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.Enumeration;
-
 import org.junit.Test;
 
 public class IpTest {

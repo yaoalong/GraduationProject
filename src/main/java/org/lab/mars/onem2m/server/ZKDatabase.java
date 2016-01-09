@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
@@ -68,7 +69,7 @@ public class ZKDatabase {
 	/**
 	 * make sure on a clear you take care of all these members.
 	 */
-	//protected DataTree dataTree;
+	// protected DataTree dataTree;
 	protected M2mData m2mData;
 	protected ConcurrentHashMap<Long, Integer> sessionsWithTimeouts;
 	// protected FileTxnSnapLog snapLog;
@@ -96,12 +97,12 @@ public class ZKDatabase {
 		this.m2mDataBase = m2mDataBase;
 		m2mData = new M2mData();
 		sessionsWithTimeouts = new ConcurrentHashMap<Long, Integer>();
-		List<M2mDataNode> m2mDataNodes=m2mDataBase.retrieve(1);
-		for(M2mDataNode node:m2mDataNodes){
+		List<M2mDataNode> m2mDataNodes = m2mDataBase.retrieve(1);
+		for (M2mDataNode node : m2mDataNodes) {
 			m2mData.addM2mDataNode(node.getId(), node);
-			
+
 		}
-		
+
 	}
 
 	/**
@@ -186,8 +187,6 @@ public class ZKDatabase {
 		m2mData.initialized = b;
 	}
 
-	
-
 	/**
 	 * get sessions with timeouts
 	 * 
@@ -254,13 +253,6 @@ public class ZKDatabase {
 		}
 	}
 
-
-
-
-
-
-
-
 	/**
 	 * the node count of the datatree
 	 * 
@@ -270,7 +262,6 @@ public class ZKDatabase {
 		return m2mData.getNodeCount();
 	}
 
-	
 	/**
 	 * the process txn on the data
 	 * 
@@ -288,7 +279,6 @@ public class ZKDatabase {
 		return m2mDataBase.processTxn(hdr, txn);
 
 	}
-
 
 	public Object getNode(String key) {
 		return m2mDataBase.retrieve(key);
@@ -311,10 +301,6 @@ public class ZKDatabase {
 	public Long updateData(String key, Map<String, Object> updated) {
 		return m2mDataBase.update(key, updated);
 	}
-
-
-
-
 
 	// /**
 	// * Truncate the ZKDatabase to the specified zxid
@@ -361,6 +347,18 @@ public class ZKDatabase {
 			InterruptedException {
 		SerializeUtils.serializeSnapshot(getM2mData(), oa,
 				getSessionWithTimeOuts());
+	}
+
+	/*
+	 * 数据库的插入
+	 */
+	public void commit() {
+		for (Entry<Integer, M2mDataNode> m2mDataNode : getM2mData().getNodes()
+				.entrySet()) {
+			m2mDataBase.create(m2mDataNode.getValue());
+
+		}
+
 	}
 
 	/**
@@ -433,8 +431,9 @@ public class ZKDatabase {
 	public void setM2mData(M2mData m2mData) {
 		this.m2mData = m2mData;
 	}
-	public void setlastProcessedZxid(long zxid){
-		
+
+	public void setlastProcessedZxid(long zxid) {
+
 	}
 
 }

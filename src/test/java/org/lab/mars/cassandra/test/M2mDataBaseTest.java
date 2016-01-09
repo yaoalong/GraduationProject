@@ -10,7 +10,7 @@ import org.lab.mars.onem2m.server.cassandra.impl.M2MDataBaseImpl;
 
 public class M2mDataBaseTest {
 	M2MDataBaseImpl m2mDataBase = new M2MDataBaseImpl(false, "tests",
-			"student", "192.168.10.139");
+			"student2", "192.168.10.139");
 
 	@Test
 	public void test() {
@@ -52,5 +52,14 @@ public class M2mDataBaseTest {
 		Map<String,Object> map=new HashMap<String,Object>();
 		map.put("data", 100);
 		m2mDataBase.update("51634", map);
+	}
+	@Test
+	public void testCreate(){
+		M2mDataNode m2mDataNode=new M2mDataNode();
+		m2mDataNode.setData(2);
+		m2mDataNode.setId(3);
+		m2mDataNode.setLabel(0);
+		m2mDataNode.setZxid(4);
+		m2mDataBase.create(m2mDataNode);
 	}
 }

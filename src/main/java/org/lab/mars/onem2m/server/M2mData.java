@@ -21,7 +21,7 @@ public class M2mData implements M2mRecord{
 	 */
 	private static final long serialVersionUID = -5084501890442461767L;
 	private static final Logger LOG = LoggerFactory.getLogger(M2mData.class);
-	 private final ConcurrentHashMap<Integer, M2mDataNode> nodes =
+	 private static final ConcurrentHashMap<Integer, M2mDataNode> nodes =
 		        new ConcurrentHashMap<Integer, M2mDataNode>();
 	 public boolean initialized = false;//数据是否初始化
 	 public M2mData(){
@@ -29,6 +29,7 @@ public class M2mData implements M2mRecord{
 		 m2mDataNode.setId(1);
 		 m2mDataNode.setLabel(4);
 		 m2mDataNode.setZxid(3);
+		 m2mDataNode.setData(4);
 		 nodes.put(1, m2mDataNode);
 	 }
 	 public void addM2mDataNode(Integer key,M2mDataNode m2mDataNode){
@@ -67,5 +68,5 @@ public class M2mData implements M2mRecord{
 	public ConcurrentHashMap<Integer, M2mDataNode> getNodes() {
 		return nodes;
 	}
-
+  
 }

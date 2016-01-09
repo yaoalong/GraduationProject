@@ -111,8 +111,9 @@ public class M2MDataBaseImpl implements M2MDataBase {
 	 * 插入数据
 	 */
 	@Override
-	public Long create(Map<String, Object> map) {
+	public Long create(Object object) {
 		try {
+			Map<String,Object> map=ResourceReflection.serialize(object);
 			Insert insert = query().insertInto(keyspace, table);
 			map.forEach(insert::value);
 			session.execute(insert);

@@ -3,14 +3,13 @@ package org.lab.mars.onem2m.serialize.test;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 import org.junit.Test;
 import org.lab.mars.onem2m.jute.M2mBinaryInputArchive;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
-import org.lab.mars.onem2m.proto.M2mCreateRequest;
 import org.lab.mars.onem2m.server.M2mData;
+import org.lab.mars.onem2m.server.M2mDataNode;
 
 public class SerializeTest {
 	static ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -20,6 +19,11 @@ public class SerializeTest {
 	@Test
 	public void testSerialize() throws IOException {
 		M2mData m2mData = new M2mData();
+		M2mDataNode m2mDataNode=new M2mDataNode();
+		m2mDataNode.setData(2);
+		m2mDataNode.setId(4);
+		m2mDataNode.setLabel(4);
+		m2mDataNode.setZxid(5);
 		m2mData.serialize(boa, "m2mData");
 		bytes = baos.toByteArray();
 		ByteArrayInputStream inbaos = new ByteArrayInputStream(bytes);
