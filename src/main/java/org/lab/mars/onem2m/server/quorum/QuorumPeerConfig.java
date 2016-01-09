@@ -85,6 +85,9 @@ public class QuorumPeerConfig {
     protected String keySpace="tests";
     protected String table="student";
     
+    
+    protected String zooKeeperServer;
+    
     /**
      * Minimum snapshot retain count.
      * @see org.apache.zookeeper.server.PurgeTxnLog#purge(File, File, int)
@@ -250,6 +253,9 @@ public class QuorumPeerConfig {
             }
             else if(key.equals("cassandra.cleaned")){
             	cleaned=Boolean.valueOf(value);
+            }
+            else if(key.equals("zookeeper.server")){
+            	zooKeeperServer=value;
             }
             else {
                 System.setProperty("zookeeper." + key, value);
@@ -452,6 +458,14 @@ public class QuorumPeerConfig {
 
 	public void setMyIp(String myIp) {
 		this.myIp = myIp;
+	}
+
+	public String getZooKeeperServer() {
+		return zooKeeperServer;
+	}
+
+	public void setZooKeeperServer(String zooKeeperServer) {
+		this.zooKeeperServer = zooKeeperServer;
 	}
     
 }

@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.zookeeper.KeeperException;
 import org.lab.mars.onem2m.common.AtomicFileOutputStream;
 import org.lab.mars.onem2m.jmx.MBeanRegistry;
 import org.lab.mars.onem2m.jmx.ZKMBeanInfo;
@@ -47,6 +48,7 @@ import org.lab.mars.onem2m.server.cassandra.interface4.M2MDataBase;
 import org.lab.mars.onem2m.server.quorum.flexible.QuorumMaj;
 import org.lab.mars.onem2m.server.quorum.flexible.QuorumVerifier;
 import org.lab.mars.onem2m.server.util.ZxidUtils;
+import org.lab.mars.onem2m.servers.monitor.RegisterIntoZooKeeper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,7 +87,8 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 	LeaderElectionBean jmxLeaderElectionBean;
 	QuorumCnxManager qcm;
 	M2MDataBase m2mDataBase;
-
+    RegisterIntoZooKeeper registerIntoZooKeeper;
+    String myIp;
 	/*
 	 * ZKDatabase is a top level member of quorumpeer which will be used in all
 	 * the zookeeperservers instantiated later. Also, it is created once on
@@ -436,6 +439,11 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 
 	@Override
 	public synchronized void start() {
+		try {
+			registerIntoZooKeeper.register(myIp);
+		} catch (IOException | KeeperException | InterruptedException e) {
+			e.printStackTrace();
+		}
 		loadDataBase();
 		cnxnFactory.start();
 		startLeaderElection();
@@ -610,6 +618,7 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 				new ZooKeeperServer.BasicDataTreeBuilder(), this.zkDb));
 	}
 
+	@SuppressWarnings("deprecation")
 	protected Election createElectionAlgorithm(int electionAlgorithm) {
 		Election le = null;
 
@@ -640,6 +649,7 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 		return le;
 	}
 
+	@SuppressWarnings("deprecation")
 	protected Election makeLEStrategy() {
 		LOG.debug("Initializing leader election protocol...");
 		if (getElectionType() == 0) {
@@ -1184,6 +1194,22 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 
 	public void setM2mDataBase(M2MDataBase m2mDataBase) {
 		this.m2mDataBase = m2mDataBase;
+	}
+
+	public RegisterIntoZooKeeper getRegisterIntoZooKeeper() {
+		return registerIntoZooKeeper;
+	}
+
+	public void setRegisterIntoZooKeeper(RegisterIntoZooKeeper registerIntoZooKeeper) {
+		this.registerIntoZooKeeper = registerIntoZooKeeper;
+	}
+
+	public String getMyIp() {
+		return myIp;
+	}
+
+	public void setMyIp(String myIp) {
+		this.myIp = myIp;
 	}
 
 }

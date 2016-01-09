@@ -29,6 +29,7 @@ import org.lab.mars.onem2m.server.NettyServerCnxnFactory;
 import org.lab.mars.onem2m.server.ZKDatabase;
 import org.lab.mars.onem2m.server.ZooKeeperServerMain;
 import org.lab.mars.onem2m.server.quorum.QuorumPeerConfig.ConfigException;
+import org.lab.mars.onem2m.servers.monitor.RegisterIntoZooKeeper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -149,6 +150,10 @@ public class QuorumPeerMain {
           quorumPeer.setLearnerType(config.getPeerType());
           quorumPeer.setSyncEnabled(config.getSyncEnabled());
           quorumPeer.setQuorumListenOnAllIPs(config.getQuorumListenOnAllIPs());
+          RegisterIntoZooKeeper registerIntoZooKeeper=new RegisterIntoZooKeeper();
+          registerIntoZooKeeper.setServer(config.getZooKeeperServer());
+          quorumPeer.setRegisterIntoZooKeeper(registerIntoZooKeeper);
+          quorumPeer.setMyIp(config.getMyIp());
           quorumPeer.start();
           quorumPeer.join();
       } catch (InterruptedException e) {
