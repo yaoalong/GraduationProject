@@ -92,7 +92,9 @@ public class ZKDatabase {
 		sessionsWithTimeouts = new ConcurrentHashMap<Long, Integer>();
 		this.m2mDataBase = m2mDataBase;
 	}
-
+	/*
+	 * 并且进行加载
+	 */
 	public ZKDatabase(FileTxnSnapLog snapLog, M2MDataBase m2mDataBase) {
 		this.m2mDataBase = m2mDataBase;
 		m2mData = new M2mData();
@@ -343,7 +345,7 @@ public class ZKDatabase {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	public void serializeSnapshot(M2mOutputArchive oa) throws IOException,
+	public void serializeSnapshot( M2mOutputArchive oa) throws IOException,
 			InterruptedException {
 		SerializeUtils.serializeSnapshot(getM2mData(), oa,
 				getSessionWithTimeOuts());

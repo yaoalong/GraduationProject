@@ -377,7 +377,6 @@ public class LearnerHandler extends Thread {
 						+ " minCommittedLog=0x" + Long.toHexString( minCommittedLog ) + " peerLastZxid=0x" + Long.toHexString( peerLastZxid ) );
 				// 看看是否还有需要处理的投票
 				LinkedList<Proposal> proposals = leader.zk.getZKDatabase().getCommittedLog();
-
 				if (proposals.size() != 0) {
 					LOG.debug( "proposal size is {}", proposals.size() );
 					if ((maxCommittedLog >= peerLastZxid) && (minCommittedLog <= peerLastZxid)) {

@@ -340,17 +340,18 @@ public class Learner {
                     throw new IOException("Missing signature");                   
                 }
                 zk.getZKDatabase().commit();
+                zk.getZKDatabase().getM2mData().clear();
             } else if (qp.getType() == Leader.TRUNC) {
                 //we need to truncate the log to the lastzxid of the leader
                 LOG.warn("Truncating log to get in sync with the leader 0x"
                         + Long.toHexString(qp.getZxid()));
-//                boolean truncated=zk.getZKDatabase().truncateLog(qp.getZxid());
-//                if (!truncated) {
-//                    // not able to truncate the log
-//                    LOG.error("Not able to truncate the log "
-//                            + Long.toHexString(qp.getZxid()));
-//                    System.exit(13);
-//                }
+                boolean truncated=zk.getZKDatabase().truncateLog(qp.getZxid());
+                if (!truncated) {
+                    // not able to truncate the log
+                    LOG.error("Not able to truncate the log "
+                            + Long.toHexString(qp.getZxid()));
+                    System.exit(13);
+                }
 
             }
             else {
