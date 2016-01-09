@@ -212,9 +212,6 @@ public class M2MDataBaseImpl implements M2MDataBase {
 			
 			M2mDataNode object = (M2mDataNode) ResourceReflection.deserializeKryo(m2mSetDataTxn
 					.getData());
-			System.out.println("要更新的是"+m2mSetDataTxn.getPath());
-			System.out.println(m2mSetDataTxn.getData().length);
-			System.out.println("是否为空:"+(object==null));
 			update(m2mSetDataTxn.getPath(),
 					ResourceReflection.serialize(object));
 			break;

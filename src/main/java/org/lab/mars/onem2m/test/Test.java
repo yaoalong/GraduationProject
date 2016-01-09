@@ -44,7 +44,7 @@ public class Test {
 		M2mDeleteRequest m2mDeleteRequest = new M2mDeleteRequest("1");
 		M2mReplyHeader m2mReplyHeader = new M2mReplyHeader();
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		M2mBinaryOutputArchive boa = M2mBinaryOutputArchive.getArchive(baos);
+		M2mBinaryOutputArchive.getArchive(baos);
 		M2mPacket m2mPacket = new M2mPacket(m2mRequestHeader, m2mReplyHeader,
 				m2mDeleteRequest, new M2mCreateResponse());
 		return m2mPacket;
