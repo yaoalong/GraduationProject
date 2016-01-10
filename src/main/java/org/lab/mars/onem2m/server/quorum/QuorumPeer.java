@@ -444,7 +444,16 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 		} catch (IOException | KeeperException | InterruptedException e) {
 			e.printStackTrace();
 		}
+		registerIntoZooKeeper.start();
 		loadDataBase();
+		if(registerIntoZooKeeper!=null){
+			try {
+				registerIntoZooKeeper.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		cnxnFactory.start();
 		startLeaderElection();
 		super.start();
@@ -1209,7 +1218,6 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 	}
 
 	public void setMyIp(String myIp) {
-		System.out.println("我的本地IP:"+myIp);
 		this.myIp = myIp;
 	}
 

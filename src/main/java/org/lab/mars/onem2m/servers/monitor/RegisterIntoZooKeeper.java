@@ -11,27 +11,36 @@ import org.apache.zookeeper.Watcher.Event.KeeperState;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
 
-public class RegisterIntoZooKeeper implements Watcher {
+public class RegisterIntoZooKeeper extends Thread implements Watcher {
 
 	private static CountDownLatch countDownLatch = new CountDownLatch(1);
-    private String server;
-	public  void register(String ip) throws IOException, KeeperException,
+	private String server;
+	private ZooKeeper zooKeeper;
+	private String ip;
+	public void register(String ip) throws IOException, KeeperException,
 			InterruptedException {
-		ZooKeeper zooKeeper = new ZooKeeper(server, 5000,
+		 zooKeeper = new ZooKeeper(server, 5000,
 				new RegisterIntoZooKeeper());
+		 this.ip=ip;
+		
+
+	}
+	@Override
+	public void run(){
 		System.out.println(zooKeeper.getState());
 		try {
 			countDownLatch.await();
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
-		zooKeeper.create("/server/"+ip, ip.getBytes(),
-				Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
-		Thread.sleep(10000);
-
+		try {
+			zooKeeper.create("/server/" + ip, "1".getBytes(), Ids.OPEN_ACL_UNSAFE,
+					CreateMode.EPHEMERAL);
+		} catch (KeeperException | InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
-
 	@Override
 	public void process(WatchedEvent event) {
 		System.out.println("Receive watched event:" + event);
