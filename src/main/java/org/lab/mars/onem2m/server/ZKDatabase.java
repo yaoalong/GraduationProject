@@ -297,7 +297,6 @@ public class ZKDatabase {
 	 * 创建数据
 	 */
 	public Long createData(Object data) {
-		System.out.println("开始创建数据库");
 		return m2mDataBase.create(ResourceReflection.serialize(data));
 	}
 

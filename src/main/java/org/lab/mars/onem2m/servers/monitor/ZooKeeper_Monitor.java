@@ -58,9 +58,6 @@ public class ZooKeeper_Monitor extends Thread implements Watcher {
 	private void getChildrens(ZooKeeper zooKeeper) throws KeeperException,
 			InterruptedException {
 		List<String> serverStrings = zooKeeper.getChildren(ROOT_NODE, null);
-		for(String string:serverStrings){
-			System.out.println("服务器弟子:"+string);
-		}
 		networkPool.setServers(serverStrings.toArray(new String[serverStrings
 				.size()]));
 		networkPool.populateConsistentBuckets();

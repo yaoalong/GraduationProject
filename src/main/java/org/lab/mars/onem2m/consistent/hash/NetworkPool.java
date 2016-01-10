@@ -105,20 +105,16 @@ public class NetworkPool {
                 }
             }
         }
-        System.out.println("初始化完成");
         initialized=true;
     }
 
     public final String getSock(String key) {
-    	System.out.println("FDSFSDF");
-    	System.out.println("开始获取了"+consistentBuckets.size());
         return consistentBuckets.get(getBucket(key));
     }
 
     private final long getBucket(String key) {
         long hc = getHash(key);
         long result= findPointFor(hc);
-        System.out.println(result+"结果");
         return result;
     }
 

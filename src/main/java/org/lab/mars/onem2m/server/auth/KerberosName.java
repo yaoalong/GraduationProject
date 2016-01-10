@@ -410,9 +410,5 @@ public class KerberosName {
   }
 
   public static void main(String[] args) throws Exception {
-    for(String arg: args) {
-      KerberosName name = new KerberosName(arg);
-      System.out.println("Name: " + name + " to " + name.getShortName());
-    }
   }
 }

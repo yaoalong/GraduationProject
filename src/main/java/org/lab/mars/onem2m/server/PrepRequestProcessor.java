@@ -263,7 +263,6 @@ public class PrepRequestProcessor extends Thread implements RequestProcessor {
 			IOException, RequestProcessorException {
 		request.m2mTxnHeader = new M2mTxnHeader(request.cxid, zxid,
 				zks.getTime(), type);
-		System.out.println("type::" + type);
 		switch (type) {
 		case OpCode.create:
 			M2mCreateRequest createRequest = (M2mCreateRequest) record;
