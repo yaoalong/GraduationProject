@@ -20,7 +20,6 @@ package org.lab.mars.onem2m.server.quorum;
 
 import org.lab.mars.onem2m.server.M2mRequest;
 import org.lab.mars.onem2m.server.RequestProcessor;
-import org.lab.mars.onem2m.server.RequestProcessor.RequestProcessorException;
 import org.lab.mars.onem2m.server.SyncRequestProcessor;
 import org.lab.mars.onem2m.server.quorum.Leader.XidRolloverException;
 import org.slf4j.Logger;

@@ -269,7 +269,11 @@ public class ZKDatabase {
 	 * m2m内存数据库处理事务请求
 	 */
 	public ProcessTxnResult processTxn(M2mTxnHeader hdr, M2mRecord txn) {
-		return m2mDataBase.processTxn(hdr, txn);
+		ProcessTxnResult processTxnResult= m2mDataBase.processTxn(hdr, txn);
+		if(processTxnResult.zxid>m2mData.getLastProcessedZxid()){
+			m2mData.setLastProcessedZxid(processTxnResult.zxid);
+		}
+		return processTxnResult;
 
 	}
 

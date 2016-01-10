@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.lab.mars.onem2m.server.SessionTracker;
-import org.lab.mars.onem2m.server.SessionTracker.SessionExpirer;
 import org.lab.mars.onem2m.server.SessionTrackerImpl;
 
 /**

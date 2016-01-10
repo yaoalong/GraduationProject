@@ -176,9 +176,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
         pwriter.print("clientPort=");
         pwriter.println(getClientPort());
         pwriter.print("dataDir=");
-   //     pwriter.println(zkDb.snapLog.getSnapDir().getAbsolutePath());
         pwriter.print("dataLogDir=");
-    //    pwriter.println(zkDb.snapLog.getDataDir().getAbsolutePath());
         pwriter.print("tickTime=");
         pwriter.println(getTickTime());
         pwriter.print("maxClientCnxns=");
@@ -702,7 +700,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
      * datatree
      */
     public long getLastProcessedZxid() {
-        return zkDb.getM2mDataBase().getLastProcessZxid();
+        return zkDb.getM2mData().getLastProcessedZxid();
     }
 
     /**

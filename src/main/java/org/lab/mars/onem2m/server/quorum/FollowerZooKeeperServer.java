@@ -82,7 +82,7 @@ public class FollowerZooKeeperServer extends LearnerZooKeeperServer {
         syncProcessor.start();
     }
 
-    LinkedBlockingQueue<M2mRequest> pendingTxns = new LinkedBlockingQueue<M2mRequest>();
+    LinkedBlockingQueue<M2mRequest> pendingTxns = new LinkedBlockingQueue<M2mRequest>();//等待处理的事务
 
     public void logRequest(M2mTxnHeader hdr, M2mRecord txn) {
         M2mRequest request = new M2mRequest(null,  hdr.getCxid(),

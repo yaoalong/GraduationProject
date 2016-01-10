@@ -37,7 +37,6 @@ import java.util.Map;
 
 import org.apache.zookeeper.KeeperException;
 import org.lab.mars.onem2m.common.AtomicFileOutputStream;
-import org.lab.mars.onem2m.consistent.hash.NetworkPool;
 import org.lab.mars.onem2m.jmx.MBeanRegistry;
 import org.lab.mars.onem2m.jmx.ZKMBeanInfo;
 import org.lab.mars.onem2m.persistence.FileTxnSnapLog;
@@ -472,7 +471,7 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 			zkDb.loadDataBase();
 
 			// load the epochs
-			long lastProcessedZxid = zkDb.getM2mDataBase().getLastProcessZxid();
+			long lastProcessedZxid = zkDb.getM2mData().getLastProcessedZxid();
 			long epochOfZxid = ZxidUtils.getEpochFromZxid(lastProcessedZxid);
 			try {
 				currentEpoch = readLongFromFile(CURRENT_EPOCH_FILENAME);

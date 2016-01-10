@@ -22,7 +22,6 @@ import java.io.PrintWriter;
 import org.lab.mars.onem2m.persistence.FileTxnSnapLog;
 import org.lab.mars.onem2m.server.ZKDatabase;
 import org.lab.mars.onem2m.server.ZooKeeperServer;
-import org.lab.mars.onem2m.server.ZooKeeperServer.DataTreeBuilder;
 
 /**
  * Abstract base class for all ZooKeeperServers that participate in

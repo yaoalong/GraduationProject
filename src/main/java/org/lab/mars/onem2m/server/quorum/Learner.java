@@ -34,15 +34,12 @@ import java.util.LinkedList;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.lab.mars.onem2m.jute.BinaryInputArchive;
 import org.lab.mars.onem2m.jute.BinaryOutputArchive;
-import org.lab.mars.onem2m.jute.InputArchive;
 import org.lab.mars.onem2m.jute.M2mBinaryInputArchive;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.jute.M2mInputArchive;
 import org.lab.mars.onem2m.jute.M2mOutputArchive;
 import org.lab.mars.onem2m.jute.M2mRecord;
-import org.lab.mars.onem2m.jute.OutputArchive;
 import org.lab.mars.onem2m.server.M2mRequest;
 import org.lab.mars.onem2m.server.ServerCnxn;
 import org.lab.mars.onem2m.server.ZooTrace;
@@ -189,6 +186,7 @@ public class Learner {
             oa.write(b);
         }
         oa.close();
+        //封装成为一个最基本的QuorumPacket
         QuorumPacket qp = new QuorumPacket(Leader.REQUEST, -1, baos
                 .toByteArray());
         writePacket(qp, true);

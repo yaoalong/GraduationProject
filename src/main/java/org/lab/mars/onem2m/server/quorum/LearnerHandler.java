@@ -41,9 +41,7 @@ import org.lab.mars.onem2m.server.M2mRequest;
 import org.lab.mars.onem2m.server.ZooTrace;
 import org.lab.mars.onem2m.server.quorum.Leader.Proposal;
 import org.lab.mars.onem2m.server.quorum.QuorumPeer.LearnerType;
-import org.lab.mars.onem2m.server.util.SerializeUtils;
 import org.lab.mars.onem2m.server.util.ZxidUtils;
-import org.lab.mars.onem2m.txn.TxnHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -383,7 +381,7 @@ public class LearnerHandler extends Thread {
 					} else {
 						LOG.warn( "Unhandled proposal scenario" );
 					}
-				} else if (peerLastZxid == leader.zk.getZKDatabase().getM2mDataBase().getLastProcessZxid()){// 如果follower和Leader保持同步，那么只需要发送一个DIFF包
+				} else if (peerLastZxid == leader.zk.getZKDatabase().getM2mData().getLastProcessedZxid()){// 如果follower和Leader保持同步，那么只需要发送一个DIFF包
 					// The leader may recently take a snapshot, so the
 					// committedLog
 					// is empty. We don't need to send snapshot if the follow
@@ -412,7 +410,7 @@ public class LearnerHandler extends Thread {
             bufferedOutput.flush();
             //Need to set the zxidToSend to the latest zxid
             if (packetToSend == Leader.SNAP) {
-                zxidToSend = leader.zk.getZKDatabase().getM2mDataBase().getLastProcessZxid();//获取对应的zxid
+                zxidToSend = leader.zk.getZKDatabase().getM2mData().getLastProcessedZxid();//获取对应的zxid
             }
             oa.writeRecord(new QuorumPacket(packetToSend, zxidToSend, null), "packet");
             bufferedOutput.flush();
@@ -426,7 +424,6 @@ public class LearnerHandler extends Thread {
                         + "sent zxid of db as 0x" 
                         + Long.toHexString(zxidToSend));
                 // Dump data to peer
-                System.out.println("日子:"+peerLastZxid);
                 leader.zk.getZKDatabase().serializeSnapshot(peerLastZxid,oa);
                 oa.writeString("BenWasHere", "signature");
             }

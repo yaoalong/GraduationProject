@@ -22,7 +22,6 @@ import java.io.IOException;
 
 import org.lab.mars.onem2m.jmx.MBeanRegistry;
 import org.lab.mars.onem2m.persistence.FileTxnSnapLog;
-import org.lab.mars.onem2m.server.DataTreeBean;
 import org.lab.mars.onem2m.server.FinalRequestProcessor;
 import org.lab.mars.onem2m.server.PrepRequestProcessor;
 import org.lab.mars.onem2m.server.RequestProcessor;

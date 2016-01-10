@@ -67,11 +67,6 @@ public class PrepRequestProcessor extends Thread implements RequestProcessor {
 		}
 	}
 
-	/**
-	 * this is only for testing purposes. should never be useed otherwise
-	 */
-	private static boolean failCreate = false;
-
 	LinkedBlockingQueue<M2mRequest> submittedRequests = new LinkedBlockingQueue<M2mRequest>();
 
 	RequestProcessor nextProcessor;
@@ -92,7 +87,6 @@ public class PrepRequestProcessor extends Thread implements RequestProcessor {
 	 * @param b
 	 */
 	public static void setFailCreate(boolean b) {
-		failCreate = b;
 	}
 
 	@Override
@@ -278,7 +272,7 @@ public class PrepRequestProcessor extends Thread implements RequestProcessor {
 			if (deserialize)
 				M2mByteBufferInputStream.byteBuffer2Record(request.request,
 						deleteRequest);
-			request.txn=new M2mDeleteTxn(deleteRequest.getKey());
+			request.txn = new M2mDeleteTxn(deleteRequest.getKey());
 			break;
 		case OpCode.setData:
 			M2mSetDataRequest setDataRequest = (M2mSetDataRequest) record;
