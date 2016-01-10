@@ -1209,6 +1209,7 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 	}
 
 	public void setMyIp(String myIp) {
+		System.out.println("我的本地IP:"+myIp);
 		this.myIp = myIp;
 	}
 

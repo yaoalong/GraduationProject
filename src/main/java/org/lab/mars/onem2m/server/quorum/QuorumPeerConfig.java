@@ -254,7 +254,7 @@ public class QuorumPeerConfig {
             else if(key.equals("cassandra.cleaned")){
             	cleaned=Boolean.valueOf(value);
             }
-            else if(key.equals("zookeeper.server")){
+            else if(key.equals("zooKeeper.server")){
             	zooKeeperServer=value;
             }
             else {
@@ -394,7 +394,7 @@ public class QuorumPeerConfig {
                         + " is not a number");
             }
             
-            myIp=servers.get(serverId).addr.getHostName();
+            myIp=servers.get(serverId).addr.getAddress().getHostAddress();
             LearnerType roleByServersList = observers.containsKey(serverId) ? LearnerType.OBSERVER
                     : LearnerType.PARTICIPANT;
             if (roleByServersList != peerType) {
