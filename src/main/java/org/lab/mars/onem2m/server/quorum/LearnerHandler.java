@@ -221,64 +221,7 @@ public class LearnerHandler extends Thread {
     }
 
     static public String packetToString(QuorumPacket p) {
-        if (true)
-            return null;
-        String type = null;
-        String mess = null;
-        Record txn = null;
-        
-        switch (p.getType()) {
-        case Leader.ACK:
-            type = "ACK";
-            break;
-        case Leader.COMMIT:
-            type = "COMMIT";
-            break;
-        case Leader.FOLLOWERINFO:
-            type = "FOLLOWERINFO";
-            break;    
-        case Leader.NEWLEADER:
-            type = "NEWLEADER";
-            break;
-        case Leader.PING:
-            type = "PING";
-            break;
-        case Leader.PROPOSAL:
-            type = "PROPOSAL";
-            TxnHeader hdr = new TxnHeader();
-            try {
-                txn = SerializeUtils.deserializeTxn(p.getData(), hdr);
-                // mess = "transaction: " + txn.toString();
-            } catch (IOException e) {
-                LOG.warn("Unexpected exception",e);
-            }
-            break;
-        case Leader.REQUEST:
-            type = "REQUEST";
-            break;
-        case Leader.REVALIDATE:
-            type = "REVALIDATE";
-            ByteArrayInputStream bis = new ByteArrayInputStream(p.getData());
-            DataInputStream dis = new DataInputStream(bis);
-            try {
-                long id = dis.readLong();
-                mess = " sessionid = " + id;
-            } catch (IOException e) {
-                LOG.warn("Unexpected exception", e);
-            }
-
-            break;
-        case Leader.UPTODATE:
-            type = "UPTODATE";
-            break;
-        default:
-            type = "UNKNOWN" + p.getType();
-        }
-        String entry = null;
-        if (type != null) {
-            entry = type + " " + Long.toHexString(p.getZxid()) + " " + mess;
-        }
-        return entry;
+        return null;
     }
 
     /**
@@ -483,7 +426,8 @@ public class LearnerHandler extends Thread {
                         + "sent zxid of db as 0x" 
                         + Long.toHexString(zxidToSend));
                 // Dump data to peer
-                leader.zk.getZKDatabase().serializeSnapshot(oa);
+                System.out.println("日子:"+peerLastZxid);
+                leader.zk.getZKDatabase().serializeSnapshot(peerLastZxid,oa);
                 oa.writeString("BenWasHere", "signature");
             }
             bufferedOutput.flush();

@@ -57,7 +57,9 @@ public class M2mDataNode implements M2mRecord {
 	public void deserialize(M2mInputArchive archive, String tag)
 			throws IOException {
 		archive.startRecord("node");
+		
 		label = archive.readInt("label");
+	
 		zxid = archive.readInt("zxid");
 		id = archive.readInt("id");
 		data=archive.readInt("data");

@@ -148,14 +148,14 @@ public class SerializeUtils {
 		m2mData.deserialize( ia, "m2mData" );
 	}
 
-	public static void serializeSnapshot(M2mData m2mData, M2mOutputArchive oa, Map<Long, Integer> sessions) throws IOException {
+	public static void serializeSnapshot(Long peerLast,M2mData m2mData, M2mOutputArchive oa, Map<Long, Integer> sessions) throws IOException {
 		HashMap<Long, Integer> sessSnap = new HashMap<Long, Integer>( sessions );
 		oa.writeInt( sessSnap.size(), "count" );
 		for (Entry<Long, Integer> entry : sessSnap.entrySet()) {
 			oa.writeLong( entry.getKey().longValue(), "id" );
 			oa.writeInt( entry.getValue().intValue(), "timeout" );
 		}
-		m2mData.serialize( oa, "m2mData" );
+		m2mData.serialize( peerLast,oa, "m2mData" );
 	}
 
 }

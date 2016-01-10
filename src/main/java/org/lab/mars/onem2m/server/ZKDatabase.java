@@ -20,8 +20,6 @@ package org.lab.mars.onem2m.server;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -31,17 +29,10 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
-import org.lab.mars.onem2m.KeeperException;
-import org.lab.mars.onem2m.KeeperException.NoNodeException;
-import org.lab.mars.onem2m.Watcher;
-import org.lab.mars.onem2m.data.ACL;
-import org.lab.mars.onem2m.data.Stat;
-import org.lab.mars.onem2m.jute.InputArchive;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.jute.M2mInputArchive;
 import org.lab.mars.onem2m.jute.M2mOutputArchive;
 import org.lab.mars.onem2m.jute.M2mRecord;
-import org.lab.mars.onem2m.jute.OutputArchive;
 import org.lab.mars.onem2m.persistence.FileTxnSnapLog;
 import org.lab.mars.onem2m.reflection.ResourceReflection;
 import org.lab.mars.onem2m.server.DataTree.ProcessTxnResult;
@@ -88,7 +79,7 @@ public class ZKDatabase {
 	 */
 
 	public ZKDatabase(M2MDataBase m2mDataBase) {
-		m2mData = new M2mData();
+		m2mData = new M2mData(m2mDataBase);
 		sessionsWithTimeouts = new ConcurrentHashMap<Long, Integer>();
 		this.m2mDataBase = m2mDataBase;
 	}
@@ -97,7 +88,7 @@ public class ZKDatabase {
 	 */
 	public ZKDatabase(FileTxnSnapLog snapLog, M2MDataBase m2mDataBase) {
 		this.m2mDataBase = m2mDataBase;
-		m2mData = new M2mData();
+		m2mData = new M2mData(m2mDataBase);
 		sessionsWithTimeouts = new ConcurrentHashMap<Long, Integer>();
 		List<M2mDataNode> m2mDataNodes = m2mDataBase.retrieve(1);
 		for (M2mDataNode node : m2mDataNodes) {
@@ -126,7 +117,7 @@ public class ZKDatabase {
 		/*
 		 * to be safe we just create a new datatree.
 		 */
-		m2mData = new M2mData();
+		m2mData = new M2mData(m2mDataBase);
 		sessionsWithTimeouts.clear();
 		WriteLock lock = logLock.writeLock();
 		try {
@@ -345,9 +336,9 @@ public class ZKDatabase {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	public void serializeSnapshot( M2mOutputArchive oa) throws IOException,
+	public void serializeSnapshot( Long  peerLast,M2mOutputArchive oa) throws IOException,
 			InterruptedException {
-		SerializeUtils.serializeSnapshot(getM2mData(), oa,
+		SerializeUtils.serializeSnapshot(peerLast,getM2mData(), oa,
 				getSessionWithTimeOuts());
 	}
 

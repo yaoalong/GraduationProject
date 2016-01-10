@@ -1,12 +1,15 @@
 package org.lab.mars.onem2m.server;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.lab.mars.cassandra.test.M2mDataBaseTest;
 import org.lab.mars.onem2m.jute.M2mInputArchive;
 import org.lab.mars.onem2m.jute.M2mOutputArchive;
 import org.lab.mars.onem2m.jute.M2mRecord;
+import org.lab.mars.onem2m.server.cassandra.interface4.M2MDataBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,9 +27,9 @@ public class M2mData implements M2mRecord {
 	private static final Logger LOG = LoggerFactory.getLogger(M2mData.class);
 	private static final ConcurrentHashMap<Integer, M2mDataNode> nodes = new ConcurrentHashMap<Integer, M2mDataNode>();
 	public boolean initialized = false;// 数据是否初始化
-
-	public M2mData() {
-		M2mDataNode m2mDataNode = new M2mDataNode();
+	private M2MDataBase m2mDataBase;
+	public M2mData(M2MDataBase m2mDataBase) {
+		this.m2mDataBase=m2mDataBase;
 	}
 
 	public void addM2mDataNode(Integer key, M2mDataNode m2mDataNode) {
@@ -45,13 +48,24 @@ public class M2mData implements M2mRecord {
 			archive.writeInt(m2mDataNode.getKey(), "key");
 			archive.writeRecord(m2mDataNode.getValue(), "m2mDataNode");
 		}
-
+		
 	}
-
+	public void serialize(Long peerLast,M2mOutputArchive archive, String tag)
+			throws IOException {
+		List<M2mDataNode> dataNodes=m2mDataBase.retrieve(Integer.valueOf(peerLast+""));
+		archive.writeInt(dataNodes.size(), "count");
+		for ( M2mDataNode m2mDataNode : dataNodes) {
+			System.out.println("我的ID:"+m2mDataNode.getId());
+			archive.writeInt(m2mDataNode.getId(), "key");
+			archive.writeRecord(m2mDataNode, "m2mDataNode");
+		}
+		
+	}
 	@Override
 	public void deserialize(M2mInputArchive archive, String tag)
 			throws IOException {
 		int count = archive.readInt("count");
+		System.out.println("反序列化数据为:"+count);
 		while (count > 0) {
 			M2mDataNode m2mDataNode = new M2mDataNode();
 			Integer key = archive.readInt("key");
@@ -60,6 +74,7 @@ public class M2mData implements M2mRecord {
 			count--;
 
 		}
+		System.out.println("读取结束");
 
 	}
 

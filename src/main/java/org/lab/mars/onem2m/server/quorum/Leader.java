@@ -41,7 +41,6 @@ import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.server.FinalRequestProcessor;
 import org.lab.mars.onem2m.server.M2mRequest;
 import org.lab.mars.onem2m.server.RequestProcessor;
-import org.lab.mars.onem2m.server.RequestProcessor.RequestProcessorException;
 import org.lab.mars.onem2m.server.quorum.QuorumPeer.LearnerType;
 import org.lab.mars.onem2m.server.quorum.flexible.QuorumVerifier;
 import org.lab.mars.onem2m.server.util.ZxidUtils;

@@ -77,6 +77,7 @@ public class M2mBinaryInputArchive implements M2mInputArchive {
     
     public String readString(String tag) throws IOException {
     	int len = in.readInt();
+    	System.out.println("读取到的数据长度是:"+len);
     	if (len == -1) return null;
     	byte b[] = new byte[len];
     	in.readFully(b);

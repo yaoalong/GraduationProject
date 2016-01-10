@@ -99,8 +99,6 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 	private ZKDatabase zkDb;
 
 	
-	private Integer clientPort;
-	
 	ZooKeeper_Monitor zooKeeper_Monitor;
 	public static class QuorumServer {
 		public QuorumServer(long id, InetSocketAddress addr,
@@ -1238,7 +1236,6 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 	}
 
 	public void setClientPort(Integer clientPort) {
-		this.clientPort = clientPort;
 	}
 
 }
