@@ -7,6 +7,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 import java.util.Set;
 
+import org.lab.mars.onem2m.consistent.hash.NetworkPool;
 import org.lab.mars.onem2m.network.intialize.PacketServerChannelInitializer;
 import org.lab.mars.onem2m.server.ServerCnxnFactory;
 
@@ -19,8 +20,10 @@ TCP服务器
 public class TcpServer {
     private Set<Channel> channels;
     private ServerCnxnFactory serverCnxnFactory;
-    public TcpServer(ServerCnxnFactory serverCnxnFactory){
+    private NetworkPool networkPool;
+    public TcpServer(ServerCnxnFactory serverCnxnFactory,NetworkPool networkPool){
     	this.serverCnxnFactory=serverCnxnFactory;
+    	this.networkPool=networkPool;
     }
     public void bind(String host,int port) throws InterruptedException {
         ServerBootstrap b=new ServerBootstrap();
@@ -28,7 +31,7 @@ public class TcpServer {
                 .channel(NioServerSocketChannel.class)
                 .option(ChannelOption.TCP_NODELAY,true)
                 .option(ChannelOption.SO_BACKLOG,1000)
-        .childHandler(new PacketServerChannelInitializer(serverCnxnFactory));
+        .childHandler(new PacketServerChannelInitializer(serverCnxnFactory,networkPool));
         b.bind(host,port).sync();
     }
     public void close(){
@@ -37,7 +40,7 @@ public class TcpServer {
         }
     }
     public static void main(String args[]) throws InterruptedException {
-        TcpServer tcpServer=new TcpServer(null);
+        TcpServer tcpServer=new TcpServer(null,null);
         tcpServer.bind("localhost",2182);
     }
 }

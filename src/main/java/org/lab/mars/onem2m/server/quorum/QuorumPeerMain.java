@@ -22,6 +22,7 @@ import java.io.IOException;
 
 import javax.management.JMException;
 
+import org.lab.mars.onem2m.consistent.hash.NetworkPool;
 import org.lab.mars.onem2m.jmx.ManagedUtil;
 import org.lab.mars.onem2m.persistence.FileTxnSnapLog;
 import org.lab.mars.onem2m.server.DatadirCleanupManager;
@@ -30,6 +31,7 @@ import org.lab.mars.onem2m.server.ZKDatabase;
 import org.lab.mars.onem2m.server.ZooKeeperServerMain;
 import org.lab.mars.onem2m.server.quorum.QuorumPeerConfig.ConfigException;
 import org.lab.mars.onem2m.servers.monitor.RegisterIntoZooKeeper;
+import org.lab.mars.onem2m.servers.monitor.ZooKeeper_Monitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -129,9 +131,12 @@ public class QuorumPeerMain {
 
 		LOG.info("Starting quorum peer");
 		try {
+			NetworkPool networkPool=new NetworkPool();
 			NettyServerCnxnFactory cnxnFactory = new NettyServerCnxnFactory();
+			cnxnFactory.setNetworkPool(networkPool);
 			cnxnFactory.configure(config.getClientPortAddress().getPort(), 5);
 			cnxnFactory.setMyIp(config.getMyIp());
+			
 			quorumPeer = new QuorumPeer();
 			quorumPeer.setClientPortAddress(config.getClientPortAddress());
 			quorumPeer.setTxnFactory(new FileTxnSnapLog(new File(config
@@ -155,8 +160,13 @@ public class QuorumPeerMain {
 					.setQuorumListenOnAllIPs(config.getQuorumListenOnAllIPs());
 			RegisterIntoZooKeeper registerIntoZooKeeper = new RegisterIntoZooKeeper();
 			registerIntoZooKeeper.setServer(config.getZooKeeperServer());
+			ZooKeeper_Monitor zooKeeper_Monitor=new ZooKeeper_Monitor();
+			zooKeeper_Monitor.setServer(config.getZooKeeperServer());
+			zooKeeper_Monitor.setNetworkPool(networkPool);
+			quorumPeer.setZooKeeper_Monitor(zooKeeper_Monitor);
 			quorumPeer.setRegisterIntoZooKeeper(registerIntoZooKeeper);
 			quorumPeer.setMyIp(config.getMyIp());
+			
 			quorumPeer.start();
 			quorumPeer.join();
 		} catch (InterruptedException e) {

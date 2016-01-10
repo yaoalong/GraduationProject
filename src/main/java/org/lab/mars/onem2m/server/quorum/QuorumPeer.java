@@ -37,6 +37,7 @@ import java.util.Map;
 
 import org.apache.zookeeper.KeeperException;
 import org.lab.mars.onem2m.common.AtomicFileOutputStream;
+import org.lab.mars.onem2m.consistent.hash.NetworkPool;
 import org.lab.mars.onem2m.jmx.MBeanRegistry;
 import org.lab.mars.onem2m.jmx.ZKMBeanInfo;
 import org.lab.mars.onem2m.persistence.FileTxnSnapLog;
@@ -49,6 +50,7 @@ import org.lab.mars.onem2m.server.quorum.flexible.QuorumMaj;
 import org.lab.mars.onem2m.server.quorum.flexible.QuorumVerifier;
 import org.lab.mars.onem2m.server.util.ZxidUtils;
 import org.lab.mars.onem2m.servers.monitor.RegisterIntoZooKeeper;
+import org.lab.mars.onem2m.servers.monitor.ZooKeeper_Monitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,6 +98,10 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 	 */
 	private ZKDatabase zkDb;
 
+	
+	private Integer clientPort;
+	
+	ZooKeeper_Monitor zooKeeper_Monitor;
 	public static class QuorumServer {
 		public QuorumServer(long id, InetSocketAddress addr,
 				InetSocketAddress electionAddr) {
@@ -440,12 +446,11 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 	@Override
 	public synchronized void start() {
 		try {
-			registerIntoZooKeeper.register(myIp);
+			registerIntoZooKeeper.register(myIp+":"+(cnxnFactory.getLocalPort()));
 		} catch (IOException | KeeperException | InterruptedException e) {
 			e.printStackTrace();
 		}
 		registerIntoZooKeeper.start();
-		loadDataBase();
 		if(registerIntoZooKeeper!=null){
 			try {
 				registerIntoZooKeeper.join();
@@ -454,6 +459,9 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 				e.printStackTrace();
 			}
 		}
+		zooKeeper_Monitor.start();
+		loadDataBase();
+		
 		cnxnFactory.start();
 		startLeaderElection();
 		super.start();
@@ -1219,6 +1227,18 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 
 	public void setMyIp(String myIp) {
 		this.myIp = myIp;
+	}
+
+	public ZooKeeper_Monitor getZooKeeper_Monitor() {
+		return zooKeeper_Monitor;
+	}
+
+	public void setZooKeeper_Monitor(ZooKeeper_Monitor zooKeeper_Monitor) {
+		this.zooKeeper_Monitor = zooKeeper_Monitor;
+	}
+
+	public void setClientPort(Integer clientPort) {
+		this.clientPort = clientPort;
 	}
 
 }

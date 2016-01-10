@@ -1,21 +1,20 @@
 package org.lab.mars.onem2m.servers.monitor;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-import org.lab.mars.onem2m.KeeperException;
-import org.lab.mars.onem2m.WatchedEvent;
-import org.lab.mars.onem2m.Watcher;
-import org.lab.mars.onem2m.ZooKeeper;
-import org.lab.mars.onem2m.Watcher.Event.EventType;
-import org.lab.mars.onem2m.Watcher.Event.KeeperState;
+import org.apache.zookeeper.KeeperException;
+import org.apache.zookeeper.WatchedEvent;
+import org.apache.zookeeper.Watcher;
+import org.apache.zookeeper.Watcher.Event.EventType;
+import org.apache.zookeeper.Watcher.Event.KeeperState;
+import org.apache.zookeeper.ZooKeeper;
 import org.lab.mars.onem2m.consistent.hash.NetworkPool;
 
 /*
  * 监控zookeeper,从而可以获取在线机器列表
  */
-public class ZooKeeper_Monitor implements Watcher {
+public class ZooKeeper_Monitor extends Thread implements Watcher {
 	private static final String ROOT_NODE = "/server";
 	private static CountDownLatch countDownLatch = new CountDownLatch(1);
 	private ZooKeeper zooKeeper;
@@ -24,16 +23,14 @@ public class ZooKeeper_Monitor implements Watcher {
 	 */
 	private String server;
 	private NetworkPool networkPool;
-
-	public void start() throws IOException {
-		ZooKeeper_Monitor zooKeeper_Constructor_Usage = new ZooKeeper_Monitor();
-		ZooKeeper zooKeeper = new ZooKeeper(server, 5000,
-				zooKeeper_Constructor_Usage);
-		System.out.println(zooKeeper.getState());
+	public void run() {
 		try {
+			ZooKeeper zooKeeper = new ZooKeeper(server, 5000,
+					this);
 			countDownLatch.await();
+			getChildrens(zooKeeper);
 			while (true) {
-				zooKeeper.getChildren("/server", zooKeeper_Constructor_Usage);
+				zooKeeper.getChildren("/server", this);
 				Thread.sleep(1000);
 			}
 
@@ -61,9 +58,13 @@ public class ZooKeeper_Monitor implements Watcher {
 	private void getChildrens(ZooKeeper zooKeeper) throws KeeperException,
 			InterruptedException {
 		List<String> serverStrings = zooKeeper.getChildren(ROOT_NODE, null);
+		for(String string:serverStrings){
+			System.out.println("服务器弟子:"+string);
+		}
 		networkPool.setServers(serverStrings.toArray(new String[serverStrings
 				.size()]));
 		networkPool.populateConsistentBuckets();
+		
 	}
 
 	public String getServer() {
@@ -81,5 +82,11 @@ public class ZooKeeper_Monitor implements Watcher {
 	public void setNetworkPool(NetworkPool networkPool) {
 		this.networkPool = networkPool;
 	}
-
+  public static void main(String args[]){
+	  ZooKeeper_Monitor zooKeeper_Monitor=new ZooKeeper_Monitor();
+	  zooKeeper_Monitor.setServer("192.168.10.139:2181");
+	  NetworkPool networkPool=new NetworkPool();
+	  zooKeeper_Monitor.setNetworkPool(networkPool);
+	  zooKeeper_Monitor.start();
+  }
 }

@@ -52,6 +52,7 @@ public class Test {
 	public static M2mPacket createM2mSetDataPacket() throws IOException {
 		M2mRequestHeader m2mRequestHeader = new M2mRequestHeader();
 		m2mRequestHeader.setType(ZooDefs.OpCode.setData);
+		m2mRequestHeader.setKey("11111");
 		M2mSetDataRequest m2mSetDataRequest = new M2mSetDataRequest();
 		M2mDataNode m2mDataNode = new M2mDataNode();
 		m2mDataNode.setId(11111);

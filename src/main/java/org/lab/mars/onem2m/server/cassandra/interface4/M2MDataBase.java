@@ -9,25 +9,23 @@ import org.lab.mars.onem2m.txn.M2mTxnHeader;
 import java.util.List;
 
 public interface M2MDataBase {
-	
-	 
+
 	public Long getLastProcessZxid();
 
 	M2mDataNode retrieve(String key);
-    List<M2mDataNode> retrieve( Integer key);
+
+	List<M2mDataNode> retrieve(Integer key);
+
 	Long create(Object object);
 
 	Long delete(String key);
 
 	Long update(String key, Map<String, Object> updated);
-	
+
 	boolean truncate(Long zxid);
 
 	void close();
 
 	public ProcessTxnResult processTxn(M2mTxnHeader header, M2mRecord m2mRecord);
-	
-	
-	
 
 }

@@ -21,8 +21,8 @@ package org.lab.mars.onem2m.server;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
+import org.lab.mars.onem2m.consistent.hash.NetworkPool;
 import org.lab.mars.onem2m.network.TcpServer;
-import org.lab.mars.onem2m.server.quorum.QuorumPeer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,9 +35,10 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
 	 * 获取本机的ip地址
 	 */
 	private String myIp;
+	private NetworkPool networkPool;
 	@Override
 	public int getLocalPort() {
-		return 0;
+		return clientPort;
 	}
 
 	@Override
@@ -53,7 +54,7 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
 	public void configure(Integer clientPort, int maxClientCnxns)
 			throws IOException {
 		this.clientPort = clientPort;
-		tcpServer = new TcpServer(this);
+		tcpServer = new TcpServer(this,networkPool);
 
 	}
 
@@ -120,10 +121,19 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
 	}
 
 	public String getMyIp() {
-		return myIp;
+		return myIp+":"+getLocalPort();
 	}
 
 	public void setMyIp(String myIp) {
 		this.myIp = myIp;
 	}
+
+	public NetworkPool getNetworkPool() {
+		return networkPool;
+	}
+
+	public void setNetworkPool(NetworkPool networkPool) {
+		this.networkPool = networkPool;
+	}
+	
 }

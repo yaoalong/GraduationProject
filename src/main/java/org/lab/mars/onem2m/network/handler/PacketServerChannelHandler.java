@@ -26,10 +26,11 @@ public class PacketServerChannelHandler extends
 	private ServerCnxnFactory serverCnxnFactory;
 	private ConcurrentHashMap<String, Channel> ipAndChannels = new ConcurrentHashMap<>();
 	private String self;
-
-	public PacketServerChannelHandler(ServerCnxnFactory serverCnxnFactory) {
+	private NetworkPool newNetworkPool;
+	public PacketServerChannelHandler(ServerCnxnFactory serverCnxnFactory,NetworkPool networkPool) {
 	   this.serverCnxnFactory = serverCnxnFactory;
-	   self=serverCnxnFactory.getMyIp();
+	   this.self=serverCnxnFactory.getMyIp();
+	   this.newNetworkPool=networkPool;
 	}
 
 	@SuppressWarnings("deprecation")
@@ -39,12 +40,12 @@ public class PacketServerChannelHandler extends
 	@Override
 	public void channelRead0(ChannelHandlerContext ctx, Object msg) {
 		M2mPacket m2mPacket = (M2mPacket) msg;
-		//if (preProcessPacket(m2mPacket)) {
+		if (preProcessPacket(m2mPacket)) {
 			NettyServerCnxn nettyServerCnxn = ctx.attr(STATE).get();
 			nettyServerCnxn.receiveMessage(ctx, m2mPacket);
-		//} else {
+		} else {
 			return;
-	//	}
+		}
 	}
 
 	@Override
@@ -76,10 +77,15 @@ public class PacketServerChannelHandler extends
 	 * @return
 	 */
 	public boolean preProcessPacket(M2mPacket m2mPacket) {
-
+		System.out.println("我的key"+m2mPacket);
 		String key = m2mPacket.getM2mRequestHeader().getKey();
-		NetworkPool networkPool = new NetworkPool();
-		String server = networkPool.getSock(key);//把server
+		System.out.println("我的key"+key);
+		if(newNetworkPool==null){
+			System.out.println("为空");
+		}
+		String server = newNetworkPool.getSock(key);//把server
+		System.out.println("服务器是:"+server);
+		System.out.println("我自己是:"+self);
 		if (server.equals(self)) {
 			return true;
 		}
@@ -88,6 +94,7 @@ public class PacketServerChannelHandler extends
 		} else {
 			TcpClient tcpClient = new TcpClient();
 			String[] splitStrings=spilitString(server);
+			System.out.println("結果是:"+splitStrings[0]+""+ Integer.valueOf(splitStrings[1]));
 			tcpClient.connectionOne(splitStrings[0], Integer.valueOf(splitStrings[1]));
 			ipAndChannels.put(server, tcpClient.getChannel());
 			tcpClient.write(m2mPacket);

@@ -25,11 +25,11 @@ public class NetworkPool {
             }
         }
     };
-    private String[] servers;
+    private volatile String[] servers;
     private Integer[] weights;
     private Integer totalWeight = 0;
-    private TreeMap<Long, String> consistentBuckets;
-    private boolean initialized = false;
+    private volatile TreeMap<Long, String> consistentBuckets;
+    private volatile boolean initialized = false;
     private int hashingAlg = CONSISTENT_HASH;
 
     /**
@@ -87,7 +87,7 @@ public class NetworkPool {
         } else if (this.weights == null) {
             this.totalWeight = this.servers.length;
         }
-
+        System.out.println("servers:"+servers.length);
         for (int i = 0; i < servers.length; i++) {
             int thisWeight = 1;
             if (this.weights != null && this.weights[i] != null)
@@ -105,20 +105,21 @@ public class NetworkPool {
                 }
             }
         }
+        System.out.println("初始化完成");
+        initialized=true;
     }
 
     public final String getSock(String key) {
-        if (!this.initialized) {
-            if (log.isErrorEnabled())
-                log.error("attempting to get SockIO from uninitialized pool!");
-            return null;
-        }
+    	System.out.println("FDSFSDF");
+    	System.out.println("开始获取了"+consistentBuckets.size());
         return consistentBuckets.get(getBucket(key));
     }
 
     private final long getBucket(String key) {
         long hc = getHash(key);
-        return findPointFor(hc);
+        long result= findPointFor(hc);
+        System.out.println(result+"结果");
+        return result;
     }
 
     private final Long findPointFor(Long hv) {
