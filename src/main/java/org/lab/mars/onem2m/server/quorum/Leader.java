@@ -590,9 +590,7 @@ public class Leader {
 			LOG.debug("Count for zxid: 0x{} is {}", Long.toHexString(zxid),
 					p.ackSet.size());
 		}
-		System.out.println("收到了对应的请求:"+p.ackSet.size());
 		if (self.getQuorumVerifier().containsQuorum(p.ackSet)) {
-			System.out.println("满足了要求开始处理");
 			if (zxid != lastCommitted + 1) {
 				LOG.warn("Commiting zxid 0x{} from {} not first!",
 						Long.toHexString(zxid), followerAddr);
@@ -653,7 +651,6 @@ public class Leader {
 		 */
 		public void processRequest(M2mRequest request)
 				throws RequestProcessorException {
-			System.out.println("开始应用");
 			next.processRequest(request);
 			Proposal p = toBeApplied.peek();
 			if (p != null && p.m2mRequest != null
