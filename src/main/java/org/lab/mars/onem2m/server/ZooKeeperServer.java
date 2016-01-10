@@ -253,7 +253,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
          * See ZOOKEEPER-1642 for more detail.
          */
         if(zkDb.isInitialized()){
-            setZxid(zkDb.getM2mDataBase().getLastProcessZxid());
+            setZxid(zkDb.getM2mData().getLastProcessedZxid());
         }
         else {
             setZxid(zkDb.loadDataBase());

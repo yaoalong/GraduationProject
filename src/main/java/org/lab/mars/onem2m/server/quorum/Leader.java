@@ -373,8 +373,6 @@ public class Leader {
 			readyToStart = true;
 			long epoch = getEpochToPropose(self.getId(),
 					self.getAcceptedEpoch());
-			System.out.println("epoch:"+epoch);
-			System.out.println("ZxidUtils.makeZxid(epoch, 0) "+ZxidUtils.makeZxid(epoch, 0));
 			zk.setZxid(ZxidUtils.makeZxid(epoch, 0));
 
 			synchronized (this) {

@@ -197,7 +197,8 @@ public class ZKDatabase {
 	 * @throws IOException
 	 */
 	public long loadDataBase() throws IOException {
-		long zxid = m2mDataBase.getLastProcessZxid();
+	
+		long zxid = m2mData.getLastProcessedZxid();
 		initialized = true;
 		return zxid;
 	}
