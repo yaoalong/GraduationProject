@@ -1,9 +1,9 @@
 package org.lab.mars.onem2m.server.cassandra.impl;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.set;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.gte;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.gt;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.gte;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.set;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -230,7 +230,13 @@ public class M2MDataBaseImpl implements M2MDataBase {
 
 			Select.Selection selection = query().select();
 			Select select = selection.from(keyspace, table);
+			Integer[] integers=new Integer[2];
+			integers[0]=140000;
+			integers[1]=140200;
+			select.where(eq("id",3333430));
+			select.orderBy(QueryBuilder.desc("zxid"),QueryBuilder.desc("label"));
 			select.limit(1);
+			select.allowFiltering();
 			ResultSet resultSet = session.execute(select);
 			if (resultSet == null) {
 				return result;
