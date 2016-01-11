@@ -16,11 +16,10 @@ import org.lab.mars.onem2m.txn.M2mTxnHeader;
 
 public class M2mDataBaseTest {
 	M2MDataBaseImpl m2mDataBase = new M2MDataBaseImpl(false, "tests",
-			"student", "192.168.10.139");
+			"student2", "192.168.10.139");
 
 	@Test
 	public void test() {
-		System.out.println(m2mDataBase.getLastProcessZxid());
 		m2mDataBase.truncate((long) 4);
 	}
 
@@ -33,20 +32,16 @@ public class M2mDataBaseTest {
 		System.out.println(m2mDataNode.getZxid());
 	}
 
-	@Test
-	public void testGetLastProcessZxid() {
-		System.out.println(m2mDataBase.getLastProcessZxid());
-	}
 
 	@Test
 	public void testDelete() {
-		m2mDataBase.delete("14");
+		m2mDataBase.delete("51634");
 	}
 
 	@Test
 	public void testRetrieve1() {
 
-		List<M2mDataNode> m2mDataNodes = m2mDataBase.retrieve(22);
+		List<M2mDataNode> m2mDataNodes = m2mDataBase.retrieve(51634);
 		for (M2mDataNode m2mDataNode : m2mDataNodes) {
 			System.out.println(m2mDataNode.getId());
 			System.out.println(m2mDataNode.getLabel());

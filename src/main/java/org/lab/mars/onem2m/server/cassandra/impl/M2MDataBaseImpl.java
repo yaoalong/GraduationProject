@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.bouncycastle.jce.provider.JCEBlockCipher.RC2;
 import org.lab.mars.onem2m.ZooDefs.OpCode;
 import org.lab.mars.onem2m.jute.M2mBinaryInputArchive;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
@@ -89,7 +88,7 @@ public class M2MDataBaseImpl implements M2MDataBase {
 		try {
 			Select.Selection selection = query().select();
 			Select select = selection.from(keyspace, table);
-			select.where(eq("id", Integer.valueOf(key)));
+			select.where(eq("id",Integer.valueOf(key)));
 			select.allowFiltering();
 			ResultSet resultSet = session.execute(select);
 			if (resultSet == null) {
@@ -222,47 +221,7 @@ public class M2MDataBaseImpl implements M2MDataBase {
 		return processTxnResult;
 	}
 
-	/**
-	 * 获取最新处理的事务Id
-	 */
-	@Override
-	public Long getLastProcessZxid() {
-		long result = 0;
-		try {
 
-			Select.Selection selection = query().select();
-			Select select = selection.from(keyspace, table);
-			Integer[] integers=new Integer[2];
-			integers[0]=140000;
-			integers[1]=140200;
-			select.where(eq("id",3333430));
-			select.orderBy(QueryBuilder.desc("zxid"),QueryBuilder.desc("label"));
-			select.limit(1);
-			select.allowFiltering();
-			ResultSet resultSet = session.execute(select);
-			if (resultSet == null) {
-				return result;
-			}
-			List<Long> longs = new ArrayList<>();
-			for (Row row : resultSet.all()) {
-				ColumnDefinitions columnDefinitions = resultSet
-						.getColumnDefinitions();
-				columnDefinitions.forEach(d -> {
-					String name = d.getName();
-					if (name.equals("zxid")) {
-						longs.add(Long.valueOf(row.getObject(name) + ""));
-					}
-				});
-			}
-			if (longs.size() > 0) {
-				result = longs.get(0);
-			}
-
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-		return result;
-	}
 
 	@Override
 	public boolean truncate(Long zxid) {
@@ -276,12 +235,11 @@ public class M2MDataBaseImpl implements M2MDataBase {
 				return true;
 			}
 			for (Row row : resultSet.all()) {
-				final Integer idValue = (Integer) row.getObject("id");
-				;
+				Integer idValue = (Integer) row.getObject("id");
 				Integer zxidValue = (Integer) row.getObject("zxid");
 				Delete deletion = query().delete().from(keyspace, table);
-				Statement delete = deletion.where(eq("id", idValue))
-						.and(eq("label", 0)).and(eq("zxid", zxidValue));
+				Statement delete = deletion.where(eq("id", Integer.valueOf(idValue)))
+						.and(eq("zxid", zxidValue));
 				session.execute(delete);
 			}
 

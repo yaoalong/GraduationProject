@@ -10,8 +10,6 @@ import java.util.List;
 
 public interface M2MDataBase {
 
-	public Long getLastProcessZxid();
-
 	M2mDataNode retrieve(String key);
 
 	List<M2mDataNode> retrieve(Integer key);

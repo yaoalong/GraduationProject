@@ -1,7 +1,5 @@
 package org.lab.mars.onem2m.txn;
 
-import java.io.IOException;
-
 import org.lab.mars.onem2m.jute.M2mBinaryInputArchive;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.jute.M2mCsvOutputArchive;

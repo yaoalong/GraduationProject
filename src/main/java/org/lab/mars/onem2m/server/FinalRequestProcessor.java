@@ -176,7 +176,7 @@ public class FinalRequestProcessor implements RequestProcessor {
             err = Code.MARSHALLINGERROR;
         }
 
-        long lastZxid = zks.getZKDatabase().getM2mDataBase().getLastProcessZxid();
+        long lastZxid = zks.getZKDatabase().getM2mData().getLastProcessedZxid();
         M2mReplyHeader hdr =
             new M2mReplyHeader(request.cxid, lastZxid, err.intValue());
 

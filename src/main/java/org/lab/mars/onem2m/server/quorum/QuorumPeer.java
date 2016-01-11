@@ -615,7 +615,7 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 		if (!zkDb.isInitialized()) {
 			loadDataBase();
 		}
-		return m2mDataBase.getLastProcessZxid();
+		return zkDb.getM2mData().getLastProcessedZxid();
 	}
 
 	public Follower follower;
