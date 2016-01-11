@@ -200,6 +200,7 @@ public class M2MDataBaseImpl implements M2MDataBase {
 				e.printStackTrace();
 				break;
 			}
+			m2mDataNode.setZxid(Integer.valueOf(header.getZxid()+""));
 			create(m2mDataNode);
 			break;
 		case OpCode.delete:
@@ -213,6 +214,7 @@ public class M2MDataBaseImpl implements M2MDataBase {
 			
 			M2mDataNode object = (M2mDataNode) ResourceReflection.deserializeKryo(m2mSetDataTxn
 					.getData());
+			
 			update(m2mSetDataTxn.getPath(),
 					ResourceReflection.serialize(object));
 			break;

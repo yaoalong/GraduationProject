@@ -502,7 +502,11 @@ public class Learner {
                     + " is valid: " + valid);
         }
     }
-        
+     /**
+      * 开始ping  
+      * @param qp
+      * @throws IOException
+      */
     protected void ping(QuorumPacket qp) throws IOException {
         // Send back the ping with our session data
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
