@@ -27,10 +27,11 @@ public class PacketServerChannelHandler extends
 	private ConcurrentHashMap<String, Channel> ipAndChannels = new ConcurrentHashMap<>();
 	private String self;
 	private NetworkPool newNetworkPool;
-	public PacketServerChannelHandler(ServerCnxnFactory serverCnxnFactory,NetworkPool networkPool) {
+	public PacketServerChannelHandler(ServerCnxnFactory serverCnxnFactory) {
 	   this.serverCnxnFactory = serverCnxnFactory;
 	   this.self=serverCnxnFactory.getMyIp();
-	   this.newNetworkPool=networkPool;
+	   this.newNetworkPool=serverCnxnFactory.getNetworkPool();
+	   
 	}
 
 	@SuppressWarnings("deprecation")

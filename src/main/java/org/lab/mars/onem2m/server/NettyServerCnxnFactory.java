@@ -54,7 +54,7 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
 	public void configure(Integer clientPort, int maxClientCnxns)
 			throws IOException {
 		this.clientPort = clientPort;
-		tcpServer = new TcpServer(this,networkPool);
+		tcpServer = new TcpServer(this);
 
 	}
 

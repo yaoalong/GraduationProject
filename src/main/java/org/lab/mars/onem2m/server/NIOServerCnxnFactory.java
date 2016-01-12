@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.lab.mars.onem2m.consistent.hash.NetworkPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -309,6 +310,12 @@ public class NIOServerCnxnFactory extends ServerCnxnFactory implements Runnable 
 
 	@Override
 	public String getMyIp() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public NetworkPool getNetworkPool() {
 		// TODO Auto-generated method stub
 		return null;
 	}

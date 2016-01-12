@@ -20,10 +20,8 @@ TCP服务器
 public class TcpServer {
     private Set<Channel> channels;
     private ServerCnxnFactory serverCnxnFactory;
-    private NetworkPool networkPool;
-    public TcpServer(ServerCnxnFactory serverCnxnFactory,NetworkPool networkPool){
+    public TcpServer(ServerCnxnFactory serverCnxnFactory){
     	this.serverCnxnFactory=serverCnxnFactory;
-    	this.networkPool=networkPool;
     }
     public void bind(String host,int port) throws InterruptedException {
         ServerBootstrap b=new ServerBootstrap();
@@ -31,7 +29,7 @@ public class TcpServer {
                 .channel(NioServerSocketChannel.class)
                 .option(ChannelOption.TCP_NODELAY,true)
                 .option(ChannelOption.SO_BACKLOG,1000)
-        .childHandler(new PacketServerChannelInitializer(serverCnxnFactory,networkPool));
+        .childHandler(new PacketServerChannelInitializer(serverCnxnFactory));
         b.bind(host,port).sync();
     }
     public void close(){
@@ -40,7 +38,7 @@ public class TcpServer {
         }
     }
     public static void main(String args[]) throws InterruptedException {
-        TcpServer tcpServer=new TcpServer(null,null);
+        TcpServer tcpServer=new TcpServer(null);
         tcpServer.bind("localhost",2182);
     }
 }

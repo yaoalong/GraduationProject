@@ -24,11 +24,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
-import java.net.SocketException;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -675,6 +672,8 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 						}
 						setPeerState(ServerState.LOOKING);
 					}
+					break;
+				default:
 					break;
 				}
 			}

@@ -32,6 +32,7 @@ import javax.security.auth.login.LoginException;
 
 import org.lab.mars.onem2m.Environment;
 import org.lab.mars.onem2m.Login;
+import org.lab.mars.onem2m.consistent.hash.NetworkPool;
 import org.lab.mars.onem2m.jmx.MBeanRegistry;
 import org.lab.mars.onem2m.server.auth.SaslServerCallbackHandler;
 import org.slf4j.Logger;
@@ -216,5 +217,7 @@ public abstract class ServerCnxnFactory {
 	public void setZkServer(ZooKeeperServer zkServer) {
 		this.zkServer = zkServer;
 	}
+	public abstract NetworkPool getNetworkPool() ;
+
     
 }
