@@ -155,31 +155,6 @@ public class DataTree {
     }
 
     /**
-     * compare two list of acls. if there elements are in the same order and the
-     * same size then return true else return false
-     *
-     * @param lista
-     *            the list to be compared
-     * @param listb
-     *            the list to be compared
-     * @return true if and only if the lists are of the same size and the
-     *         elements are in the same order in lista and listb
-     */
-    private boolean listACLEquals(List<ACL> lista, List<ACL> listb) {
-        if (lista.size() != listb.size()) {
-            return false;
-        }
-        for (int i = 0; i < lista.size(); i++) {
-            ACL a = lista.get(i);
-            ACL b = listb.get(i);
-            if (!a.equals(b)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
      * converts the list of acls to a list of longs.
      *
      * @param acls
@@ -712,7 +687,6 @@ public class DataTree {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public List<ACL> getACL(String path, Stat stat)
             throws KeeperException.NoNodeException {
         DataNode n = nodes.get(path);

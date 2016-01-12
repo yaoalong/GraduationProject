@@ -26,11 +26,13 @@ public class PacketServerChannelHandler extends
 	private ServerCnxnFactory serverCnxnFactory;
 	private ConcurrentHashMap<String, Channel> ipAndChannels = new ConcurrentHashMap<>();
 	private String self;
-	private NetworkPool newNetworkPool;
+	private NetworkPool networkPool;
+	private Integer replicationFactor;
 	public PacketServerChannelHandler(ServerCnxnFactory serverCnxnFactory) {
 	   this.serverCnxnFactory = serverCnxnFactory;
 	   this.self=serverCnxnFactory.getMyIp();
-	   this.newNetworkPool=serverCnxnFactory.getNetworkPool();
+	   this.networkPool=serverCnxnFactory.getNetworkPool();
+	   this.replicationFactor=serverCnxnFactory.getReplicationFactor();
 	   
 	}
 
@@ -78,24 +80,16 @@ public class PacketServerChannelHandler extends
 	 * @return
 	 */
 	public boolean preProcessPacket(M2mPacket m2mPacket) {
-		System.out.println("我的key"+m2mPacket);
 		String key = m2mPacket.getM2mRequestHeader().getKey();
-		System.out.println("我的key"+key);
-		if(newNetworkPool==null){
-			System.out.println("为空");
-		}
-		String server = newNetworkPool.getSock(key);//把server
-		System.out.println("服务器是:"+server);
-		System.out.println("我自己是:"+self);
-		if (server.equals(self)) {
+		if(isShouldHandle(key)){
 			return true;
 		}
+		String server = networkPool.getSock(key);//把server
 		if (ipAndChannels.containsKey(server)) {
 			ipAndChannels.get(server).writeAndFlush(m2mPacket);
 		} else {
 			TcpClient tcpClient = new TcpClient();
 			String[] splitStrings=spilitString(server);
-			System.out.println("結果是:"+splitStrings[0]+""+ Integer.valueOf(splitStrings[1]));
 			tcpClient.connectionOne(splitStrings[0], Integer.valueOf(splitStrings[1]));
 			ipAndChannels.put(server, tcpClient.getChannel());
 			tcpClient.write(m2mPacket);
@@ -110,4 +104,22 @@ public class PacketServerChannelHandler extends
 		String[] splitMessage=ip.split(":");
 		return splitMessage;
 	}
+	/**
+	 * 是否应该自己处理
+	 * @return
+	 */
+    private boolean isShouldHandle(String key){
+    	String server=networkPool.getSock(key);
+    	long myServerId=networkPool.getServerPosition().get(self);
+    	long handlerServerId=networkPool.getServerPosition().get(server);
+    	long serverSize=networkPool.getServerPosition().size();
+    	long distance=Math.abs(myServerId-handlerServerId);
+    	if(distance>serverSize/2){
+    		distance=distance-serverSize/2;
+    	}
+    	if(distance<=(replicationFactor-1)){
+    		return true;
+    	}
+    	return false;
+    }
 }

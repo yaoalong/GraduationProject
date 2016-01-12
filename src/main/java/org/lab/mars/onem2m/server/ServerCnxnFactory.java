@@ -218,6 +218,8 @@ public abstract class ServerCnxnFactory {
 		this.zkServer = zkServer;
 	}
 	public abstract NetworkPool getNetworkPool() ;
+	
+	public abstract Integer getReplicationFactor();
 
     
 }

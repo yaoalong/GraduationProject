@@ -319,4 +319,10 @@ public class NIOServerCnxnFactory extends ServerCnxnFactory implements Runnable 
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public Integer getReplicationFactor() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

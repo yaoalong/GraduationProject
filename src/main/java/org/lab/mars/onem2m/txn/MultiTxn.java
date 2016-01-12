@@ -22,7 +22,6 @@ package org.lab.mars.onem2m.txn;
 import org.lab.mars.onem2m.jute.BinaryInputArchive;
 import org.lab.mars.onem2m.jute.BinaryOutputArchive;
 import org.lab.mars.onem2m.jute.CsvOutputArchive;
-import org.lab.mars.onem2m.jute.Index;
 import org.lab.mars.onem2m.jute.InputArchive;
 import org.lab.mars.onem2m.jute.OutputArchive;
 import org.lab.mars.onem2m.jute.Record;

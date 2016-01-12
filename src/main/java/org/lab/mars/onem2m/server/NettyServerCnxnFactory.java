@@ -36,6 +36,7 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
 	 */
 	private String myIp;
 	private NetworkPool networkPool;
+	private Integer replicationFactor;
 	@Override
 	public int getLocalPort() {
 		return clientPort;
@@ -134,6 +135,16 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
 
 	public void setNetworkPool(NetworkPool networkPool) {
 		this.networkPool = networkPool;
+	}
+
+	@Override
+	public Integer getReplicationFactor() {
+		// TODO Auto-generated method stub
+		return replicationFactor;
+	}
+	public void setReplicationFactory(Integer replicationFactor){
+		this.replicationFactor=replicationFactor;
+		
 	}
 	
 }

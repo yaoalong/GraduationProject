@@ -136,7 +136,7 @@ public class QuorumPeerMain {
 			cnxnFactory.setNetworkPool(networkPool);
 			cnxnFactory.configure(config.getClientPortAddress().getPort(), 5);
 			cnxnFactory.setMyIp(config.getMyIp());
-			
+			cnxnFactory.setReplicationFactory(config.getReplication_factor());//设置复制因子
 			quorumPeer = new QuorumPeer();
 			quorumPeer.setClientPortAddress(config.getClientPortAddress());
 			quorumPeer.setTxnFactory(new FileTxnSnapLog(new File(config

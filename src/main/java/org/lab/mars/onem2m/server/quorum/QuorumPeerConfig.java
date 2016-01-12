@@ -87,7 +87,7 @@ public class QuorumPeerConfig {
     
     
     protected String zooKeeperServer;
-    
+    protected Integer replication_factor;
     /**
      * Minimum snapshot retain count.
      * @see org.apache.zookeeper.server.PurgeTxnLog#purge(File, File, int)
@@ -256,6 +256,9 @@ public class QuorumPeerConfig {
             }
             else if(key.equals("zooKeeper.server")){
             	zooKeeperServer=value;
+            }
+            else if(key.equals("replication.factor")){
+            	replication_factor=Integer.valueOf(value);
             }
             else {
                 System.setProperty("zookeeper." + key, value);
@@ -466,6 +469,14 @@ public class QuorumPeerConfig {
 
 	public void setZooKeeperServer(String zooKeeperServer) {
 		this.zooKeeperServer = zooKeeperServer;
+	}
+
+	public Integer getReplication_factor() {
+		return replication_factor;
+	}
+
+	public void setReplication_factor(Integer replication_factor) {
+		this.replication_factor = replication_factor;
 	}
     
 }
