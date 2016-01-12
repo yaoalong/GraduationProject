@@ -226,6 +226,7 @@ public class QuorumPeerConfig {
 				InetSocketAddress addr = new InetSocketAddress(parts[0],
 						Integer.parseInt(parts[1]));
 				serversStrings.add(parts[0]);// 将server添加到队列中
+				addressToSid.put(parts[0], sid);
 				if (parts.length == 2) {
 					servers.put(Long.valueOf(sid), new QuorumServer(sid, addr));
 				} else if (parts.length == 3) {
