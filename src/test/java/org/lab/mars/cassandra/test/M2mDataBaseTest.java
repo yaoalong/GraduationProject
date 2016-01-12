@@ -82,4 +82,10 @@ public class M2mDataBaseTest {
 
 		
 	}
+	
+	@Test
+	public void testMod(){
+		System.out.println((-1+6)%6);
+		
+	}
 }

@@ -432,7 +432,7 @@ public class QuorumPeerConfig {
 			for (int j = 0; j < replication_factor; j++) {
 
 				String leftServer = networkPool.getPositionToServer().get(
-						myIdInRing - (replication_factor - 1 - j-i));// 最左边
+						((myIdInRing - (replication_factor - 1 - j-i))+serversStrings.size())%serversStrings.size());// 最左边
 				Long sid = addressToSid.get(leftServer);// 找出对应的sid;
                 
 				QuorumServer quorumServer = servers.get(sid);
