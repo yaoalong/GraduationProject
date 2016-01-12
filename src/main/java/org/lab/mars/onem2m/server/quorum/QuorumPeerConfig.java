@@ -62,9 +62,7 @@ public class QuorumPeerConfig {
     protected int electionPort = 2182;
     protected boolean quorumListenOnAllIPs = false;
     protected final HashMap<Long,QuorumServer> servers =
-        new HashMap<Long, QuorumServer>();
-    protected final HashMap<Long,QuorumServer> observers =
-        new HashMap<Long, QuorumServer>();
+        new HashMap<Long, QuorumServer>(); //sid、服务器选举的配置信息
 
     protected long serverId;
     protected String myIp;
@@ -203,18 +201,14 @@ public class QuorumPeerConfig {
                     servers.put(Long.valueOf(sid), new QuorumServer(sid, addr));
                 } else if (parts.length == 3) {
                     InetSocketAddress electionAddr = new InetSocketAddress(
-                            parts[0], Integer.parseInt(parts[2]));
+                            parts[0], Integer.parseInt(parts[2]));//用来选举的信息
                     servers.put(Long.valueOf(sid), new QuorumServer(sid, addr,
-                            electionAddr));
+                            electionAddr));//用来和别的机器进行沟通的配置信息
                 } else if (parts.length == 4) {
                     InetSocketAddress electionAddr = new InetSocketAddress(
                             parts[0], Integer.parseInt(parts[2]));
                     LearnerType type = LearnerType.PARTICIPANT;
-                    if (parts[3].toLowerCase().equals("observer")) {
-                        type = LearnerType.OBSERVER;
-                        observers.put(Long.valueOf(sid), new QuorumServer(sid, addr,
-                                electionAddr,type));
-                    } else if (parts[3].toLowerCase().equals("participant")) {
+                  if (parts[3].toLowerCase().equals("participant")) {
                         type = LearnerType.PARTICIPANT;
                         servers.put(Long.valueOf(sid), new QuorumServer(sid, addr,
                                 electionAddr,type));
@@ -303,17 +297,8 @@ public class QuorumPeerConfig {
                     "minSessionTimeout must not be larger than maxSessionTimeout");
         }
         if (servers.size() == 0) {
-            if (observers.size() > 0) {
-                throw new IllegalArgumentException("Observers w/o participants is an invalid configuration");
-            }
-            // Not a quorum configuration so return immediately - not an error
-            // case (for b/w compatibility), server will default to standalone
-            // mode.
             return;
         } else if (servers.size() == 1) {
-            if (observers.size() > 0) {
-                throw new IllegalArgumentException("Observers w/o quorum is an invalid configuration");
-            }
 
             // HBase currently adds a single server line to the config, for
             // b/w compatibility reasons we need to keep this here.
@@ -371,10 +356,7 @@ public class QuorumPeerConfig {
                 LOG.info("Defaulting to majority quorums");
                 quorumVerifier = new QuorumMaj(servers.size());
             }
-
-            // Now add observers to servers, once the quorums have been
-            // figured out
-            servers.putAll(observers);
+   
             m2mDataBase=new M2MDataBaseImpl(cleaned, keySpace,table , node);
     
             File myIdFile = new File(dataDir, "myid");
@@ -398,8 +380,7 @@ public class QuorumPeerConfig {
             }
             
             myIp=servers.get(serverId).addr.getAddress().getHostAddress();
-            LearnerType roleByServersList = observers.containsKey(serverId) ? LearnerType.OBSERVER
-                    : LearnerType.PARTICIPANT;
+            LearnerType roleByServersList =  LearnerType.PARTICIPANT;
             if (roleByServersList != peerType) {
                 LOG.warn("Peer type from servers list (" + roleByServersList
                         + ") doesn't match peerType (" + peerType

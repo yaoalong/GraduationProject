@@ -141,7 +141,7 @@ public class QuorumPeerMain {
 			quorumPeer.setClientPortAddress(config.getClientPortAddress());
 			quorumPeer.setTxnFactory(new FileTxnSnapLog(new File(config
 					.getDataLogDir()), new File(config.getDataDir())));
-			quorumPeer.setQuorumPeers(config.getServers());
+			quorumPeer.setQuorumPeers(config.getServers());//设置对应的服务器信息
 			quorumPeer.setElectionType(config.getElectionAlg());
 			quorumPeer.setMyid(config.getServerId());
 			quorumPeer.setTickTime(config.getTickTime());
