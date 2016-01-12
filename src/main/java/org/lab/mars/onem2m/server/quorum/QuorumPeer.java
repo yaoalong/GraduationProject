@@ -95,6 +95,9 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 	private ZKDatabase zkDb;
 
 	
+	
+	private boolean isStart=false;
+	
 	ZooKeeper_Monitor zooKeeper_Monitor;
 	public static class QuorumServer {
 		public QuorumServer(long id, InetSocketAddress addr,
@@ -317,6 +320,12 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 		quorumStats = new QuorumStats(this);
 	}
 
+	
+	
+	public QuorumPeer(Boolean isStart){
+	   this();
+	   this.isStart=isStart;
+	}
 	/**
 	 * For backward compatibility purposes, we instantiate QuorumMaj by default.
 	 */
@@ -359,24 +368,27 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 
 	@Override
 	public synchronized void start() {
-		try {
-			registerIntoZooKeeper.register(myIp+":"+(cnxnFactory.getLocalPort()));
-		} catch (IOException | KeeperException | InterruptedException e) {
-			e.printStackTrace();
-		}
-		registerIntoZooKeeper.start();
-		if(registerIntoZooKeeper!=null){
+		if(isStart==true){
 			try {
-				registerIntoZooKeeper.join();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
+				registerIntoZooKeeper.register(myIp+":"+(cnxnFactory.getLocalPort()));
+			} catch (IOException | KeeperException | InterruptedException e) {
 				e.printStackTrace();
 			}
+			registerIntoZooKeeper.start();
+			if(registerIntoZooKeeper!=null){
+				try {
+					registerIntoZooKeeper.join();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			zooKeeper_Monitor.start();
+			cnxnFactory.start();
 		}
-		zooKeeper_Monitor.start();
+	 
 		loadDataBase();
-		
-		cnxnFactory.start();
+	
 		startLeaderElection();
 		super.start();
 	}

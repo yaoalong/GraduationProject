@@ -560,4 +560,8 @@ public class QuorumPeerConfig {
 		this.replication_factor = replication_factor;
 	}
 
+	public HashMap<Long, HashMap<Long, QuorumServer>> getPositionToServers() {
+		return positionToServers;
+	}
+
 }
