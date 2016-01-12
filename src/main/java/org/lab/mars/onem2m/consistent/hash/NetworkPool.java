@@ -2,11 +2,14 @@ package org.lab.mars.onem2m.consistent.hash;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 /*
  * 一致性哈希的实现
  */
@@ -31,6 +34,8 @@ public class NetworkPool {
     private volatile TreeMap<Long, String> consistentBuckets;
     private volatile boolean initialized = false;
     private int hashingAlg = CONSISTENT_HASH;
+    
+    private ConcurrentHashMap<String,Long> serverPosition=new ConcurrentHashMap<String, Long>();
 
     /**
      * Internal private hashing method.
@@ -87,23 +92,27 @@ public class NetworkPool {
         } else if (this.weights == null) {
             this.totalWeight = this.servers.length;
         }
-        System.out.println("servers:"+servers.length);
         for (int i = 0; i < servers.length; i++) {
-            int thisWeight = 1;
-            if (this.weights != null && this.weights[i] != null)
-                thisWeight = this.weights[i];
+           // int thisWeight = 1;
+//            if (this.weights != null && this.weights[i] != null)
+//                thisWeight = this.weights[i];
 
-            double factor = Math.floor(((double) (40 * this.servers.length * thisWeight)) / (double) this.totalWeight);
-
+           // double factor = Math.floor(((double) (40 * this.servers.length * thisWeight)) / (double) this.totalWeight);
+            long factor=1;
             for (long j = 0; j < factor; j++) {
                 byte[] d = md5.digest((servers[i] + "-" + j).getBytes());
-                for (int h = 0; h < 4; h++) {
+                for (int h = 0; h < 1; h++) {
                     Long k = ((long) (d[3 + h * 4] & 0xFF) << 24) | ((long) (d[2 + h * 4] & 0xFF) << 16)
                             | ((long) (d[1 + h * 4] & 0xFF) << 8) | ((long) (d[0 + h * 4] & 0xFF));
 
                     consistentBuckets.put(k, servers[i]);
                 }
             }
+        }
+        long position=0;
+        for(Map.Entry<Long,String> map:consistentBuckets.entrySet()){
+        	System.out.println("hash value:"+map.getKey()+" ip address:"+map.getValue());
+        	serverPosition.put(map.getValue(), position++);
         }
         initialized=true;
     }
@@ -136,5 +145,13 @@ public class NetworkPool {
     public void setServers(String[] servers) {
         this.servers = servers;
     }
+
+	public ConcurrentHashMap<String, Long> getServerPosition() {
+		return serverPosition;
+	}
+
+	public void setServerPosition(ConcurrentHashMap<String, Long> serverPosition) {
+		this.serverPosition = serverPosition;
+	}
     
 }
