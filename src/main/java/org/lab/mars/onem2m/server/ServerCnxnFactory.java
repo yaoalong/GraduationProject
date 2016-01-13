@@ -98,12 +98,12 @@ public abstract class ServerCnxnFactory {
      * 设置zkServer
      * @param zk
      */
-    final public void setZooKeeperServer(ZooKeeperServer zk) {
-        this.zkServer = zk;
-        if (zk != null) {
-            zk.setServerCnxnFactory(this);
-        }
-    }
+//    final public void setZooKeeperServer(ZooKeeperServer zk) {
+//        this.zkServer = zk;
+//        if (zk != null) {
+//            zk.setServerCnxnFactory(this);
+//        }
+//    }
     /**
      * 每个特定的QuorumPeer都会添加自己的ZooKeeperServer
      * @param ip
@@ -114,6 +114,13 @@ public abstract class ServerCnxnFactory {
     	if(zooKeeperServer!=null){
     		zooKeeperServer.setServerCnxnFactory(this);
     	}
+    }
+    /**
+     * 删除特定Ip的ZooKeeper
+     * @param ip
+     */
+    final public void removeZookeeper(String ip){
+    	this.zkServers.remove(ip);
     }
     public abstract void closeAll();
     

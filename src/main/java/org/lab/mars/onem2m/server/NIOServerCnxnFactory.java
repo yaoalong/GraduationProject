@@ -122,7 +122,7 @@ public class NIOServerCnxnFactory extends ServerCnxnFactory implements Runnable 
         start();
         zks.startdata();
         zks.startup();
-        setZooKeeperServer(zks);
+       // setZooKeeperServer(zks);
     }
 
     @Override
