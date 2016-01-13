@@ -99,6 +99,11 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 	private boolean isStart=false;
 	
 	ZooKeeper_Monitor zooKeeper_Monitor;
+	
+	/**
+	 * 它所负责的zab server对应的ip
+	 */
+	private String zookeeperServerString;
 	public static class QuorumServer {
 		public QuorumServer(long id, InetSocketAddress addr,
 				InetSocketAddress electionAddr) {
@@ -1155,5 +1160,14 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 
 	public void setClientPort(Integer clientPort) {
 	}
+
+	public String getZookeeperServerString() {
+		return zookeeperServerString;
+	}
+
+	public void setZookeeperServerString(String zookeeperServerString) {
+		this.zookeeperServerString = zookeeperServerString;
+	}
+	
 
 }

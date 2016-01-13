@@ -572,11 +572,6 @@ public class QuorumPeerConfig {
 	public void setReplication_factor(Integer replication_factor) {
 		this.replication_factor = replication_factor;
 	}
-
-	public HashMap<Long, HashMap<Long, QuorumServer>> getPositionToServers() {
-		return positionToServers;
-	}
-
 	public M2mQuorumServer getM2mQuorumServers() {
 		return m2mQuorumServers;
 	}

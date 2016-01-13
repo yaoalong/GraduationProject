@@ -144,7 +144,8 @@ public class QuorumPeerMain {
 			List<QuorumPeer> quorumPeers=new ArrayList<QuorumPeer>();
 			for(int i=0;i<config.getReplication_factor();i++){
 				 QuorumPeer quorumPeer=new QuorumPeer();
-				 HashMap<Long, QuorumServer> servers=config.getPositionToServers().get(Long.valueOf(i+""));
+				 M2mQuorumServer m2mQuorumServer=config.getM2mQuorumServers();
+				 HashMap<Long, QuorumServer> servers=m2mQuorumServer.getPositionToServers().get(Long.valueOf(i+""));
 				 	
 				    if(i==config.getReplication_factor()-1){
 					    quorumPeer = new QuorumPeer(true);
@@ -152,6 +153,7 @@ public class QuorumPeerMain {
 				    else{
 				    	quorumPeer=new QuorumPeer();
 				    }
+				    quorumPeer.setZookeeperServerString(m2mQuorumServer.getServers().get(i));
 					quorumPeer.setClientPortAddress(config.getClientPortAddress());
 					quorumPeer.setTxnFactory(new FileTxnSnapLog(new File(config
 							.getDataLogDir()), new File(config.getDataDir())));
