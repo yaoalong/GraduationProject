@@ -228,6 +228,7 @@ public class QuorumPeerConfig {
 				InetSocketAddress addr = new InetSocketAddress(parts[0],
 						Integer.parseInt(parts[1]));
 				serversStrings.add(parts[0]);// 将server添加到队列中
+				System.out.println("分成了:"+parts.length);
 				addressToSid.put(parts[0], sid);
 				if (parts.length == 2) {
 					servers.put(Long.valueOf(sid), new QuorumServer(sid, addr));
@@ -417,6 +418,7 @@ public class QuorumPeerConfig {
 				peerType = roleByServersList;
 			}
 		}
+		setAllReplicationServers();
 	}
 
 	/**
@@ -425,6 +427,7 @@ public class QuorumPeerConfig {
 	 */
 	public void setAllReplicationServers() {
 		networkPool = new NetworkPool();
+		System.out.println("大小是:"+serversStrings.size());
 		networkPool.setServers(serversStrings.toArray(new String[serversStrings
 				.size()]));
 		networkPool.initialize();
@@ -439,11 +442,17 @@ public class QuorumPeerConfig {
 						.getPositionToServer()
 						.get(((myIdInRing - (replication_factor - 1 - j - i)) + serversStrings
 								.size()) % serversStrings.size());// 最左边
+				System.out.println("位置是:"+(((myIdInRing - (replication_factor - 1 - j - i)) + serversStrings
+								.size()) % serversStrings.size()));
+				System.out.println("leftServer:"+leftServer);
 				Long sid = addressToSid.get(leftServer);// 找出对应的sid;
-
+				System.out.println("sid:"+sid);
 				QuorumServer quorumServer = servers.get(sid);
+		        System.out.println("quorumServer isTrue:"+(quorumServer==null)+":"+sid);
+		        System.out.println("quorumServer.addr isTrue:"+(quorumServer.addr==null)+":"+sid);
 				String address = quorumServer.addr.getAddress()
 						.getHostAddress();
+				
 				Integer firstPort = quorumServer.addr.getPort();
 				Integer secondPort = quorumServer.electionAddr.getPort();
 				InetSocketAddress firstInetSocketAddress = new InetSocketAddress(

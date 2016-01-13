@@ -125,9 +125,10 @@ public class NetworkPool {
 		long position = 0;
 		for (Map.Entry<Long, String> map : consistentBuckets.entrySet()) {
 			System.out.println("hash value:" + map.getKey() + " ip address:"
-					+ map.getValue());
-			serverToPosition.put(map.getValue(), position++);
-			positionToServer.put(position++, map.getValue());
+					+ map.getValue()+":::"+position);
+			serverToPosition.put(map.getValue(), position);
+			positionToServer.put(position, map.getValue());
+			position++;
 		}
 		initialized = true;
 	}
