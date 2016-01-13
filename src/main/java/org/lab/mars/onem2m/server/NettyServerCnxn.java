@@ -54,7 +54,7 @@ public class NettyServerCnxn extends ServerCnxn {
     ServerCnxnFactory factory;
     boolean initialized;
     public NettyServerCnxn(Channel ctx,ZooKeeperServer zk,ServerCnxnFactory serverCnxnFactory){
-    	this.channel=channel;
+    	this.channel=ctx;
     	this.zkServer=zk;
     	this.factory=serverCnxnFactory;
     	
@@ -651,7 +651,11 @@ public class NettyServerCnxn extends ServerCnxn {
         }
         return false;
     }
-
+    /**
+     * 应该在这里进行判断在哪个ZkServer进行处理
+     * @param ctx
+     * @param m2mPacket
+     */
     public void receiveMessage(ChannelHandlerContext ctx,M2mPacket m2mPacket ){
     	
       zkServer.processPacket(ctx, m2mPacket);

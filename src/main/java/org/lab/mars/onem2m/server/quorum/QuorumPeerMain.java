@@ -147,7 +147,7 @@ public class QuorumPeerMain {
 				 HashMap<Long, QuorumServer> servers=config.getPositionToServers().get(Long.valueOf(i+""));
 				 	
 				    if(i==config.getReplication_factor()-1){
-					    quorumPeer = new QuorumPeer();
+					    quorumPeer = new QuorumPeer(true);
 				    }
 				    else{
 				    	quorumPeer=new QuorumPeer();

@@ -88,6 +88,10 @@ public abstract class ServerCnxnFactory {
     public abstract void start() ;
    public abstract String getMyIp();
     protected ZooKeeperServer zkServer;
+    /**
+     * 设置zkServer
+     * @param zk
+     */
     final public void setZooKeeperServer(ZooKeeperServer zk) {
         this.zkServer = zk;
         if (zk != null) {

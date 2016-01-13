@@ -857,7 +857,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
         return false; 
     }
     /*
-     * 将请求发送给
+     * 将请求发送给processor
      */
     public void processPacket(ChannelHandlerContext ctx,M2mPacket  m2mPaket){
     	M2mRequestHeader m2mRequestHeader=m2mPaket.getM2mRequestHeader();
@@ -879,118 +879,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
     	M2mRequest m2mRequest=new M2mRequest(ctx,m2mRequestHeader.getXid(),m2mRequestHeader.getType(),ByteBuffer.wrap(baos.toByteArray()));
                 submitRequest(m2mRequest);
     }
-//    public void processPacket(ChannelHandlerContext  ctx, ByteBuffer incomingBuffer) throws IOException {
-//        // We have the request, now process and setup for next
-//        InputStream bais = new ByteBufferInputStream(incomingBuffer);
-//        BinaryInputArchive bia = BinaryInputArchive.getArchive(bais);
-//        RequestHeader h = new RequestHeader();
-//        h.deserialize(bia, "header");
-//        // Through the magic of byte buffers, txn will not be
-//        // pointing
-//        // to the start of the txn
-//        incomingBuffer = incomingBuffer.slice();
-//        if (h.getType() == OpCode.auth) {
-//            LOG.info("got auth packet " + cnxn.getRemoteSocketAddress());
-//            AuthPacket authPacket = new AuthPacket();
-//            ByteBufferInputStream.byteBuffer2Record(incomingBuffer, authPacket);
-//            String scheme = authPacket.getScheme();
-//            AuthenticationProvider ap = ProviderRegistry.getProvider(scheme);
-//            Code authReturn = KeeperException.Code.AUTHFAILED;
-//            if(ap != null) {
-//                try {
-//                    authReturn = ap.handleAuthentication(cnxn, authPacket.getAuth());
-//                } catch(RuntimeException e) {
-//                    LOG.warn("Caught runtime exception from AuthenticationProvider: " + scheme + " due to " + e);
-//                    authReturn = KeeperException.Code.AUTHFAILED;                   
-//                }
-//            }
-//            if (authReturn!= KeeperException.Code.OK) {
-//                if (ap == null) {
-//                    LOG.warn("No authentication provider for scheme: "
-//                            + scheme + " has "
-//                            + ProviderRegistry.listProviders());
-//                } else {
-//                    LOG.warn("Authentication failed for scheme: " + scheme);
-//                }
-//                // send a response...
-//                ReplyHeader rh = new ReplyHeader(h.getXid(), 0,
-//                        KeeperException.Code.AUTHFAILED.intValue());
-//                cnxn.sendResponse(rh, null, null);
-//                // ... and close connection
-//                cnxn.sendBuffer(ServerCnxnFactory.closeConn);
-//                cnxn.disableRecv();
-//            } else {
-//                if (LOG.isDebugEnabled()) {
-//                    LOG.debug("Authentication succeeded for scheme: "
-//                              + scheme);
-//                }
-//                LOG.info("auth success " + cnxn.getRemoteSocketAddress());
-//                ReplyHeader rh = new ReplyHeader(h.getXid(), 0,
-//                        KeeperException.Code.OK.intValue());
-//                cnxn.sendResponse(rh, null, null);
-//            }
-//            return;
-//        } else {
-//            if (h.getType() == OpCode.sasl) {
-//                Record rsp = processSasl(incomingBuffer,cnxn);
-//                ReplyHeader rh = new ReplyHeader(h.getXid(), 0, KeeperException.Code.OK.intValue());
-//                cnxn.sendResponse(rh,rsp, "response"); // not sure about 3rd arg..what is it?
-//            }
-//            else {
-//                Request si = new Request(cnxn, cnxn.getSessionId(), h.getXid(),
-//                  h.getType(), incomingBuffer);
-//                si.setOwner(ServerCnxn.me);
-//                submitRequest(si);
-//            }
-//        }
-//        cnxn.incrOutstandingRequests(h);
-//        Request si = new Request(ctx, 1, h.getXid(),
-//                h.getType(), incomingBuffer);
-//              si.setOwner(ServerCnxn.me);
-//              submitRequest(si);
-//    }
 
-    private Record processSasl(ByteBuffer incomingBuffer, ServerCnxn cnxn) throws IOException {
-        LOG.debug("Responding to client SASL token.");
-        GetSASLRequest clientTokenRecord = new GetSASLRequest();
-        ByteBufferInputStream.byteBuffer2Record(incomingBuffer,clientTokenRecord);
-        byte[] clientToken = clientTokenRecord.getToken();
-        LOG.debug("Size of client SASL token: " + clientToken.length);
-        byte[] responseToken = null;
-        try {
-            ZooKeeperSaslServer saslServer  = cnxn.zooKeeperSaslServer;
-            try {
-                // note that clientToken might be empty (clientToken.length == 0):
-                // if using the DIGEST-MD5 mechanism, clientToken will be empty at the beginning of the
-                // SASL negotiation process.
-                responseToken = saslServer.evaluateResponse(clientToken);
-                if (saslServer.isComplete() == true) {
-                    String authorizationID = saslServer.getAuthorizationID();
-                    LOG.info("adding SASL authorization for authorizationID: " + authorizationID);
-                    cnxn.addAuthInfo(new Id("sasl",authorizationID));
-                }
-            }
-            catch (SaslException e) {
-                LOG.warn("Client failed to SASL authenticate: " + e);
-                if ((System.getProperty("zookeeper.allowSaslFailedClients") != null)
-                  &&
-                  (System.getProperty("zookeeper.allowSaslFailedClients").equals("true"))) {
-                    LOG.warn("Maintaining client connection despite SASL authentication failure.");
-                } else {
-                    LOG.warn("Closing client connection due to SASL authentication failure.");
-                    cnxn.close();
-                }
-            }
-        }
-        catch (NullPointerException e) {
-            LOG.error("cnxn.saslServer is null: cnxn object did not initialize its saslServer properly.");
-        }
-        if (responseToken != null) {
-            LOG.debug("Size of server SASL response: " + responseToken.length);
-        }
-        // wrap SASL response token to client inside a Response object.
-        return new SetSASLResponse(responseToken);
-    }
     /*
      * 在这里处理事务请求,应用到数据数据库
      */
@@ -1002,7 +891,6 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
 
 	@Override
 	public void expire(Session session) {
-		// TODO Auto-generated method stub
 		
 	}
 

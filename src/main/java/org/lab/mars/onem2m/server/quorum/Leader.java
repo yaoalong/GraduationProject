@@ -433,7 +433,9 @@ public class Leader {
 				long zxid = Long.parseLong(initialZxid);
 				zk.setZxid((zk.getZxid() & 0xffffffff00000000L) | zxid);
 			}
-
+			/**
+			 * 设置对应的zooKeeperServer,方便CnxnFactory来的时候进行处理
+			 */
 			if (!System.getProperty("zookeeper.leaderServes", "yes").equals(
 					"no")) {
 				self.cnxnFactory.setZooKeeperServer(zk);
@@ -754,8 +756,8 @@ public class Leader {
 			shutdown(msg);
 			throw new XidRolloverException(msg);
 		}
-		System.out.println("开始处理投票数据包" + request.type + "::"+request.zxid
-				+ request.toString()+request);
+		System.out.println("开始处理投票数据包" + request.type + "::" + request.zxid
+				+ request.toString() + request);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		M2mBinaryOutputArchive boa = M2mBinaryOutputArchive.getArchive(baos);
 		try {

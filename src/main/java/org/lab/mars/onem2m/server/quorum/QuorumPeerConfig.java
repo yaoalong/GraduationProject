@@ -113,6 +113,10 @@ public class QuorumPeerConfig {
 	 * @see org.apache.zookeeper.server.PurgeTxnLog#purge(File, File, int)
 	 */
 	private final int MIN_SNAP_RETAIN_COUNT = 3;
+	
+	
+	
+	M2mQuorumServer m2mQuorumServers=new M2mQuorumServer();
 
 	@SuppressWarnings("serial")
 	public static class ConfigException extends Exception {
@@ -427,7 +431,9 @@ public class QuorumPeerConfig {
 				.size()]));
 		networkPool.initialize();
 		Long myIdInRing = networkPool.getServerPosition().get(myIp);
+		List<String> list=new ArrayList<>();
 		for (int i = 0; i < replication_factor; i++) {
+		
 			HashMap<Long, QuorumServer> map = new HashMap<Long, QuorumServer>();
 			for (int j = 0; j < replication_factor; j++) {
 
@@ -448,11 +454,18 @@ public class QuorumPeerConfig {
 						firstInetSocketAddress, secondInetSocketAddress,
 						LearnerType.PARTICIPANT);
 				map.put(sid, myQuorumServer);
+				if(j==0){
+					list.add(leftServer);
+				}
 
 			}
+			
 			positionToServers.put(Long.valueOf(i+""), map);
 
 		}
+		
+		m2mQuorumServers.setPositionToServers(positionToServers);
+		m2mQuorumServers.setServers(list);
 
 	}
 
@@ -563,5 +576,15 @@ public class QuorumPeerConfig {
 	public HashMap<Long, HashMap<Long, QuorumServer>> getPositionToServers() {
 		return positionToServers;
 	}
+
+	public M2mQuorumServer getM2mQuorumServers() {
+		return m2mQuorumServers;
+	}
+
+	public void setM2mQuorumServers(M2mQuorumServer m2mQuorumServers) {
+		this.m2mQuorumServers = m2mQuorumServers;
+	}
+	
+	
 
 }
