@@ -93,10 +93,7 @@ public class QuorumPeerConfig {
 
 	protected String zooKeeperServer;
 	protected Integer replication_factor;
-	/**
-	 * 服务器ip地址的集合
-	 */
-	private List<String> serversStrings = new ArrayList<String>();
+
 	/**
 	 * 用这个来判断自己在环中的位置
 	 */
@@ -106,7 +103,7 @@ public class QuorumPeerConfig {
 	 * 一个服务器对应的sid
 	 */
 
-	protected HashMap<String, Long> addressToSid = new HashMap<>();
+	protected List<M2mAddressToId> addressToSid = new ArrayList<>();
 	/**
 	 * Minimum snapshot retain count.
 	 * 
@@ -116,6 +113,12 @@ public class QuorumPeerConfig {
 
 	M2mQuorumServer m2mQuorumServers = new M2mQuorumServer();
 
+	
+	
+	
+	private HashMap<Long, Integer> sidToClientPort=new HashMap<>();
+	
+	
 	@SuppressWarnings("serial")
 	public static class ConfigException extends Exception {
 		public ConfigException(String msg) {
@@ -227,9 +230,7 @@ public class QuorumPeerConfig {
 				}
 				InetSocketAddress addr = new InetSocketAddress(parts[0],
 						Integer.parseInt(parts[1]));
-				serversStrings.add(parts[0]);// 将server添加到队列中
-				System.out.println("分成了:"+parts.length);
-				addressToSid.put(parts[0], sid);
+				addressToSid.add(new M2mAddressToId(sid, parts[0]));
 				if (parts.length == 2) {
 					servers.put(Long.valueOf(sid), new QuorumServer(sid, addr));
 				} else if (parts.length == 3) {
@@ -282,7 +283,13 @@ public class QuorumPeerConfig {
 				zooKeeperServer = value;
 			} else if (key.equals("replication.factor")) {
 				replication_factor = Integer.valueOf(value);
-			} else {
+			}else if(key.startsWith("client.")){
+				int dot = key.indexOf('.');
+				long sid = Long.parseLong(key.substring(dot + 1));
+				sidToClientPort.put(sid, Integer.valueOf(value));
+			}
+			
+			else {
 				System.setProperty("zookeeper." + key, value);
 			}
 		}
@@ -427,25 +434,32 @@ public class QuorumPeerConfig {
 	 */
 	public void setAllReplicationServers() {
 		networkPool = new NetworkPool();
-		System.out.println("大小是:"+serversStrings.size());
+	
+		 List<String> serversStrings = new ArrayList<String>();
+		System.out.println("DD"+addressToSid.size());
+		
+		Map<String,Long> arrayList=new HashMap<String,Long>();
+		for(M2mAddressToId m2mAddressToId:addressToSid){
+			serversStrings.add(m2mAddressToId.getAddress()+":"+sidToClientPort.get(m2mAddressToId.getSid()));
+			arrayList.put(m2mAddressToId.getAddress()+":"+sidToClientPort.get(m2mAddressToId.getSid()), m2mAddressToId.getSid());
+		}
 		networkPool.setServers(serversStrings.toArray(new String[serversStrings
 				.size()]));
 		networkPool.initialize();
-		Long myIdInRing = networkPool.getServerPosition().get(myIp);
+		Long myIdInRing = networkPool.getServerPosition().get(myIp+":"+"2182");
 		List<String> list = new ArrayList<>();
 		for (int i = 0; i < replication_factor; i++) {
 
 			HashMap<Long, QuorumServer> map = new HashMap<Long, QuorumServer>();
 			for (int j = 0; j < replication_factor; j++) {
-
+               System.out.println("XXX"+((myIdInRing - (replication_factor - 1 - j - i)) + serversStrings
+								.size()) % serversStrings.size());
 				String leftServer = networkPool
 						.getPositionToServer()
 						.get(((myIdInRing - (replication_factor - 1 - j - i)) + serversStrings
 								.size()) % serversStrings.size());// 最左边
-				System.out.println("位置是:"+(((myIdInRing - (replication_factor - 1 - j - i)) + serversStrings
-								.size()) % serversStrings.size()));
 				System.out.println("leftServer:"+leftServer);
-				Long sid = addressToSid.get(leftServer);// 找出对应的sid;
+				Long sid = arrayList.get(leftServer);// 找出对应的sid;
 				System.out.println("sid:"+sid);
 				QuorumServer quorumServer = servers.get(sid);
 		        System.out.println("quorumServer isTrue:"+(quorumServer==null)+":"+sid);
