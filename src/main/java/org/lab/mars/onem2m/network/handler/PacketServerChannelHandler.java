@@ -56,7 +56,7 @@ public class PacketServerChannelHandler extends
 
 		ctx.attr(STATE).set(
 				new NettyServerCnxn(ctx.channel(), serverCnxnFactory
-						.getZkServer(), serverCnxnFactory));
+						.getZkServers(), serverCnxnFactory));
 		ctx.fireChannelRegistered();
 	};
 

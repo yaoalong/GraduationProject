@@ -88,6 +88,12 @@ public abstract class ServerCnxnFactory {
     public abstract void start() ;
    public abstract String getMyIp();
     protected ZooKeeperServer zkServer;
+    
+    /**
+     * 多个ZooKeeper
+     * 不同的ip对应的是不同的ZooKeeperServer
+     */
+    protected ConcurrentHashMap<String, ZooKeeperServer> zkServers=new ConcurrentHashMap<String, ZooKeeperServer>();
     /**
      * 设置zkServer
      * @param zk
@@ -98,7 +104,17 @@ public abstract class ServerCnxnFactory {
             zk.setServerCnxnFactory(this);
         }
     }
-
+    /**
+     * 每个特定的QuorumPeer都会添加自己的ZooKeeperServer
+     * @param ip
+     * @param zooKeeperServer
+     */
+    final public void addZooKeeperServer(String ip,ZooKeeperServer zooKeeperServer){
+    	this.zkServers.put(ip,zooKeeperServer);
+    	if(zooKeeperServer!=null){
+    		zooKeeperServer.setServerCnxnFactory(this);
+    	}
+    }
     public abstract void closeAll();
     
     static public ServerCnxnFactory createFactory() throws IOException {
@@ -225,5 +241,8 @@ public abstract class ServerCnxnFactory {
 	
 	public abstract Integer getReplicationFactor();
 
+	public ConcurrentHashMap<String, ZooKeeperServer> getZkServers() {
+		return zkServers;
+	}
     
 }
