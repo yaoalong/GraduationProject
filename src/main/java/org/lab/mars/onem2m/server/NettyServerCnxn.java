@@ -11,8 +11,6 @@ import java.io.Writer;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.util.AbstractSet;
-import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -21,16 +19,13 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.MessageEvent;
 import org.lab.mars.onem2m.Environment;
-import org.lab.mars.onem2m.Version;
 import org.lab.mars.onem2m.WatchedEvent;
+import org.lab.mars.onem2m.consistent.hash.NetworkPool;
 import org.lab.mars.onem2m.jute.BinaryOutputArchive;
 import org.lab.mars.onem2m.jute.Record;
 import org.lab.mars.onem2m.proto.M2mPacket;
 import org.lab.mars.onem2m.proto.ReplyHeader;
 import org.lab.mars.onem2m.proto.WatcherEvent;
-import org.lab.mars.onem2m.server.quorum.Leader;
-import org.lab.mars.onem2m.server.quorum.LeaderZooKeeperServer;
-import org.lab.mars.onem2m.server.util.OSMXBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,6 +49,10 @@ public class NettyServerCnxn extends ServerCnxn {
 	private ConcurrentHashMap<String, ZooKeeperServer> zookeeperServers;
 	ServerCnxnFactory factory;
 	boolean initialized;
+	/**
+	 * 一致性hash环
+	 */
+	private NetworkPool networkPool;
 
 	public NettyServerCnxn(Channel ctx,
 			ConcurrentHashMap<String, ZooKeeperServer> zooKeeperServers,
@@ -155,8 +154,10 @@ public class NettyServerCnxn extends ServerCnxn {
 			return null;
 		}
 	};
+
 	/**
 	 * 发送对应的响应
+	 * 
 	 * @param h
 	 * @param r
 	 * @param tag
@@ -187,9 +188,10 @@ public class NettyServerCnxn extends ServerCnxn {
 		sendBuffer(bb);
 		if (h.getXid() > 0) {
 			// zks cannot be null otherwise we would not have gotten here!
-//			if (!zkServer.shouldThrottle(outstandingCount.decrementAndGet())) {
-//				enableRecv();
-//			}
+			// if (!zkServer.shouldThrottle(outstandingCount.decrementAndGet()))
+			// {
+			// enableRecv();
+			// }
 		}
 	}
 
@@ -381,11 +383,11 @@ public class NettyServerCnxn extends ServerCnxn {
 
 		@Override
 		public void commandRun() {
-//			if (zkServer == null) {
-//				pw.println(ZK_NOT_SERVING);
-//			} else {
-//				zkServer.dumpConf(pw);
-//			}
+			// if (zkServer == null) {
+			// pw.println(ZK_NOT_SERVING);
+			// } else {
+			// zkServer.dumpConf(pw);
+			// }
 		}
 	}
 
@@ -396,12 +398,12 @@ public class NettyServerCnxn extends ServerCnxn {
 
 		@Override
 		public void commandRun() {
-//			if (zkServer == null) {
-//				pw.println(ZK_NOT_SERVING);
-//			} else {
-//				zkServer.serverStats().reset();
-//				pw.println("Server stats reset.");
-//			}
+			// if (zkServer == null) {
+			// pw.println(ZK_NOT_SERVING);
+			// } else {
+			// zkServer.serverStats().reset();
+			// pw.println("Server stats reset.");
+			// }
 		}
 	}
 
@@ -412,16 +414,16 @@ public class NettyServerCnxn extends ServerCnxn {
 
 		@Override
 		public void commandRun() {
-//			if (zkServer == null) {
-//				pw.println(ZK_NOT_SERVING);
-//			} else {
-//				synchronized (factory.cnxns) {
-//					for (ServerCnxn c : factory.cnxns) {
-//						c.resetStats();
-//					}
-//				}
-//				pw.println("Connection stats reset.");
-//			}
+			// if (zkServer == null) {
+			// pw.println(ZK_NOT_SERVING);
+			// } else {
+			// synchronized (factory.cnxns) {
+			// for (ServerCnxn c : factory.cnxns) {
+			// c.resetStats();
+			// }
+			// }
+			// pw.println("Connection stats reset.");
+			// }
 		}
 	}
 
@@ -432,14 +434,14 @@ public class NettyServerCnxn extends ServerCnxn {
 
 		@Override
 		public void commandRun() {
-//			if (zkServer == null) {
-//				pw.println(ZK_NOT_SERVING);
-//			} else {
-//				pw.println("SessionTracker dump:");
-//				zkServer.sessionTracker.dumpSessions(pw);
-//				pw.println("ephemeral nodes dump:");
-//				// zkServer.dumpEphemerals(pw);
-//			}
+			// if (zkServer == null) {
+			// pw.println(ZK_NOT_SERVING);
+			// } else {
+			// pw.println("SessionTracker dump:");
+			// zkServer.sessionTracker.dumpSessions(pw);
+			// pw.println("ephemeral nodes dump:");
+			// // zkServer.dumpEphemerals(pw);
+			// }
 		}
 	}
 
@@ -453,30 +455,30 @@ public class NettyServerCnxn extends ServerCnxn {
 
 		@Override
 		public void commandRun() {
-//			if (zkServer == null) {
-//				pw.println(ZK_NOT_SERVING);
-//			} else {
-//				pw.print("Zookeeper version: ");
-//				pw.println(Version.getFullVersion());
-//				if (len == statCmd) {
-//					LOG.info("Stat command output");
-//					pw.println("Clients:");
-//					// clone should be faster than iteration
-//					// ie give up the cnxns lock faster
-//					HashSet<ServerCnxn> cnxns;
-//					synchronized (factory.cnxns) {
-//						cnxns = new HashSet<ServerCnxn>(factory.cnxns);
-//					}
-//					for (ServerCnxn c : cnxns) {
-//						c.dumpConnectionInfo(pw, true);
-//						pw.println();
-//					}
-//					pw.println();
-//				}
-//				pw.print(zkServer.serverStats().toString());
-//				pw.print("Node count: ");
-//				pw.println(zkServer.getZKDatabase().getNodeCount());
-//			}
+			// if (zkServer == null) {
+			// pw.println(ZK_NOT_SERVING);
+			// } else {
+			// pw.print("Zookeeper version: ");
+			// pw.println(Version.getFullVersion());
+			// if (len == statCmd) {
+			// LOG.info("Stat command output");
+			// pw.println("Clients:");
+			// // clone should be faster than iteration
+			// // ie give up the cnxns lock faster
+			// HashSet<ServerCnxn> cnxns;
+			// synchronized (factory.cnxns) {
+			// cnxns = new HashSet<ServerCnxn>(factory.cnxns);
+			// }
+			// for (ServerCnxn c : cnxns) {
+			// c.dumpConnectionInfo(pw, true);
+			// pw.println();
+			// }
+			// pw.println();
+			// }
+			// pw.print(zkServer.serverStats().toString());
+			// pw.print("Node count: ");
+			// pw.println(zkServer.getZKDatabase().getNodeCount());
+			// }
 
 		}
 	}
@@ -488,21 +490,21 @@ public class NettyServerCnxn extends ServerCnxn {
 
 		@Override
 		public void commandRun() {
-//			if (zkServer == null) {
-//				pw.println(ZK_NOT_SERVING);
-//			} else {
-//				// clone should be faster than iteration
-//				// ie give up the cnxns lock faster
-//				AbstractSet<ServerCnxn> cnxns;
-//				synchronized (factory.cnxns) {
-//					cnxns = new HashSet<ServerCnxn>(factory.cnxns);
-//				}
-//				for (ServerCnxn c : cnxns) {
-//					c.dumpConnectionInfo(pw, false);
-//					pw.println();
-//				}
-//				pw.println();
-//			}
+			// if (zkServer == null) {
+			// pw.println(ZK_NOT_SERVING);
+			// } else {
+			// // clone should be faster than iteration
+			// // ie give up the cnxns lock faster
+			// AbstractSet<ServerCnxn> cnxns;
+			// synchronized (factory.cnxns) {
+			// cnxns = new HashSet<ServerCnxn>(factory.cnxns);
+			// }
+			// for (ServerCnxn c : cnxns) {
+			// c.dumpConnectionInfo(pw, false);
+			// pw.println();
+			// }
+			// pw.println();
+			// }
 		}
 	}
 
@@ -516,13 +518,13 @@ public class NettyServerCnxn extends ServerCnxn {
 
 		@Override
 		public void commandRun() {
-//			if (zkServer == null) {
-//				pw.println(ZK_NOT_SERVING);
-//			} else {
-//				M2mData dt = zkServer.getZKDatabase().getM2mData();
-//
-//				pw.println();
-//			}
+			// if (zkServer == null) {
+			// pw.println(ZK_NOT_SERVING);
+			// } else {
+			// M2mData dt = zkServer.getZKDatabase().getM2mData();
+			//
+			// pw.println();
+			// }
 		}
 	}
 
@@ -534,44 +536,45 @@ public class NettyServerCnxn extends ServerCnxn {
 
 		@Override
 		public void commandRun() {
-//			if (zkServer == null) {
-//				pw.println(ZK_NOT_SERVING);
-//				return;
-//			}
-//			ZKDatabase zkdb = zkServer.getZKDatabase();
-//			ServerStats stats = zkServer.serverStats();
-//
-//			print("version", Version.getFullVersion());
-//
-//			print("avg_latency", stats.getAvgLatency());
-//			print("max_latency", stats.getMaxLatency());
-//			print("min_latency", stats.getMinLatency());
-//
-//			print("packets_received", stats.getPacketsReceived());
-//			print("packets_sent", stats.getPacketsSent());
-//			print("num_alive_connections", stats.getNumAliveClientConnections());
-//
-//			print("outstanding_requests", stats.getOutstandingRequests());
-//
-//			print("server_state", stats.getServerState());
-//			print("znode_count", zkdb.getNodeCount());
-//
-//			OSMXBean osMbean = new OSMXBean();
-//			if (osMbean != null && osMbean.getUnix() == true) {
-//				print("open_file_descriptor_count",
-//						osMbean.getOpenFileDescriptorCount());
-//				print("max_file_descriptor_count",
-//						osMbean.getMaxFileDescriptorCount());
-//			}
-//
-//			if (stats.getServerState().equals("leader")) {
-//				Leader leader = ((LeaderZooKeeperServer) zkServer).getLeader();
-//
-//				print("followers", leader.getLearners().size());
-//				print("synced_followers", leader.getForwardingFollowers()
-//						.size());
-//				print("pending_syncs", leader.getNumPendingSyncs());
-//			}
+			// if (zkServer == null) {
+			// pw.println(ZK_NOT_SERVING);
+			// return;
+			// }
+			// ZKDatabase zkdb = zkServer.getZKDatabase();
+			// ServerStats stats = zkServer.serverStats();
+			//
+			// print("version", Version.getFullVersion());
+			//
+			// print("avg_latency", stats.getAvgLatency());
+			// print("max_latency", stats.getMaxLatency());
+			// print("min_latency", stats.getMinLatency());
+			//
+			// print("packets_received", stats.getPacketsReceived());
+			// print("packets_sent", stats.getPacketsSent());
+			// print("num_alive_connections",
+			// stats.getNumAliveClientConnections());
+			//
+			// print("outstanding_requests", stats.getOutstandingRequests());
+			//
+			// print("server_state", stats.getServerState());
+			// print("znode_count", zkdb.getNodeCount());
+			//
+			// OSMXBean osMbean = new OSMXBean();
+			// if (osMbean != null && osMbean.getUnix() == true) {
+			// print("open_file_descriptor_count",
+			// osMbean.getOpenFileDescriptorCount());
+			// print("max_file_descriptor_count",
+			// osMbean.getMaxFileDescriptorCount());
+			// }
+			//
+			// if (stats.getServerState().equals("leader")) {
+			// Leader leader = ((LeaderZooKeeperServer) zkServer).getLeader();
+			//
+			// print("followers", leader.getLearners().size());
+			// print("synced_followers", leader.getForwardingFollowers()
+			// .size());
+			// print("pending_syncs", leader.getNumPendingSyncs());
+			// }
 		}
 
 		private void print(String key, long number) {
@@ -610,8 +613,11 @@ public class NettyServerCnxn extends ServerCnxn {
 	 * @param m2mPacket
 	 */
 	public void receiveMessage(ChannelHandlerContext ctx, M2mPacket m2mPacket) {
-
-		//zkServer.processPacket(ctx, m2mPacket);
+		String server = networkPool.getSock(m2mPacket.getM2mRequestHeader()
+				.getKey());
+		if (zookeeperServers.containsKey(server)) {
+			zookeeperServers.get(server).processPacket(ctx, m2mPacket);
+		}
 	}
 
 	@Override
@@ -651,6 +657,10 @@ public class NettyServerCnxn extends ServerCnxn {
 	void disableRecv() {
 		// TODO Auto-generated method stub
 
+	}
+
+	public void setNetworkPool(NetworkPool networkPool) {
+		this.networkPool = networkPool;
 	}
 
 }

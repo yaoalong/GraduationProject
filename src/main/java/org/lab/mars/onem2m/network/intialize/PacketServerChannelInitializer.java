@@ -7,7 +7,6 @@ import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 
-import org.lab.mars.onem2m.consistent.hash.NetworkPool;
 import org.lab.mars.onem2m.network.handler.PacketServerChannelHandler;
 import org.lab.mars.onem2m.server.ServerCnxnFactory;
 

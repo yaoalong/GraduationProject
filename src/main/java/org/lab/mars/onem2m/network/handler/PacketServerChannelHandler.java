@@ -53,10 +53,11 @@ public class PacketServerChannelHandler extends
 
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
-
+		NettyServerCnxn nettyServerCnxn=new NettyServerCnxn(ctx.channel(), serverCnxnFactory
+				.getZkServers(), serverCnxnFactory);
+		nettyServerCnxn.setNetworkPool(serverCnxnFactory.getNetworkPool());
 		ctx.attr(STATE).set(
-				new NettyServerCnxn(ctx.channel(), serverCnxnFactory
-						.getZkServers(), serverCnxnFactory));
+				nettyServerCnxn);
 		ctx.fireChannelRegistered();
 	};
 

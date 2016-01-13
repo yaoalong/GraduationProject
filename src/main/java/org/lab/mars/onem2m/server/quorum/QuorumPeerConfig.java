@@ -113,10 +113,8 @@ public class QuorumPeerConfig {
 	 * @see org.apache.zookeeper.server.PurgeTxnLog#purge(File, File, int)
 	 */
 	private final int MIN_SNAP_RETAIN_COUNT = 3;
-	
-	
-	
-	M2mQuorumServer m2mQuorumServers=new M2mQuorumServer();
+
+	M2mQuorumServer m2mQuorumServers = new M2mQuorumServer();
 
 	@SuppressWarnings("serial")
 	public static class ConfigException extends Exception {
@@ -431,39 +429,41 @@ public class QuorumPeerConfig {
 				.size()]));
 		networkPool.initialize();
 		Long myIdInRing = networkPool.getServerPosition().get(myIp);
-		List<String> list=new ArrayList<>();
+		List<String> list = new ArrayList<>();
 		for (int i = 0; i < replication_factor; i++) {
-		
+
 			HashMap<Long, QuorumServer> map = new HashMap<Long, QuorumServer>();
 			for (int j = 0; j < replication_factor; j++) {
 
-				String leftServer = networkPool.getPositionToServer().get(
-						((myIdInRing - (replication_factor - 1 - j-i))+serversStrings.size())%serversStrings.size());// 最左边
+				String leftServer = networkPool
+						.getPositionToServer()
+						.get(((myIdInRing - (replication_factor - 1 - j - i)) + serversStrings
+								.size()) % serversStrings.size());// 最左边
 				Long sid = addressToSid.get(leftServer);// 找出对应的sid;
-                
+
 				QuorumServer quorumServer = servers.get(sid);
 				String address = quorumServer.addr.getAddress()
 						.getHostAddress();
 				Integer firstPort = quorumServer.addr.getPort();
 				Integer secondPort = quorumServer.electionAddr.getPort();
 				InetSocketAddress firstInetSocketAddress = new InetSocketAddress(
-						address, firstPort-j);
+						address, firstPort - j);
 				InetSocketAddress secondInetSocketAddress = new InetSocketAddress(
-						address, secondPort-j);
+						address, secondPort - j);
 				QuorumServer myQuorumServer = new QuorumServer(sid,
 						firstInetSocketAddress, secondInetSocketAddress,
 						LearnerType.PARTICIPANT);
 				map.put(sid, myQuorumServer);
-				if(j==0){
+				if (j == 0) {
 					list.add(leftServer);
 				}
 
 			}
-			
-			positionToServers.put(Long.valueOf(i+""), map);
+
+			positionToServers.put(Long.valueOf(i + ""), map);
 
 		}
-		
+
 		m2mQuorumServers.setPositionToServers(positionToServers);
 		m2mQuorumServers.setServers(list);
 
@@ -572,6 +572,7 @@ public class QuorumPeerConfig {
 	public void setReplication_factor(Integer replication_factor) {
 		this.replication_factor = replication_factor;
 	}
+
 	public M2mQuorumServer getM2mQuorumServers() {
 		return m2mQuorumServers;
 	}
@@ -579,7 +580,9 @@ public class QuorumPeerConfig {
 	public void setM2mQuorumServers(M2mQuorumServer m2mQuorumServers) {
 		this.m2mQuorumServers = m2mQuorumServers;
 	}
-	
-	
+
+	public NetworkPool getNetworkPool() {
+		return networkPool;
+	}
 
 }
