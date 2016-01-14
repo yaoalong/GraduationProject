@@ -1106,7 +1106,11 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 		writeLongToFile(CURRENT_EPOCH_FILENAME, e);
 
 	}
-
+	/**
+	 * 不用再向文件里面写入epoch
+	 * @param e
+	 * @throws IOException
+	 */
 	public void setAcceptedEpoch(long e) throws IOException {
 		acceptedEpoch = e;
 		writeLongToFile(ACCEPTED_EPOCH_FILENAME, e);

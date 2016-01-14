@@ -93,6 +93,8 @@ public class QuorumPeerConfig {
 
 	protected String zooKeeperServer;
 	protected Integer replication_factor;
+	
+	protected Integer clientPort;
 
 	/**
 	 * 用这个来判断自己在环中的位置
@@ -175,7 +177,6 @@ public class QuorumPeerConfig {
 	 */
 	public void parseProperties(Properties zkProp) throws IOException,
 			ConfigException {
-		int clientPort = 0;
 		String clientPortAddress = null;
 		for (Entry<Object, Object> entry : zkProp.entrySet()) {
 			String key = entry.getKey().toString().trim();
@@ -446,7 +447,7 @@ public class QuorumPeerConfig {
 		networkPool.setServers(serversStrings.toArray(new String[serversStrings
 				.size()]));
 		networkPool.initialize();
-		Long myIdInRing = networkPool.getServerPosition().get(myIp+":"+"2182");
+		Long myIdInRing = networkPool.getServerPosition().get(myIp+":"+clientPort);
 		List<String> list = new ArrayList<>();
 		for (int i = 0; i < replication_factor; i++) {
 
