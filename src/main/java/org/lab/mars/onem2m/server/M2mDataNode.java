@@ -13,32 +13,32 @@ public class M2mDataNode implements M2mRecord {
 	 */
 	private static final long serialVersionUID = 3291328270207258803L;
 	public Integer label;
-	public Integer zxid;
-	public Integer id;
+	public Long zxid;
+	public String id;
 	public Integer data;
 
 	public Integer getLabel() {
 		return label;
 	}
 
-	public void setLabel(Integer label) {
-		this.label = label;
-	}
-
-	public Integer getZxid() {
+	public Long getZxid() {
 		return zxid;
 	}
 
-	public void setZxid(Integer zxid) {
+	public void setZxid(Long zxid) {
 		this.zxid = zxid;
 	}
 
-	public Integer getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(Integer id) {
+	public void setId(String id) {
 		this.id = id;
+	}
+
+	public void setLabel(Integer label) {
+		this.label = label;
 	}
 
 	@Override
@@ -46,8 +46,8 @@ public class M2mDataNode implements M2mRecord {
 			throws IOException {
 		archive.startRecord(this, tag);
 		archive.writeInt(label, "label");
-		archive.writeInt(zxid, "zxid");
-		archive.writeInt(id, "id");
+		archive.writeLong(zxid, "zxid");
+		archive.writeString(id, "id");
 		archive.writeInt(data, "data");
 		archive.endRecord(this, tag);
 
@@ -57,12 +57,12 @@ public class M2mDataNode implements M2mRecord {
 	public void deserialize(M2mInputArchive archive, String tag)
 			throws IOException {
 		archive.startRecord("node");
-		
+
 		label = archive.readInt("label");
-	
-		zxid = archive.readInt("zxid");
-		id = archive.readInt("id");
-		data=archive.readInt("data");
+
+		zxid = archive.readLong("zxid");
+		id = archive.readString("id");
+		data = archive.readInt("data");
 		archive.endRecord(tag);
 	}
 

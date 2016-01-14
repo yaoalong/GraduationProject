@@ -16,7 +16,7 @@ import org.lab.mars.onem2m.txn.M2mTxnHeader;
 
 public class M2mDataBaseTest {
 	M2MDataBaseImpl m2mDataBase = new M2MDataBaseImpl(false, "tests",
-			"student2", "192.168.10.139");
+			"student2", "192.168.10.133");
 
 	@Test
 	public void test() {
@@ -26,7 +26,7 @@ public class M2mDataBaseTest {
 	@Test
 	public void testRetrieve() {
 
-		M2mDataNode m2mDataNode = m2mDataBase.retrieve("11");
+		M2mDataNode m2mDataNode = m2mDataBase.retrieve("3333430");
 		System.out.println(m2mDataNode.getId());
 		System.out.println(m2mDataNode.getLabel());
 		System.out.println(m2mDataNode.getZxid());
@@ -57,9 +57,9 @@ public class M2mDataBaseTest {
 	@Test
 	public void testCreate(){
 		M2mDataNode m2mDataNode=new M2mDataNode();
-		m2mDataNode.setZxid(140200);
+		m2mDataNode.setZxid(Long.valueOf(140200+""));
 		m2mDataNode.setData(2);
-		m2mDataNode.setId(3333430);
+		m2mDataNode.setId(3333430+"");
 		m2mDataNode.setLabel(0);
 		m2mDataBase.create(m2mDataNode);
 	}
@@ -70,9 +70,9 @@ public class M2mDataBaseTest {
 		M2mSetDataTxn m2mSetDataTxn =new M2mSetDataTxn();
 		m2mSetDataTxn.setPath("11111");;
 		M2mDataNode m2mDataNode = new M2mDataNode();
-		m2mDataNode.setId(11111);
+		m2mDataNode.setId(11111+"");
 		m2mDataNode.setLabel(0);
-		m2mDataNode.setZxid(999);
+		m2mDataNode.setZxid(Long.valueOf("9999"));
 		m2mDataNode.setData(1331);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		M2mBinaryOutputArchive boa = M2mBinaryOutputArchive.getArchive(baos);

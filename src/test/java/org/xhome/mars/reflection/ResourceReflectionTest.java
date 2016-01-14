@@ -25,9 +25,9 @@ public class ResourceReflectionTest {
 	@Test
 	public void testSerialToByte(){
 		M2mDataNode m2mDataNode = new M2mDataNode();
-		m2mDataNode.setId(11111);
+		m2mDataNode.setId(11111+"");
 		m2mDataNode.setLabel(0);
-		m2mDataNode.setZxid(999);
+		m2mDataNode.setZxid(999L);
 		m2mDataNode.setData(1331);
 		byte[] bytes=ResourceReflection.serializeKryo(m2mDataNode);
 		System.out.println("长度是:"+bytes.length);

@@ -88,7 +88,7 @@ public class M2MDataBaseImpl implements M2MDataBase {
 		try {
 			Select.Selection selection = query().select();
 			Select select = selection.from(keyspace, table);
-			select.where(eq("id",Integer.valueOf(key)));
+			select.where(eq("id", key));
 			select.allowFiltering();
 			ResultSet resultSet = session.execute(select);
 			if (resultSet == null) {
@@ -122,7 +122,7 @@ public class M2MDataBaseImpl implements M2MDataBase {
 	@Override
 	public Long create(Object object) {
 		try {
-			Map<String,Object> map=ResourceReflection.serialize(object);
+			Map<String, Object> map = ResourceReflection.serialize(object);
 			Insert insert = query().insertInto(keyspace, table);
 			map.forEach(insert::value);
 			session.execute(insert);
@@ -138,7 +138,7 @@ public class M2MDataBaseImpl implements M2MDataBase {
 	public Long delete(String key) {
 		try {
 			Statement delete = query().delete().from(keyspace, table)
-					.where(eq("id", Integer.valueOf(key)));
+					.where(eq("id", key));
 			session.execute(delete);
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -150,10 +150,12 @@ public class M2MDataBaseImpl implements M2MDataBase {
 	@Override
 	public Long update(String key, Map<String, Object> updated) {
 		try {
-			M2mDataNode m2mDataNode=retrieve(key);
+			M2mDataNode m2mDataNode = retrieve(key);
 			Update update = query().update(keyspace, table);
 			update.with(set("data", updated.get("data")));
-			update.where(eq("id", Integer.valueOf(key))).and(eq("zxid", m2mDataNode.getZxid())).and(eq("label", m2mDataNode.getLabel()));
+			update.where(eq("id", key))
+					.and(eq("zxid", m2mDataNode.getZxid()))
+					.and(eq("label", m2mDataNode.getLabel()));
 			session.execute(update);
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -189,17 +191,18 @@ public class M2MDataBaseImpl implements M2MDataBase {
 		case OpCode.create:
 			M2mCreateTxn createTxn = (M2mCreateTxn) m2mRecord;
 			processTxnResult.path = createTxn.getPath();
-			ByteArrayInputStream inbaos = new ByteArrayInputStream(createTxn.getData());
-			DataInputStream dis = new DataInputStream( inbaos );
+			ByteArrayInputStream inbaos = new ByteArrayInputStream(
+					createTxn.getData());
+			DataInputStream dis = new DataInputStream(inbaos);
 			M2mBinaryInputArchive inboa = M2mBinaryInputArchive.getArchive(dis);
-			M2mDataNode m2mDataNode=new M2mDataNode();
+			M2mDataNode m2mDataNode = new M2mDataNode();
 			try {
 				m2mDataNode.deserialize(inboa, "m2mData");
 			} catch (IOException e) {
 				e.printStackTrace();
 				break;
 			}
-			m2mDataNode.setZxid(Integer.valueOf(header.getZxid()+""));
+			m2mDataNode.setZxid(header.getZxid());
 			create(m2mDataNode);
 			break;
 		case OpCode.delete:
@@ -210,18 +213,16 @@ public class M2MDataBaseImpl implements M2MDataBase {
 		case OpCode.setData:
 			M2mSetDataTxn m2mSetDataTxn = (M2mSetDataTxn) m2mRecord;
 			processTxnResult.path = m2mSetDataTxn.getPath();
-			
-			M2mDataNode object = (M2mDataNode) ResourceReflection.deserializeKryo(m2mSetDataTxn
-					.getData());
-			
+
+			M2mDataNode object = (M2mDataNode) ResourceReflection
+					.deserializeKryo(m2mSetDataTxn.getData());
+
 			update(m2mSetDataTxn.getPath(),
 					ResourceReflection.serialize(object));
 			break;
 		}
 		return processTxnResult;
 	}
-
-
 
 	@Override
 	public boolean truncate(Long zxid) {
@@ -235,11 +236,11 @@ public class M2MDataBaseImpl implements M2MDataBase {
 				return true;
 			}
 			for (Row row : resultSet.all()) {
-				Integer idValue = (Integer) row.getObject("id");
-				Integer zxidValue = (Integer) row.getObject("zxid");
+				String idValue = (String) row.getObject("id");
+				long zxidValue = (Long) row.getObject("zxid");
 				Delete deletion = query().delete().from(keyspace, table);
-				Statement delete = deletion.where(eq("id", Integer.valueOf(idValue)))
-						.and(eq("zxid", zxidValue));
+				Statement delete = deletion.where(eq("id", idValue)).and(
+						eq("zxid", zxidValue));
 				session.execute(delete);
 			}
 
@@ -252,8 +253,8 @@ public class M2MDataBaseImpl implements M2MDataBase {
 
 	@Override
 	public List<M2mDataNode> retrieve(Integer key) {
-		List<M2mDataNode> m2mList=new ArrayList<>();
- 		try {
+		List<M2mDataNode> m2mList = new ArrayList<>();
+		try {
 			Select.Selection selection = query().select();
 			Select select = selection.from(keyspace, table);
 			select.where(gt("zxid", Integer.valueOf(key)));
@@ -271,18 +272,17 @@ public class M2MDataBaseImpl implements M2MDataBase {
 					String name = d.getName();
 					Object object = row.getObject(name);
 					result.put(name, object);
-					
+
 				});
-				m2mList.add(ResourceReflection.deserialize(
-						M2mDataNode.class, result));
+				m2mList.add(ResourceReflection.deserialize(M2mDataNode.class,
+						result));
 				result.clear();
 			}
-
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			return m2mList;
 		}
- 		return m2mList;
+		return m2mList;
 	}
 }

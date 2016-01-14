@@ -351,7 +351,7 @@ public class ZKDatabase {
 	 * 数据库的插入
 	 */
 	public void commit() {
-		for (Entry<Integer, M2mDataNode> m2mDataNode : getM2mData().getNodes()
+		for (Entry<String, M2mDataNode> m2mDataNode : getM2mData().getNodes()
 				.entrySet()) {
 			m2mDataBase.create(m2mDataNode.getValue());
 

@@ -24,9 +24,9 @@ public class Test {
 		M2mReplyHeader m2mReplyHeader = new M2mReplyHeader();
 		m2mCreateRequest.setKey("1111");
 		M2mDataNode m2mDataNode = new M2mDataNode();
-		m2mDataNode.setId(11111);
+		m2mDataNode.setId(11111+"");
 		m2mDataNode.setLabel(0);
-		m2mDataNode.setZxid(999);
+		m2mDataNode.setZxid(999L);
 		m2mDataNode.setData(11);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		M2mBinaryOutputArchive boa = M2mBinaryOutputArchive.getArchive(baos);
@@ -55,9 +55,9 @@ public class Test {
 		m2mRequestHeader.setKey("11111");
 		M2mSetDataRequest m2mSetDataRequest = new M2mSetDataRequest();
 		M2mDataNode m2mDataNode = new M2mDataNode();
-		m2mDataNode.setId(11111);
+		m2mDataNode.setId(11111+"");
 		m2mDataNode.setLabel(0);
-		m2mDataNode.setZxid(999);
+		m2mDataNode.setZxid(999L);
 		m2mDataNode.setData(1331);
 		M2mReplyHeader m2mReplyHeader = new M2mReplyHeader();
 		m2mSetDataRequest.setData(ResourceReflection.serializeKryo(m2mDataNode));

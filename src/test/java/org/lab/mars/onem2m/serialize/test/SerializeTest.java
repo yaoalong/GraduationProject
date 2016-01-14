@@ -22,9 +22,9 @@ public class SerializeTest {
 		M2mData m2mData = new M2mData(new M2MDataBaseImpl());
 		M2mDataNode m2mDataNode=new M2mDataNode();
 		m2mDataNode.setData(2);
-		m2mDataNode.setId(4);
+		m2mDataNode.setId(4+"");
 		m2mDataNode.setLabel(4);
-		m2mDataNode.setZxid(5);
+		m2mDataNode.setZxid(5L);
 		m2mData.serialize(boa, "m2mData");
 		bytes = baos.toByteArray();
 		ByteArrayInputStream inbaos = new ByteArrayInputStream(bytes);

@@ -24,7 +24,7 @@ public class M2mData implements M2mRecord {
 	 */
 	private static final long serialVersionUID = -5084501890442461767L;
 	private static final Logger LOG = LoggerFactory.getLogger(M2mData.class);
-	private static final ConcurrentHashMap<Integer, M2mDataNode> nodes = new ConcurrentHashMap<Integer, M2mDataNode>();
+	private static final ConcurrentHashMap<String, M2mDataNode> nodes = new ConcurrentHashMap<String, M2mDataNode>();
 	public boolean initialized = false;
 	private M2MDataBase m2mDataBase;
 	private volatile long lastProcessedZxid = 0;
@@ -33,7 +33,7 @@ public class M2mData implements M2mRecord {
 		this.m2mDataBase = m2mDataBase;
 	}
 
-	public void addM2mDataNode(Integer key, M2mDataNode m2mDataNode) {
+	public void addM2mDataNode(String key, M2mDataNode m2mDataNode) {
 		nodes.put(key, m2mDataNode);
 		lastProcessedZxid = Long.valueOf(m2mDataNode.getZxid() + "");
 	}
@@ -46,8 +46,8 @@ public class M2mData implements M2mRecord {
 	public void serialize(M2mOutputArchive archive, String tag)
 			throws IOException {
 		archive.writeInt(nodes.size(), "count");
-		for (Map.Entry<Integer, M2mDataNode> m2mDataNode : nodes.entrySet()) {
-			archive.writeInt(m2mDataNode.getKey(), "key");
+		for (Map.Entry<String, M2mDataNode> m2mDataNode : nodes.entrySet()) {
+			archive.writeString(m2mDataNode.getKey(), "key");
 			archive.writeRecord(m2mDataNode.getValue(), "m2mDataNode");
 		}
 
@@ -59,7 +59,7 @@ public class M2mData implements M2mRecord {
 				.valueOf(peerLast + ""));
 		archive.writeInt(dataNodes.size(), "count");
 		for (M2mDataNode m2mDataNode : dataNodes) {
-			archive.writeInt(m2mDataNode.getId(), "key");
+			archive.writeString(m2mDataNode.getId(), "key");
 			archive.writeRecord(m2mDataNode, "m2mDataNode");
 		}
 
@@ -71,7 +71,7 @@ public class M2mData implements M2mRecord {
 		int count = archive.readInt("count");
 		while (count > 0) {
 			M2mDataNode m2mDataNode = new M2mDataNode();
-			Integer key = archive.readInt("key");
+			String key = archive.readString("key");
 			archive.readRecord(m2mDataNode, "m2mDataNode");
 			nodes.put(key, m2mDataNode);
 			count--;
@@ -79,7 +79,7 @@ public class M2mData implements M2mRecord {
 		}
 	}
 
-	public ConcurrentHashMap<Integer, M2mDataNode> getNodes() {
+	public ConcurrentHashMap<String, M2mDataNode> getNodes() {
 		return nodes;
 	}
 
