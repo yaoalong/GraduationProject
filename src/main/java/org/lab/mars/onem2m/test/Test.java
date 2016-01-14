@@ -66,4 +66,26 @@ public class Test {
 				m2mSetDataRequest, new M2mCreateResponse());
 		return m2mPacket;
 	}
+	
+	
+	public void testTryAndCatch()throws Exception{
+		try{
+			int z=1/0;
+		}catch(Exception ex){
+			System.out.println("log");
+			System.out.println("losssg");
+			throw ex;
+		}finally{
+			System.out.println("姚阿龍");
+		}
+	}
+	
+	public static void main(String args[]){
+		try {
+			new Test().testTryAndCatch();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }

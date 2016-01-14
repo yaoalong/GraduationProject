@@ -1113,7 +1113,7 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 	 */
 	public void setAcceptedEpoch(long e) throws IOException {
 		acceptedEpoch = e;
-		writeLongToFile(ACCEPTED_EPOCH_FILENAME, e);
+		//writeLongToFile(ACCEPTED_EPOCH_FILENAME, e);
 	}
 
 	/**
