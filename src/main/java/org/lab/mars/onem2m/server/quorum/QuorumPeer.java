@@ -429,7 +429,7 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 						CURRENT_EPOCH_FILENAME
 								+ " not found! Creating with a reasonable default of {}. This should only happen when you are upgrading your installation",
 						currentEpoch);
-				writeLongToFile(CURRENT_EPOCH_FILENAME, currentEpoch);
+				//writeLongToFile(CURRENT_EPOCH_FILENAME, currentEpoch);
 			}
 			if (epochOfZxid > currentEpoch) {
 				throw new IOException("The current epoch, "
@@ -664,6 +664,7 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 				case FOLLOWING:
 					try {
 						LOG.info("FOLLOWING");
+						System.out.println("开始启动:"+isStart);
 						setFollower(makeFollower(logFactory));
 						follower.followLeader();
 					} catch (Exception e) {
@@ -1103,7 +1104,7 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 
 	public void setCurrentEpoch(long e) throws IOException {
 		currentEpoch = e;
-		writeLongToFile(CURRENT_EPOCH_FILENAME, e);
+		//writeLongToFile(CURRENT_EPOCH_FILENAME, e);
 
 	}
 	/**
