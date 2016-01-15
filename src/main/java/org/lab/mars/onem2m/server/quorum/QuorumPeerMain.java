@@ -142,10 +142,10 @@ public class QuorumPeerMain {
 			cnxnFactory.setNetworkPool(config.getNetworkPool());
 			
 			List<QuorumPeer> quorumPeers=new ArrayList<QuorumPeer>();
-			for(int i=0;i<config.getReplication_factor();i++){
+			for(long i=0;i<config.getReplication_factor();i++){
 				 QuorumPeer quorumPeer=new QuorumPeer();
 				 M2mQuorumServer m2mQuorumServer=config.getM2mQuorumServers();
-				 HashMap<Long, QuorumServer> servers=m2mQuorumServer.getPositionToServers().get(Long.valueOf(i+""));
+				 HashMap<Long, QuorumServer> servers=m2mQuorumServer.getPositionToServers().get(i);
 				 	
 				    if(i==config.getReplication_factor()-1){
 					    quorumPeer = new QuorumPeer(true);
@@ -153,7 +153,7 @@ public class QuorumPeerMain {
 				    else{
 				    	quorumPeer=new QuorumPeer();
 				    }
-				    quorumPeer.setZookeeperServerString(m2mQuorumServer.getServers().get(i));
+				    quorumPeer.setZookeeperServerString(m2mQuorumServer.getServers().get(Integer.valueOf(i+"")));
 					quorumPeer.setClientPortAddress(config.getClientPortAddress());
 					quorumPeer.setTxnFactory(new FileTxnSnapLog(new File(config
 							.getDataLogDir()), new File(config.getDataDir())));
@@ -168,8 +168,8 @@ public class QuorumPeerMain {
 					quorumPeer.setQuorumVerifier(config.getQuorumVerifier());
 					quorumPeer.setCnxnFactory(cnxnFactory);
 					quorumPeer.setM2mDataBase(config.m2mDataBase);
-					quorumPeer.setZKDatabase(new ZKDatabase(quorumPeer.getTxnFactory(),
-							quorumPeer.m2mDataBase));
+					quorumPeer.setZKDatabase(new ZKDatabase(
+							config.m2mDataBase));
 					quorumPeer.setLearnerType(config.getPeerType());
 					quorumPeer.setSyncEnabled(config.getSyncEnabled());
 					quorumPeer

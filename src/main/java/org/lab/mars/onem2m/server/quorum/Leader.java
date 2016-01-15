@@ -295,7 +295,9 @@ public class Leader {
 	ConcurrentMap<Long, Proposal> outstandingProposals = new ConcurrentHashMap<Long, Proposal>();
 
 	ConcurrentLinkedQueue<Proposal> toBeApplied = new ConcurrentLinkedQueue<Proposal>();// 去应用的列表
-
+    /**
+     * 新的Leader投票 ，用来进行投票统计等作用
+     */
 	Proposal newLeaderProposal = new Proposal();
 
 	class LearnerCnxAcceptor extends Thread {

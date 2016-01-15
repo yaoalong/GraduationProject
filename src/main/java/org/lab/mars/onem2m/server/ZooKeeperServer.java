@@ -27,28 +27,21 @@ import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-
-import javax.security.sasl.SaslException;
 
 import org.lab.mars.onem2m.Environment;
 import org.lab.mars.onem2m.KeeperException.SessionExpiredException;
 import org.lab.mars.onem2m.data.ACL;
-import org.lab.mars.onem2m.data.Id;
 import org.lab.mars.onem2m.data.StatPersisted;
 import org.lab.mars.onem2m.jmx.MBeanRegistry;
 import org.lab.mars.onem2m.jute.BinaryOutputArchive;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.jute.M2mRecord;
-import org.lab.mars.onem2m.jute.Record;
 import org.lab.mars.onem2m.persistence.FileTxnSnapLog;
 import org.lab.mars.onem2m.proto.ConnectResponse;
-import org.lab.mars.onem2m.proto.GetSASLRequest;
 import org.lab.mars.onem2m.proto.M2mPacket;
 import org.lab.mars.onem2m.proto.M2mRequestHeader;
-import org.lab.mars.onem2m.proto.SetSASLResponse;
 import org.lab.mars.onem2m.reflection.Person;
 import org.lab.mars.onem2m.server.DataTree.ProcessTxnResult;
 import org.lab.mars.onem2m.server.RequestProcessor.RequestProcessorException;
@@ -166,7 +159,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
 	public ZooKeeperServer(FileTxnSnapLog txnLogFactory, int tickTime,
 			DataTreeBuilder treeBuilder) throws IOException {
 		this(txnLogFactory, tickTime, -1, -1, treeBuilder, new ZKDatabase(
-				txnLogFactory, null));
+				 null));
 	}
 
 	public ServerStats serverStats() {
@@ -209,7 +202,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
 	public ZooKeeperServer(FileTxnSnapLog txnLogFactory,
 			DataTreeBuilder treeBuilder) throws IOException {
 		this(txnLogFactory, DEFAULT_TICK_TIME, -1, -1, treeBuilder,
-				new ZKDatabase(txnLogFactory, null));
+				new ZKDatabase( null));
 	}
 
 	/**
@@ -234,39 +227,13 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
 	 * Restore sessions and data
 	 */
 	public void loadData() throws IOException, InterruptedException {
-		/*
-		 * When a new leader starts executing Leader#lead, it invokes this
-		 * method. The database, however, has been initialized before running
-		 * leader election so that the server could pick its zxid for its
-		 * initial vote. It does it by invoking QuorumPeer#getLastLoggedZxid.
-		 * Consequently, we don't need to initialize it once more and avoid the
-		 * penalty of loading it a second time. Not reloading it is particularly
-		 * important for applications that host a large database.
-		 * 
-		 * The following if block checks whether the database has been
-		 * initialized or not. Note that this method is invoked by at least one
-		 * other method: ZooKeeperServer#startdata.
-		 * 
-		 * See ZOOKEEPER-1642 for more detail.
-		 */
 		if (zkDb.isInitialized()) {
 			setZxid(zkDb.getM2mData().getLastProcessedZxid());
 		} else {
 			setZxid(zkDb.loadDataBase());
 		}
 
-		// Clean up dead sessions
-		LinkedList<Long> deadSessions = new LinkedList<Long>();
-		// for (Long session : zkDb.getSessions()) {
-		// if (zkDb.getSessionWithTimeOuts().get(session) == null) {
-		// deadSessions.add(session);
-		// }
-		// }
 		zkDb.setM2mDataInit(true);
-		// for (long session : deadSessions) {
-		// // XXX: Is lastProcessedZxid really the best thing to use?
-		// killSession(session, zkDb.getDataTreeLastProcessedZxid());
-		// }
 	}
 
 	public void takeSnapshot() {
@@ -375,7 +342,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
 	public void startdata() throws IOException, InterruptedException {
 		// check to see if zkDb is not null
 		if (zkDb == null) {
-			zkDb = new ZKDatabase(this.txnLogFactory, null);
+			zkDb = new ZKDatabase( null);
 		}
 		if (!zkDb.isInitialized()) {
 			loadData();

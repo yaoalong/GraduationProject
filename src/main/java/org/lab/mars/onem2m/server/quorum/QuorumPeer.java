@@ -217,6 +217,9 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 	/**
 	 * This is who I think the leader currently is.
 	 */
+	/**
+	 * 这个Vote我们可以知道哪台机器是Leader
+	 */
 	volatile private Vote currentVote;
 
 	/**
@@ -305,7 +308,10 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 
 	DatagramSocket udpSocket;
 
-	private InetSocketAddress myQuorumAddr;
+	/**
+	 * 我自己的本地addr
+	 */
+	private InetSocketAddress myQuorumAddr; 
 
 	public InetSocketAddress getQuorumAddress() {
 		return myQuorumAddr;
@@ -359,7 +365,7 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 		this.syncLimit = syncLimit;
 		this.quorumListenOnAllIPs = quorumListenOnAllIPs;
 		this.logFactory = new FileTxnSnapLog(dataLogDir, dataDir);
-		this.zkDb = new ZKDatabase(this.logFactory,m2mDataBase);
+		this.zkDb = new ZKDatabase(m2mDataBase);
 		this.m2mDataBase = new M2MDataBaseImpl();
 		if (quorumConfig == null)
 			this.quorumConfig = new QuorumMaj(countParticipants(quorumPeers));
@@ -373,7 +379,18 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 
 	@Override
 	public synchronized void start() {
-		if(isStart==true){
+		startRegisterAndMonitor();
+		cnxnFactory.start();
+		loadDataBase();
+	
+		startLeaderElection();
+		super.start();
+	}
+	/**
+	 *注册 并监控ZooKeeper信息
+	 */
+    public void startRegisterAndMonitor(){
+    	if(isStart==true){
 			try {
 				registerIntoZooKeeper.register(myIp+":"+(cnxnFactory.getLocalPort()));
 			} catch (IOException | KeeperException | InterruptedException e) {
@@ -389,15 +406,13 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 				}
 			}
 			zooKeeper_Monitor.start();
-			cnxnFactory.start();
 		}
 	 
-		loadDataBase();
-	
-		startLeaderElection();
-		super.start();
-	}
-
+    	
+    }
+    /**
+     * 将Zxid写入文件中
+     */
 	private void loadDataBase() {
 		File updating = new File(getTxnFactory().getSnapDir(),
 				UPDATING_EPOCH_FILENAME);
@@ -557,8 +572,6 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 	@SuppressWarnings("deprecation")
 	protected Election createElectionAlgorithm(int electionAlgorithm) {
 		Election le = null;
-
-		// TODO: use a factory rather than a switch
 		switch (electionAlgorithm) {
 		case 0:
 			le = new LeaderElection(this);
@@ -621,7 +634,7 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 			MBeanRegistry.getInstance().register(jmxQuorumBean, null);
 			for (QuorumServer s : getView().values()) {
 				ZKMBeanInfo p;
-				if (getId() == s.id) {
+				if (getId() == s.id&&isStart==true) {
 					p = jmxLocalPeerBean = new LocalPeerBean(this);
 					try {
 						MBeanRegistry.getInstance().register(p, jmxQuorumBean);

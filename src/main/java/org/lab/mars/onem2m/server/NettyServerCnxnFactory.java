@@ -111,7 +111,6 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
 	@Override
 	public void configure(InetSocketAddress addr, int maxClientCnxns)
 			throws IOException {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -139,7 +138,6 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
 
 	@Override
 	public Integer getReplicationFactor() {
-		// TODO Auto-generated method stub
 		return replicationFactor;
 	}
 	public void setReplicationFactory(Integer replicationFactor){

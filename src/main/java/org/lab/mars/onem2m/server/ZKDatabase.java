@@ -33,7 +33,6 @@ import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.jute.M2mInputArchive;
 import org.lab.mars.onem2m.jute.M2mOutputArchive;
 import org.lab.mars.onem2m.jute.M2mRecord;
-import org.lab.mars.onem2m.persistence.FileTxnSnapLog;
 import org.lab.mars.onem2m.reflection.ResourceReflection;
 import org.lab.mars.onem2m.server.DataTree.ProcessTxnResult;
 import org.lab.mars.onem2m.server.cassandra.interface4.M2MDataBase;
@@ -70,23 +69,11 @@ public class ZKDatabase {
 	protected ReentrantReadWriteLock logLock = new ReentrantReadWriteLock();
 	volatile private boolean initialized = false;
 
-	/**
-	 * the filetxnsnaplog that this zk database maps to. There is a one to one
-	 * relationship between a filetxnsnaplog and zkdatabase.
-	 * 
-	 * @param snapLog
-	 *            the FileTxnSnapLog mapping this zkdatabase
-	 */
 
-	public ZKDatabase(M2MDataBase m2mDataBase) {
-		m2mData = new M2mData(m2mDataBase);
-		sessionsWithTimeouts = new ConcurrentHashMap<Long, Integer>();
-		this.m2mDataBase = m2mDataBase;
-	}
 	/*
 	 * 并且进行加载
 	 */
-	public ZKDatabase(FileTxnSnapLog snapLog, M2MDataBase m2mDataBase) {
+	public ZKDatabase(M2MDataBase m2mDataBase) {
 		this.m2mDataBase = m2mDataBase;
 		m2mData = new M2mData(m2mDataBase);
 		sessionsWithTimeouts = new ConcurrentHashMap<Long, Integer>();

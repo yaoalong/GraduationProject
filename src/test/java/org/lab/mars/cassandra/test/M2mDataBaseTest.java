@@ -16,7 +16,7 @@ import org.lab.mars.onem2m.txn.M2mTxnHeader;
 
 public class M2mDataBaseTest {
 	M2MDataBaseImpl m2mDataBase = new M2MDataBaseImpl(false, "tests",
-			"student2", "192.168.10.133");
+			"student", "192.168.10.133");
 
 	@Test
 	public void test() {
@@ -41,7 +41,7 @@ public class M2mDataBaseTest {
 	@Test
 	public void testRetrieve1() {
 
-		List<M2mDataNode> m2mDataNodes = m2mDataBase.retrieve(111151634L);
+		List<M2mDataNode> m2mDataNodes = m2mDataBase.retrieve(634L);
 		for (M2mDataNode m2mDataNode : m2mDataNodes) {
 			System.out.println(m2mDataNode.getId());
 			System.out.println(m2mDataNode.getLabel());

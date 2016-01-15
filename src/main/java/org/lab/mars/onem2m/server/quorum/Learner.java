@@ -195,6 +195,10 @@ public class Learner {
 	/**
 	 * Returns the address of the node we think is the leader.
 	 */
+	/**
+	 * 根据选票我们可以获取Leader节点
+	 * @return
+	 */
 	protected InetSocketAddress findLeader() {
 		InetSocketAddress addr = null;
 		// Find the leader by id

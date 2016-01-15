@@ -93,7 +93,7 @@ public class QuorumPeerConfig {
 
 	protected String zooKeeperServer;
 	protected Integer replication_factor;
-	
+	//client port
 	protected Integer clientPort;
 
 	/**
@@ -106,12 +106,7 @@ public class QuorumPeerConfig {
 	 */
 
 	protected List<M2mAddressToId> addressToSid = new ArrayList<>();
-	/**
-	 * Minimum snapshot retain count.
-	 * 
-	 * @see org.apache.zookeeper.server.PurgeTxnLog#purge(File, File, int)
-	 */
-	private final int MIN_SNAP_RETAIN_COUNT = 3;
+
 
 	M2mQuorumServer m2mQuorumServers = new M2mQuorumServer();
 
@@ -295,14 +290,7 @@ public class QuorumPeerConfig {
 			}
 		}
 
-		// Reset to MIN_SNAP_RETAIN_COUNT if invalid (less than 3)
-		// PurgeTxnLog.purge(File, File, int) will not allow to purge less
-		// than 3.
-		if (snapRetainCount < MIN_SNAP_RETAIN_COUNT) {
-			LOG.warn("Invalid autopurge.snapRetainCount: " + snapRetainCount
-					+ ". Defaulting to " + MIN_SNAP_RETAIN_COUNT);
-			snapRetainCount = MIN_SNAP_RETAIN_COUNT;
-		}
+	
 
 		if (dataDir == null) {
 			throw new IllegalArgumentException("dataDir is not set");
@@ -437,8 +425,6 @@ public class QuorumPeerConfig {
 		networkPool = new NetworkPool();
 	
 		 List<String> serversStrings = new ArrayList<String>();
-		System.out.println("DD"+addressToSid.size());
-		
 		Map<String,Long> arrayList=new HashMap<String,Long>();
 		for(M2mAddressToId m2mAddressToId:addressToSid){
 			serversStrings.add(m2mAddressToId.getAddress()+":"+sidToClientPort.get(m2mAddressToId.getSid()));
@@ -449,22 +435,16 @@ public class QuorumPeerConfig {
 		networkPool.initialize();
 		Long myIdInRing = networkPool.getServerPosition().get(myIp+":"+clientPort);
 		List<String> list = new ArrayList<>();
-		for (int i = 0; i < replication_factor; i++) {
+		for (long i = 0; i < replication_factor; i++) {
 
 			HashMap<Long, QuorumServer> map = new HashMap<Long, QuorumServer>();
 			for (int j = 0; j < replication_factor; j++) {
-               System.out.println("XXX"+((myIdInRing - (replication_factor - 1 - j - i)) + serversStrings
-								.size()) % serversStrings.size());
 				String leftServer = networkPool
 						.getPositionToServer()
 						.get(((myIdInRing - (replication_factor - 1 - j - i)) + serversStrings
 								.size()) % serversStrings.size());// 最左边
-				System.out.println("leftServer:"+leftServer);
 				Long sid = arrayList.get(leftServer);// 找出对应的sid;
-				System.out.println("sid:"+sid);
 				QuorumServer quorumServer = servers.get(sid);
-		        System.out.println("quorumServer isTrue:"+(quorumServer==null)+":"+sid);
-		        System.out.println("quorumServer.addr isTrue:"+(quorumServer.addr==null)+":"+sid);
 				String address = quorumServer.addr.getAddress()
 						.getHostAddress();
 				
@@ -484,7 +464,7 @@ public class QuorumPeerConfig {
 
 			}
 
-			positionToServers.put(Long.valueOf(i + ""), map);
+			positionToServers.put(i, map);
 
 		}
 
