@@ -54,6 +54,7 @@ public class FollowerRequestProcessor extends Thread implements
         try {
             while (!finished) {
                 M2mRequest request = queuedRequests.take();
+                nextProcessor.processRequest(request);
                 switch (request.type) {
                 case OpCode.sync:
                     zks.pendingSyncs.add(request);

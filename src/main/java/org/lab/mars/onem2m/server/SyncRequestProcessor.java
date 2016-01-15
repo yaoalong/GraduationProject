@@ -47,12 +47,10 @@ import org.slf4j.LoggerFactory;
  */
 public class SyncRequestProcessor extends Thread implements RequestProcessor {
     private static final Logger LOG = LoggerFactory.getLogger(SyncRequestProcessor.class);
-    private final ZooKeeperServer zks;
     private final LinkedBlockingQueue<M2mRequest> queuedRequests =
         new LinkedBlockingQueue<M2mRequest>();
     private final RequestProcessor nextProcessor;
 
-    private Thread snapInProcess = null;
     volatile private boolean running;
 
     /**
@@ -67,19 +65,10 @@ public class SyncRequestProcessor extends Thread implements RequestProcessor {
      */
     private static int snapCount = ZooKeeperServer.getSnapCount();
     
-    /**
-     * The number of log entries before rolling the log, number
-     * is chosen randomly
-     */
-    private static int randRoll;
-
-    private final Request requestOfDeath = Request.requestOfDeath;
-
     public SyncRequestProcessor(ZooKeeperServer zks,
             RequestProcessor nextProcessor)
     {
         super("SyncThread:" + zks.getServerId());
-        this.zks = zks;
         this.nextProcessor = nextProcessor;
         running = true;
     }
@@ -91,7 +80,6 @@ public class SyncRequestProcessor extends Thread implements RequestProcessor {
      */
     public static void setSnapCount(int count) {
         snapCount = count;
-        randRoll = count;
     }
 
     /**
@@ -111,14 +99,11 @@ public class SyncRequestProcessor extends Thread implements RequestProcessor {
      * @param roll
      */
     private static void setRandRoll(int roll) {
-        randRoll = roll;
     }
 
     @Override
     public void run() {
         try {
-            int logCount = 0;
-
             // we do this in an attempt to ensure that not all of the servers
             // in the ensemble take a snapshot at the same time
             setRandRoll(r.nextInt(snapCount/2));

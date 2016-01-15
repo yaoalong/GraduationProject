@@ -118,7 +118,6 @@ public class Follower extends Learner{
                         + Long.toHexString(lastQueued + 1));
             }
             lastQueued = hdr.getZxid();
-            System.out.println("hdr::+zxid:"+hdr.getZxid());
             fzk.logRequest(hdr, txn);
             break;
         case Leader.COMMIT:

@@ -614,7 +614,6 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
 			}
 		}
 		try {
-			System.out.println("si type"+si.type);
 			boolean validpacket = Request.isValid(si.type);// 判断请求是否是支持的type
 			if (validpacket) {
 				firstProcessor.processRequest(si);

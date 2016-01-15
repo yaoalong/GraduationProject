@@ -129,6 +129,9 @@ public class Leader {
 	}
 
 	// Pending sync requests. Must access under 'this' lock.
+	/**
+	 * 根据Sid,一系列LearnerSyncRequest
+	 */
 	private final HashMap<Long, List<LearnerSyncRequest>> pendingSyncs = new HashMap<Long, List<LearnerSyncRequest>>();
 
 	synchronized public int getNumPendingSyncs() {
@@ -685,15 +688,6 @@ public class Leader {
 		}
 	}
 
-	/**
-	 * send a packet to all observers
-	 */
-	void sendObserverPacket(QuorumPacket qp) {
-		for (LearnerHandler f : getObservingLearners()) {
-			f.queuePacket(qp);
-		}
-	}
-
 	long lastCommitted = -1;
 
 	/**
@@ -716,9 +710,6 @@ public class Leader {
 	 * @param proposal
 	 */
 	public void inform(Proposal proposal) {
-		QuorumPacket qp = new QuorumPacket(Leader.INFORM,
-				proposal.m2mRequest.zxid, proposal.packet.getData());
-		sendObserverPacket(qp);
 	}
     /**
      * 上一次的投票的zxid
@@ -797,7 +788,11 @@ public class Leader {
 	 * @param r
 	 *            the request
 	 */
-
+    /**
+     * 处理所有的sync请求
+     * 
+     * @param r
+     */
 	synchronized public void processSync(LearnerSyncRequest r) {
 		if (outstandingProposals.isEmpty()) {
 			sendSync(r);

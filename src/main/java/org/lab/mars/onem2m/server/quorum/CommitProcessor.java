@@ -75,6 +75,9 @@ public class CommitProcessor extends Thread implements RequestProcessor {
                 }
                 toProcess.clear();
                 synchronized (this) {
+                	/**
+                	 *只有第一个处理过了，后面才能接着处理
+                	 */
                     if ((queuedRequests.size() == 0 || nextPending != null)
                             && committedRequests.size() == 0) {
                         wait();

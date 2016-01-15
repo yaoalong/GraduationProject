@@ -131,6 +131,12 @@ public class Learner {
 	 *            the proposal packet to be sent to the leader
 	 * @throws IOException
 	 */
+	/**
+	 * 发送一个新的数据包
+	 * @param pp
+	 * @param flush
+	 * @throws IOException
+	 */
 	void writePacket(QuorumPacket pp, boolean flush) throws IOException {
 		synchronized (leaderOs) {
 			if (pp != null) {
