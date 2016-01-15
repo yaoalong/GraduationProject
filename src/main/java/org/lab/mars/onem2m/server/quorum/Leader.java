@@ -720,7 +720,9 @@ public class Leader {
 				proposal.m2mRequest.zxid, proposal.packet.getData());
 		sendObserverPacket(qp);
 	}
-
+    /**
+     * 上一次的投票的zxid
+     */
 	long lastProposed;
 
 	/**

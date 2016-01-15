@@ -87,6 +87,10 @@ public class LearnerHandler extends Thread {
 	/**
 	 * The packets to be sent to the learner
 	 */
+	/**
+	 * 用来发送
+	 * 并且是线程安全的
+	 */
 	final LinkedBlockingQueue<QuorumPacket> queuedPackets = new LinkedBlockingQueue<QuorumPacket>();
 
 	/**
@@ -550,16 +554,6 @@ public class LearnerHandler extends Thread {
 					dos.writeLong(id);
 					boolean valid = leader.zk.touch(id, to);
 					if (valid) {
-						// try {
-						// //set the session owner
-						// // as the follower that
-						// // owns the session
-						// leader.zk.setOwner(id, this);
-						// } catch (SessionExpiredException e) {
-						// LOG.error("Somehow session " + Long.toHexString(id) +
-						// " expired right after being renewed! (impossible)",
-						// e);
-						// }
 					}
 					if (LOG.isTraceEnabled()) {
 						ZooTrace.logTraceMessage(LOG,
@@ -581,7 +575,6 @@ public class LearnerHandler extends Thread {
 						// si = new LearnerSyncRequest(this, sessionId, cxid,
 						// type, bb);
 					} else {
-						// si = new Request(null, sessionId, cxid, type, bb);
 						si = new M2mRequest(null, cxid, type, bb);
 					}
 					leader.zk.submitRequest(si);
