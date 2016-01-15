@@ -12,7 +12,7 @@ public interface M2MDataBase {
 
 	M2mDataNode retrieve(String key);
 
-	List<M2mDataNode> retrieve(Integer key);
+	List<M2mDataNode> retrieve(Long  zxid);
 
 	Long create(Object object);
 

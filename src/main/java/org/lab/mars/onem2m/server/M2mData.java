@@ -55,8 +55,7 @@ public class M2mData implements M2mRecord {
 
 	public void serialize(Long peerLast, M2mOutputArchive archive, String tag)
 			throws IOException {
-		List<M2mDataNode> dataNodes = m2mDataBase.retrieve(Integer
-				.valueOf(peerLast + ""));
+		List<M2mDataNode> dataNodes = m2mDataBase.retrieve(peerLast);
 		archive.writeInt(dataNodes.size(), "count");
 		for (M2mDataNode m2mDataNode : dataNodes) {
 			archive.writeString(m2mDataNode.getId(), "key");

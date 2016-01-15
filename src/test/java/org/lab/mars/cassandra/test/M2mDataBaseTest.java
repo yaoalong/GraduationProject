@@ -41,7 +41,7 @@ public class M2mDataBaseTest {
 	@Test
 	public void testRetrieve1() {
 
-		List<M2mDataNode> m2mDataNodes = m2mDataBase.retrieve(51634);
+		List<M2mDataNode> m2mDataNodes = m2mDataBase.retrieve(111151634L);
 		for (M2mDataNode m2mDataNode : m2mDataNodes) {
 			System.out.println(m2mDataNode.getId());
 			System.out.println(m2mDataNode.getLabel());

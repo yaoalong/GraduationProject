@@ -250,14 +250,18 @@ public class M2MDataBaseImpl implements M2MDataBase {
 		}
 		return true;
 	}
-
+   /**
+    * 检索比特定zxid大的值
+    * @param zxid
+    * @return
+    */
 	@Override
-	public List<M2mDataNode> retrieve(Integer key) {
+	public List<M2mDataNode> retrieve(Long zxid) {
 		List<M2mDataNode> m2mList = new ArrayList<>();
 		try {
 			Select.Selection selection = query().select();
 			Select select = selection.from(keyspace, table);
-			select.where(gt("zxid", Integer.valueOf(key)));
+			select.where(gt("zxid", zxid));
 			select.allowFiltering();
 			ResultSet resultSet = session.execute(select);
 			if (resultSet == null) {
@@ -265,7 +269,8 @@ public class M2MDataBaseImpl implements M2MDataBase {
 			}
 
 			Map<String, Object> result = new HashMap<String, Object>();
-			for (Row row : resultSet.all()) {
+			for (Row row : resultSet.all())
+			{
 				ColumnDefinitions columnDefinitions = resultSet
 						.getColumnDefinitions();
 				columnDefinitions.forEach(d -> {
