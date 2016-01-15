@@ -573,7 +573,6 @@ public class LearnerHandler extends Thread {
 					break;
 				case Leader.REQUEST:
 					bb = ByteBuffer.wrap(qp.getData());
-					bb.getLong();
 					cxid = bb.getInt();
 					type = bb.getInt();
 					bb = bb.slice();

@@ -7,7 +7,6 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 import java.util.Set;
 
-import org.lab.mars.onem2m.consistent.hash.NetworkPool;
 import org.lab.mars.onem2m.network.intialize.PacketServerChannelInitializer;
 import org.lab.mars.onem2m.server.ServerCnxnFactory;
 

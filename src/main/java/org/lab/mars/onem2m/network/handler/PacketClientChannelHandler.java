@@ -23,7 +23,7 @@ public class PacketClientChannelHandler extends
 	public PacketClientChannelHandler() throws KeeperException,
 			InterruptedException {
 		try {
-			m2mPacket=Test.createM2mSetDataPacket();
+			m2mPacket=Test.createM2mCreatePacket();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -34,6 +34,7 @@ public class PacketClientChannelHandler extends
 	public void channelActive(ChannelHandlerContext ctx) {
 		// Send the first message if this handler is a client-side handler.
 		ctx.writeAndFlush(m2mPacket);
+		System.out.println("发送成功");
 	}
 
 	@Override

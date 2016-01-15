@@ -624,7 +624,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
 	/**
 	 * @param cnxn
 	 * @param sessionId
-	 * @param xid
+	 * @param xidkio
 	 * @param bb
 	 */
 	/*
@@ -647,6 +647,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
 			}
 		}
 		try {
+			System.out.println("si type"+si.type);
 			boolean validpacket = Request.isValid(si.type);// 判断请求是否是支持的type
 			if (validpacket) {
 				firstProcessor.processRequest(si);
@@ -880,7 +881,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+        System.out.println("xx:"+m2mRequestHeader.getType());
 		M2mRequest m2mRequest = new M2mRequest(ctx, m2mRequestHeader.getXid(),
 				m2mRequestHeader.getType(), ByteBuffer.wrap(baos.toByteArray()));
 		submitRequest(m2mRequest);

@@ -19,6 +19,7 @@ public class Test {
 	public static M2mPacket createM2mCreatePacket() throws IOException {
 		M2mRequestHeader m2mRequestHeader = new M2mRequestHeader();
 		m2mRequestHeader.setType(ZooDefs.OpCode.create);
+		m2mRequestHeader.setKey("1111");
 		M2mCreateRequest m2mCreateRequest = new M2mCreateRequest();
 		M2mCreateResponse m2mCreateResponse = new M2mCreateResponse();
 		M2mReplyHeader m2mReplyHeader = new M2mReplyHeader();

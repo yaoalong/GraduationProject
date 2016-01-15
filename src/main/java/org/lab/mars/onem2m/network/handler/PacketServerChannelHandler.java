@@ -81,6 +81,7 @@ public class PacketServerChannelHandler extends
 	 * @return
 	 */
 	public boolean preProcessPacket(M2mPacket m2mPacket) {
+		System.out.println("手动阿乐数据包"+m2mPacket);
 		String key = m2mPacket.getM2mRequestHeader().getKey();
 		if(isShouldHandle(key)){
 			return true;

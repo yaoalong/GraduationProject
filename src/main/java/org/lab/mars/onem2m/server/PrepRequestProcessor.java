@@ -292,7 +292,6 @@ public class PrepRequestProcessor extends Thread implements RequestProcessor {
 	 *
 	 * @param request
 	 */
-	@SuppressWarnings("unchecked")
 	protected void pRequest(M2mRequest request)
 			throws RequestProcessorException {
 		// LOG.info("Prep>>> cxid = " + request.cxid + " type = " +

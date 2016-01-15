@@ -46,7 +46,6 @@ public class KryoConfiguration {
     private static void resolveClass(Class seedCls) {
         Field[] fields = seedCls.getFields();
         for (Field field : fields) {
-            System.out.println("field:"+field.getName());
             int modifiers = field.getModifiers();
             if (Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers))//omit static and final field
                 continue;
