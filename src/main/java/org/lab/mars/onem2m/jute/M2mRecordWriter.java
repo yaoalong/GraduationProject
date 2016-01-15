@@ -18,10 +18,8 @@
 
 package org.lab.mars.onem2m.jute;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -34,26 +32,8 @@ public class M2mRecordWriter {
     
     private M2mOutputArchive archive;
     
-    static private M2mOutputArchive getBinaryArchive(OutputStream out) {
-        return new M2mBinaryOutputArchive(new DataOutputStream(out));
-    }
-    
-    static private M2mOutputArchive getCsvArchive(OutputStream out)
-    throws IOException {
-        try {
-            return new M2mCsvOutputArchive(out);
-        } catch (UnsupportedEncodingException ex) {
-            throw new IOException("Unsupported encoding UTF-8");
-        }
-    }
-    
-    static private M2mOutputArchive getXmlArchive(OutputStream out)
-    throws IOException {
-        return new M2mXmlOutputArchive(out);
-    }
-
-    static HashMap constructFactory() {
-        HashMap factory = new HashMap();
+    static HashMap<String, Method> constructFactory() {
+        HashMap<String, Method> factory = new HashMap<String, Method>();
         Class[] params = { OutputStream.class };
         try {
             factory.put("binary",
@@ -73,7 +53,7 @@ public class M2mRecordWriter {
         return factory;
     }
     
-    static private HashMap archiveFactory = constructFactory();
+    static private HashMap<String, Method> archiveFactory = constructFactory();
     
     static private M2mOutputArchive createArchive(OutputStream out,
             String format)

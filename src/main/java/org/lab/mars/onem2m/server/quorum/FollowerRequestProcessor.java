@@ -87,7 +87,6 @@ public class FollowerRequestProcessor extends Thread implements
         LOG.info("Shutting down");
         finished = true;
         queuedRequests.clear();
-//        queuedRequests.add(Request.requestOfDeath);
         nextProcessor.shutdown();
     }
 

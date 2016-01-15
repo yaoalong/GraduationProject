@@ -33,10 +33,10 @@ public class M2mRecordReader {
     
     private M2mInputArchive archive;
 
-    static private HashMap archiveFactory;
+    static private HashMap<String, Method> archiveFactory;
     
     static {
-        archiveFactory = new HashMap();
+        archiveFactory = new HashMap<String, Method>();
         Class[] params = { InputStream.class };
         try {
             archiveFactory.put("binary",

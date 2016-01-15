@@ -39,9 +39,9 @@ public interface M2mOutputArchive {
     public void writeRecord(M2mRecord r, String tag) throws IOException;
     public void startRecord(M2mRecord r, String tag) throws IOException;
     public void endRecord(M2mRecord r, String tag) throws IOException;
-    public void startVector(List v, String tag) throws IOException;
-    public void endVector(List v, String tag) throws IOException;
-    public void startMap(TreeMap v, String tag) throws IOException;
-    public void endMap(TreeMap v, String tag) throws IOException;
+    public void startVector(List<?> v, String tag) throws IOException;
+    public void endVector(List<?> v, String tag) throws IOException;
+    public void startMap(TreeMap<?, ?> v, String tag) throws IOException;
+    public void endMap(TreeMap<?, ?> v, String tag) throws IOException;
 
 }

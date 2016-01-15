@@ -44,10 +44,6 @@ public class M2mCsvInputArchive implements M2mInputArchive {
         public void incr() {}
     }
     
-    private void throwExceptionOnError(String tag) throws IOException {
-        throw new IOException("Error deserializing "+tag);
-    }
-    
     private String readField(String tag) throws IOException {
         try {
             StringBuilder buf = new StringBuilder();

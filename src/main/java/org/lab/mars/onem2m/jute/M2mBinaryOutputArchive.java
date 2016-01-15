@@ -128,7 +128,7 @@ public class M2mBinaryOutputArchive implements M2mOutputArchive {
     
     public void endRecord(M2mRecord r, String tag) throws IOException {}
     
-    public void startVector(List v, String tag) throws IOException {
+    public void startVector(List<?> v, String tag) throws IOException {
     	if (v == null) {
     		writeInt(-1, tag);
     		return;
@@ -136,12 +136,12 @@ public class M2mBinaryOutputArchive implements M2mOutputArchive {
         writeInt(v.size(), tag);
     }
     
-    public void endVector(List v, String tag) throws IOException {}
+    public void endVector(List<?> v, String tag) throws IOException {}
     
-    public void startMap(TreeMap v, String tag) throws IOException {
+    public void startMap(TreeMap<?, ?> v, String tag) throws IOException {
         writeInt(v.size(), tag);
     }
     
-    public void endMap(TreeMap v, String tag) throws IOException {}
+    public void endMap(TreeMap<?, ?> v, String tag) throws IOException {}
     
 }

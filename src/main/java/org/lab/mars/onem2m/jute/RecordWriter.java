@@ -34,26 +34,8 @@ public class RecordWriter {
     
     private OutputArchive archive;
     
-    static private OutputArchive getBinaryArchive(OutputStream out) {
-        return new BinaryOutputArchive(new DataOutputStream(out));
-    }
-    
-    static private OutputArchive getCsvArchive(OutputStream out)
-    throws IOException {
-        try {
-            return new CsvOutputArchive(out);
-        } catch (UnsupportedEncodingException ex) {
-            throw new IOException("Unsupported encoding UTF-8");
-        }
-    }
-    
-    static private OutputArchive getXmlArchive(OutputStream out)
-    throws IOException {
-        return new XmlOutputArchive(out);
-    }
-
-    static HashMap constructFactory() {
-        HashMap factory = new HashMap();
+    static HashMap<String, Method> constructFactory() {
+        HashMap<String, Method> factory = new HashMap<String, Method>();
         Class[] params = { OutputStream.class };
         try {
             factory.put("binary",
@@ -73,7 +55,7 @@ public class RecordWriter {
         return factory;
     }
     
-    static private HashMap archiveFactory = constructFactory();
+    static private HashMap<String, Method> archiveFactory = constructFactory();
     
     static private OutputArchive createArchive(OutputStream out,
             String format)
