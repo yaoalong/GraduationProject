@@ -177,7 +177,13 @@ public class Leader {
 	}
 
 	ServerSocket ss;
-
+	/**
+	 * server.num
+	 * 中第一个端口为监听Learner的连接，而第二个则负责选举
+	 * @param self
+	 * @param zk
+	 * @throws IOException
+	 */
 	Leader(QuorumPeer self, LeaderZooKeeperServer zk) throws IOException {
 		this.self = self;
 		try {

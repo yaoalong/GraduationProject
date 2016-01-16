@@ -477,6 +477,11 @@ public class QuorumCnxManager {
     /**
      * Thread to listen on some port
      */
+    /**
+     * 在选举端口上进行监听
+     * @author Administrator
+     *
+     */
     public class Listener extends Thread {
 
         volatile ServerSocket ss = null;
