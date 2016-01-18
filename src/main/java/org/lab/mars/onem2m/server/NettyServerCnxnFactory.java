@@ -37,6 +37,7 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
 	private String myIp;
 	private NetworkPool networkPool;
 	private Integer replicationFactor;
+	private boolean isTemporyAdd;
 	@Override
 	public int getLocalPort() {
 		return clientPort;
@@ -143,6 +144,15 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
 	public void setReplicationFactory(Integer replicationFactor){
 		this.replicationFactor=replicationFactor;
 		
+	}
+
+	public void setTemporyAdd(boolean isTemporyAdd) {
+		this.isTemporyAdd = isTemporyAdd;
+	}
+
+	@Override
+	public boolean isTemporyAdd() {
+		return isTemporyAdd;
 	}
 	
 }

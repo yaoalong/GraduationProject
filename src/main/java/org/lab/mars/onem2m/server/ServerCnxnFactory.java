@@ -251,5 +251,7 @@ public abstract class ServerCnxnFactory {
 	public ConcurrentHashMap<String, ZooKeeperServer> getZkServers() {
 		return zkServers;
 	}
+	
+	public abstract  boolean isTemporyAdd();
     
 }

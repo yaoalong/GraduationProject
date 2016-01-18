@@ -34,7 +34,6 @@ import java.util.Map;
 
 import org.apache.zookeeper.KeeperException;
 import org.lab.mars.onem2m.common.AtomicFileOutputStream;
-import org.lab.mars.onem2m.consistent.hash.NetworkPool;
 import org.lab.mars.onem2m.jmx.MBeanRegistry;
 import org.lab.mars.onem2m.jmx.ZKMBeanInfo;
 import org.lab.mars.onem2m.persistence.FileTxnSnapLog;

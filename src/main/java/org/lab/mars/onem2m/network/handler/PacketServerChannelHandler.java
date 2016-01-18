@@ -81,7 +81,6 @@ public class PacketServerChannelHandler extends
 	 * @return
 	 */
 	public boolean preProcessPacket(M2mPacket m2mPacket) {
-		System.out.println("手动阿乐数据包"+m2mPacket);
 		String key = m2mPacket.getM2mRequestHeader().getKey();
 		if(isShouldHandle(key)){
 			return true;
@@ -112,6 +111,11 @@ public class PacketServerChannelHandler extends
 	 */
     private boolean isShouldHandle(String key){
     	String server=networkPool.getSock(key);
+    	if(serverCnxnFactory.isTemporyAdd()){
+    		if(server.equals(self)){
+    			return true;
+    		}
+    	}
     	long myServerId=networkPool.getServerPosition().get(self);
     	long handlerServerId=networkPool.getServerPosition().get(server);
     	long serverSize=networkPool.getServerPosition().size();

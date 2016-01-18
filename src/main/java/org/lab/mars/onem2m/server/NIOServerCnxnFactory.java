@@ -325,4 +325,10 @@ public class NIOServerCnxnFactory extends ServerCnxnFactory implements Runnable 
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public boolean isTemporyAdd() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

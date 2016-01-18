@@ -116,6 +116,9 @@ public class QuorumPeerConfig {
 	private HashMap<Long, Integer> sidToClientPort=new HashMap<>();
 	
 	
+	
+	private boolean isTemporyAdd=false;
+	
 	@SuppressWarnings("serial")
 	public static class ConfigException extends Exception {
 		public ConfigException(String msg) {
@@ -284,7 +287,9 @@ public class QuorumPeerConfig {
 				long sid = Long.parseLong(key.substring(dot + 1));
 				sidToClientPort.put(sid, Integer.valueOf(value));
 			}
-			
+			else if(key.equals("is.tempory.add")){
+				isTemporyAdd=Boolean.valueOf(value);
+			}
 			else {
 				System.setProperty("zookeeper." + key, value);
 			}
@@ -422,8 +427,11 @@ public class QuorumPeerConfig {
 	 *
 	 */
 	public void setAllReplicationServers() {
+		if(isTemporyAdd==true){
+			return;
+		}
 		networkPool = new NetworkPool();
-	
+	    
 		 List<String> serversStrings = new ArrayList<String>();
 		Map<String,Long> arrayList=new HashMap<String,Long>();
 		for(M2mAddressToId m2mAddressToId:addressToSid){
@@ -587,6 +595,14 @@ public class QuorumPeerConfig {
 
 	public NetworkPool getNetworkPool() {
 		return networkPool;
+	}
+
+	public boolean isTemporyAdd() {
+		return isTemporyAdd;
+	}
+
+	public void setTemporyAdd(boolean isTemporyAdd) {
+		this.isTemporyAdd = isTemporyAdd;
 	}
 
 }

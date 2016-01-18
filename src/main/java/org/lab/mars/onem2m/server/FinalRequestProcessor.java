@@ -87,11 +87,9 @@ public class FinalRequestProcessor implements RequestProcessor {
         }
         ChannelHandlerContext ctx = request.ctx;
 
-        String lastOp = "NA";
         zks.decInProcess();
         Code err = Code.OK;
         M2mRecord rsp = null;
-        boolean closeSession = false;
         try {
             if (request.m2mTxnHeader != null && request.m2mTxnHeader.getType() == OpCode.error) {
                 throw KeeperException.create(KeeperException.Code.get((
@@ -108,18 +106,15 @@ public class FinalRequestProcessor implements RequestProcessor {
             }
             switch (request.type) {
             case OpCode.create: {
-                lastOp = "CREA";
                 rsp = new M2mCreateResponse(rc.path);
                 err = Code.get(rc.err);
                 break;
             }
             case OpCode.delete: {
-                lastOp = "DELE";
                 err = Code.get(rc.err);
                 break;
             }
             case OpCode.setData: {
-                lastOp = "SETD";
                 rsp = new M2mSetDataResponse();
                 err = Code.get(rc.err);
                 break;
@@ -133,7 +128,6 @@ public class FinalRequestProcessor implements RequestProcessor {
 //                break;
             }
             case OpCode.getData: {
-                lastOp = "GETD";
                 GetDataRequest getDataRequest = new GetDataRequest();
                 ByteBufferInputStream.byteBuffer2Record(request.request,
                         getDataRequest);

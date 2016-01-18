@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.lab.mars.onem2m.ZooDefs.OpCode;
-import org.lab.mars.onem2m.consistent.hash.NetworkPool;
 import org.lab.mars.onem2m.jute.M2mBinaryInputArchive;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.jute.M2mRecord;
