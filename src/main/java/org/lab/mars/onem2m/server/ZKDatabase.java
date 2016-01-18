@@ -29,6 +29,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
+import org.lab.mars.onem2m.consistent.hash.NetworkPool;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.jute.M2mInputArchive;
 import org.lab.mars.onem2m.jute.M2mOutputArchive;
@@ -69,17 +70,20 @@ public class ZKDatabase {
 	protected ReentrantReadWriteLock logLock = new ReentrantReadWriteLock();
 	volatile private boolean initialized = false;
 
-
+    private NetworkPool networkPool;
+	
 	/*
 	 * 并且进行加载
 	 */
-	public ZKDatabase(M2MDataBase m2mDataBase) {
+	public ZKDatabase(M2MDataBase m2mDataBase,String mySelfString) {
 		this.m2mDataBase = m2mDataBase;
 		m2mData = new M2mData(m2mDataBase);
 		sessionsWithTimeouts = new ConcurrentHashMap<Long, Integer>();
 		List<M2mDataNode> m2mDataNodes = m2mDataBase.retrieve(1L);
 		for (M2mDataNode node : m2mDataNodes) {
-			m2mData.addM2mDataNode(node.getId(), node);
+			if(networkPool.getSock(node.getId()).equals(mySelfString)){
+				m2mData.addM2mDataNode(node.getId(), node);	
+			}
 
 		}
 
@@ -420,5 +424,14 @@ public class ZKDatabase {
 	public void setlastProcessedZxid(long zxid) {
 
 	}
+
+	public NetworkPool getNetworkPool() {
+		return networkPool;
+	}
+
+	public void setNetworkPool(NetworkPool networkPool) {
+		this.networkPool = networkPool;
+	}
+	
 
 }

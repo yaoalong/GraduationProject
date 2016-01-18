@@ -169,7 +169,7 @@ public class QuorumPeerMain {
 					quorumPeer.setCnxnFactory(cnxnFactory);
 					quorumPeer.setM2mDataBase(config.m2mDataBase);
 					quorumPeer.setZKDatabase(new ZKDatabase(
-							config.m2mDataBase));
+							config.m2mDataBase,config.getZooKeeperServer()));
 					quorumPeer.setLearnerType(config.getPeerType());
 					quorumPeer.setSyncEnabled(config.getSyncEnabled());
 					quorumPeer

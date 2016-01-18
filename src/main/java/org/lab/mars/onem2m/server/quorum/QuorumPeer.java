@@ -104,6 +104,10 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 	 * 它所负责的zab server对应的ip
 	 */
 	private String zookeeperServerString;
+	
+	
+	
+	
 	public static class QuorumServer {
 		public QuorumServer(long id, InetSocketAddress addr,
 				InetSocketAddress electionAddr) {
@@ -365,7 +369,7 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 		this.syncLimit = syncLimit;
 		this.quorumListenOnAllIPs = quorumListenOnAllIPs;
 		this.logFactory = new FileTxnSnapLog(dataLogDir, dataDir);
-		this.zkDb = new ZKDatabase(m2mDataBase);
+		this.zkDb = new ZKDatabase(m2mDataBase,myIp+":"+(cnxnFactory.getLocalPort()));
 		this.m2mDataBase = new M2MDataBaseImpl();
 		if (quorumConfig == null)
 			this.quorumConfig = new QuorumMaj(countParticipants(quorumPeers));

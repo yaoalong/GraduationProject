@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.lab.mars.onem2m.ZooDefs.OpCode;
+import org.lab.mars.onem2m.consistent.hash.NetworkPool;
 import org.lab.mars.onem2m.jute.M2mBinaryInputArchive;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.jute.M2mRecord;
@@ -50,6 +51,8 @@ public class M2MDataBaseImpl implements M2MDataBase {
 	private Cluster cluster;
 	private Session session;
 	private boolean clean = false;
+	
+	
 
 	public M2MDataBaseImpl() {
 		this(false, "mars", "onem2m", "127.0.0.1");
