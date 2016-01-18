@@ -34,6 +34,7 @@ import java.util.Map;
 
 import org.apache.zookeeper.KeeperException;
 import org.lab.mars.onem2m.common.AtomicFileOutputStream;
+import org.lab.mars.onem2m.consistent.hash.NetworkPool;
 import org.lab.mars.onem2m.jmx.MBeanRegistry;
 import org.lab.mars.onem2m.jmx.ZKMBeanInfo;
 import org.lab.mars.onem2m.persistence.FileTxnSnapLog;
@@ -369,7 +370,7 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 		this.syncLimit = syncLimit;
 		this.quorumListenOnAllIPs = quorumListenOnAllIPs;
 		this.logFactory = new FileTxnSnapLog(dataLogDir, dataDir);
-		this.zkDb = new ZKDatabase(m2mDataBase,myIp+":"+(cnxnFactory.getLocalPort()));
+		this.zkDb = new ZKDatabase(null,m2mDataBase,myIp+":"+(cnxnFactory.getLocalPort()));
 		this.m2mDataBase = new M2MDataBaseImpl();
 		if (quorumConfig == null)
 			this.quorumConfig = new QuorumMaj(countParticipants(quorumPeers));
@@ -384,7 +385,6 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 	@Override
 	public synchronized void start() {
 		startRegisterAndMonitor();
-		cnxnFactory.start();
 		loadDataBase();
 	
 		startLeaderElection();
@@ -409,9 +409,14 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 					e.printStackTrace();
 				}
 			}
-			zooKeeper_Monitor.start();
+			try{
+				zooKeeper_Monitor.start();
+		    	cnxnFactory.start();
+			}
+			catch(Exception ex){
+				ex.printStackTrace();
+			}
 		}
-	 
     	
     }
     /**
@@ -468,12 +473,12 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 						acceptedEpoch);
 				writeLongToFile(ACCEPTED_EPOCH_FILENAME, acceptedEpoch);
 			}
-			if (acceptedEpoch < currentEpoch) {
-				throw new IOException("The current epoch, "
-						+ ZxidUtils.zxidToString(currentEpoch)
-						+ " is less than the accepted epoch, "
-						+ ZxidUtils.zxidToString(acceptedEpoch));
-			}
+//			if (acceptedEpoch < currentEpoch) {
+//				throw new IOException("The current epoch, "
+//						+ ZxidUtils.zxidToString(currentEpoch)
+//						+ " is less than the accepted epoch, "
+//						+ ZxidUtils.zxidToString(acceptedEpoch));
+//			}
 		} catch (IOException ie) {
 			LOG.error("Unable to load database on disk", ie);
 			throw new RuntimeException("Unable to run quorum server ", ie);
@@ -668,7 +673,6 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 				switch (getPeerState()) {
 				case LOOKING:
 					LOG.info("LOOKING");
-
 					try {
 						setBCVote(null);
 						setCurrentVote(makeLEStrategy().lookForLeader());

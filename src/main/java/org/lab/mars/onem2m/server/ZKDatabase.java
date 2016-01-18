@@ -75,12 +75,14 @@ public class ZKDatabase {
 	/*
 	 * 并且进行加载
 	 */
-	public ZKDatabase(M2MDataBase m2mDataBase,String mySelfString) {
+	public ZKDatabase(NetworkPool networkPool,M2MDataBase m2mDataBase,String mySelfString) {
+		this.networkPool=networkPool;
 		this.m2mDataBase = m2mDataBase;
 		m2mData = new M2mData(m2mDataBase);
 		sessionsWithTimeouts = new ConcurrentHashMap<Long, Integer>();
 		List<M2mDataNode> m2mDataNodes = m2mDataBase.retrieve(1L);
 		for (M2mDataNode node : m2mDataNodes) {
+			System.out.println("查询出来的:"+"id="+node.getId()+networkPool.getSock(node.getId())+"server:"+mySelfString);
 			if(networkPool.getSock(node.getId()).equals(mySelfString)){
 				m2mData.addM2mDataNode(node.getId(), node);	
 			}

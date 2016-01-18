@@ -159,7 +159,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
 	public ZooKeeperServer(FileTxnSnapLog txnLogFactory, int tickTime,
 			DataTreeBuilder treeBuilder) throws IOException {
 		this(txnLogFactory, tickTime, -1, -1, treeBuilder, new ZKDatabase(
-				 null,null));
+				 null,null,null));
 	}
 
 	public ServerStats serverStats() {
@@ -202,7 +202,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
 	public ZooKeeperServer(FileTxnSnapLog txnLogFactory,
 			DataTreeBuilder treeBuilder) throws IOException {
 		this(txnLogFactory, DEFAULT_TICK_TIME, -1, -1, treeBuilder,
-				new ZKDatabase( null,null));
+				new ZKDatabase( null,null,null));
 	}
 
 	/**
@@ -342,7 +342,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
 	public void startdata() throws IOException, InterruptedException {
 		// check to see if zkDb is not null
 		if (zkDb == null) {
-			zkDb = new ZKDatabase( null,null);
+			zkDb = new ZKDatabase( null,null,null);
 		}
 		if (!zkDb.isInitialized()) {
 			loadData();

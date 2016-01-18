@@ -35,7 +35,9 @@ public class M2mData implements M2mRecord {
 
 	public void addM2mDataNode(String key, M2mDataNode m2mDataNode) {
 		nodes.put(key, m2mDataNode);
-		lastProcessedZxid = Long.valueOf(m2mDataNode.getZxid() + "");
+		if(lastProcessedZxid<m2mDataNode.getZxid()){
+			lastProcessedZxid=m2mDataNode.getZxid();
+		}
 	}
 
 	public Integer getNodeCount() {

@@ -153,7 +153,7 @@ public class QuorumPeerMain {
 				    else{
 				    	quorumPeer=new QuorumPeer();
 				    }
-				    quorumPeer.setZookeeperServerString(m2mQuorumServer.getServers().get(Integer.valueOf(i+"")));
+				    quorumPeer.setZookeeperServerString(m2mQuorumServer.getServers().get(Integer.valueOf((i)+"")));
 					quorumPeer.setClientPortAddress(config.getClientPortAddress());
 					quorumPeer.setTxnFactory(new FileTxnSnapLog(new File(config
 							.getDataLogDir()), new File(config.getDataDir())));
@@ -169,7 +169,7 @@ public class QuorumPeerMain {
 					quorumPeer.setCnxnFactory(cnxnFactory);
 					quorumPeer.setM2mDataBase(config.m2mDataBase);
 					quorumPeer.setZKDatabase(new ZKDatabase(
-							config.m2mDataBase,config.getZooKeeperServer()));
+							config.getNetworkPool(),config.m2mDataBase,m2mQuorumServer.getServers().get(Integer.valueOf((i)+""))));
 					quorumPeer.setLearnerType(config.getPeerType());
 					quorumPeer.setSyncEnabled(config.getSyncEnabled());
 					quorumPeer
@@ -182,8 +182,8 @@ public class QuorumPeerMain {
 					quorumPeer.setZooKeeper_Monitor(zooKeeper_Monitor);
 					quorumPeer.setRegisterIntoZooKeeper(registerIntoZooKeeper);
 					quorumPeer.setMyIp(config.getMyIp());
-					
 					quorumPeer.start();
+					
 					quorumPeers.add(quorumPeer);
 			}
 			for(QuorumPeer quorumPeer:quorumPeers){

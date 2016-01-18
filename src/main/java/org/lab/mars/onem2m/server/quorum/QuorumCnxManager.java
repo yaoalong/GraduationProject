@@ -362,9 +362,10 @@ public class QuorumCnxManager {
                 }
                 Socket sock = new Socket();
                 setSockOpts(sock);
+             
                 sock.connect(self.getView().get(sid).electionAddr, cnxTO);
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Connected to server " + sid);
+                    LOG.debug("Connected to server " + sid+"port:"+self.getView().get(sid).electionAddr);
                 }
                 initiateConnection(sock, sid);
             } catch (UnresolvedAddressException e) {
@@ -372,13 +373,16 @@ public class QuorumCnxManager {
                 // exception to be thrown, also UAE cannot be wrapped cleanly
                 // so we log the exception in order to capture this critical
                 // detail.
+            	
                 LOG.warn("Cannot open channel to " + sid
                         + " at election address " + electionAddr, e);
+                System.out.println(e.getMessage());
                 throw e;
             } catch (IOException e) {
                 LOG.warn("Cannot open channel to " + sid
                         + " at election address " + electionAddr,
                         e);
+                System.out.println(e.getMessage());
             }
         } else {
             LOG.debug("There is a connection already for server " + sid);
