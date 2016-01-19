@@ -12,10 +12,10 @@ public class M2mDataNode implements M2mRecord {
 	 * 
 	 */
 	private static final long serialVersionUID = 3291328270207258803L;
-	public Integer label;
-	public Long zxid;
+	public int label;
+	public long zxid;
 	public String id;
-	public Integer data;
+	public int data;
 
 	public Integer getLabel() {
 		return label;
