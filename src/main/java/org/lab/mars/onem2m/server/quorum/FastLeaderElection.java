@@ -672,7 +672,7 @@ public class FastLeaderElection implements Election {
 				set.add(entry.getKey());
 			}
 		}
-
+		
 		return self.getQuorumVerifier().containsQuorum(set);
 	}
 
@@ -892,6 +892,7 @@ public class FastLeaderElection implements Election {
 									n.peerEpoch, getInitId(),
 									getInitLastLoggedZxid(), getPeerEpoch())) {
 								updateProposal(n.leader, n.zxid, n.peerEpoch);
+								System.out.println("更新选票");
 							} else {
 								updateProposal(getInitId(),
 										getInitLastLoggedZxid(), getPeerEpoch());

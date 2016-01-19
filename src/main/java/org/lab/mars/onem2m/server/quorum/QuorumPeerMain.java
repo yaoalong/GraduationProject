@@ -34,6 +34,7 @@ import org.lab.mars.onem2m.server.ZKDatabase;
 import org.lab.mars.onem2m.server.ZooKeeperServerMain;
 import org.lab.mars.onem2m.server.quorum.QuorumPeer.QuorumServer;
 import org.lab.mars.onem2m.server.quorum.QuorumPeerConfig.ConfigException;
+import org.lab.mars.onem2m.server.quorum.flexible.QuorumMaj;
 import org.lab.mars.onem2m.servers.monitor.RegisterIntoZooKeeper;
 import org.lab.mars.onem2m.servers.monitor.ZooKeeper_Monitor;
 import org.slf4j.Logger;
@@ -149,7 +150,7 @@ public class QuorumPeerMain {
 				quorumPeer.setClientPortAddress(config.getClientPortAddress());
 				quorumPeer.setTxnFactory(new FileTxnSnapLog(new File(config
 						.getDataLogDir()), new File(config.getDataDir())));
-				quorumPeer.setQuorumPeers(m2mQuorumServer.getPositionToServers().get(config.getReplication_factor()-1));//设置对应的服务器信息
+				quorumPeer.setQuorumPeers(m2mQuorumServer.getPositionToServers().get(0L));//设置对应的服务器信息
 				quorumPeer.setElectionType(config.getElectionAlg());
 				quorumPeer.setMyid(config.getServerId());
 				quorumPeer.setTickTime(config.getTickTime());
@@ -157,7 +158,7 @@ public class QuorumPeerMain {
 				quorumPeer.setMaxSessionTimeout(config.getMaxSessionTimeout());
 				quorumPeer.setInitLimit(config.getInitLimit());
 				quorumPeer.setSyncLimit(config.getSyncLimit());
-				quorumPeer.setQuorumVerifier(config.getQuorumVerifier());
+				quorumPeer.setQuorumVerifier(new QuorumMaj(m2mQuorumServer.getPositionToServers().get(0L).size()));
 				quorumPeer.setCnxnFactory(cnxnFactory);
 				quorumPeer.setM2mDataBase(config.m2mDataBase);
 				quorumPeer.setZKDatabase(new ZKDatabase(
@@ -175,7 +176,6 @@ public class QuorumPeerMain {
 				quorumPeer.setRegisterIntoZooKeeper(registerIntoZooKeeper);
 				quorumPeer.setMyIp(config.getMyIp());
 				quorumPeer.start();
-				
 				quorumPeers.add(quorumPeer);
 			}
 			else{

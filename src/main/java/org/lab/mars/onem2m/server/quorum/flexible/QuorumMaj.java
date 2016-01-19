@@ -34,6 +34,7 @@ public class QuorumMaj implements QuorumVerifier {
      * @param n number of servers
      */
     public QuorumMaj(int n){
+    	System.out.println("ha"+n);
         this.half = n/2;
     }
     
@@ -50,6 +51,8 @@ public class QuorumMaj implements QuorumVerifier {
      * Verifies if a set is a majority.
      */
     public boolean containsQuorum(HashSet<Long> set){
+    	System.out.println("half:"+half);
+    	System.out.println("set size:"+set.size());
         return (set.size() > half);
     }
     
