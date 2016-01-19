@@ -350,6 +350,7 @@ public class PrepRequestProcessor extends Thread implements RequestProcessor {
 			}
 		}
 		request.zxid = zks.getZxid();
+
 		nextProcessor.processRequest(request);
 	}
 

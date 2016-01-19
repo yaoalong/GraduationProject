@@ -372,7 +372,8 @@ public class Leader {
 		try {
 			self.tick = 0;
 			zk.loadData();
-
+			System.out.println("我自己的"+self.getCurrentEpoch());
+			System.out.println("处理L"+zk.getLastProcessedZxid());
 			leaderStateSummary = new StateSummary(self.getCurrentEpoch(),
 					zk.getLastProcessedZxid());
 
@@ -384,6 +385,7 @@ public class Leader {
 			readyToStart = true;
 			long epoch = getEpochToPropose(self.getId(),
 					self.getAcceptedEpoch());
+			System.out.println("接收的:epoch"+epoch);
 			zk.setZxid(ZxidUtils.makeZxid(epoch, 0));
 
 			synchronized (this) {
@@ -758,7 +760,7 @@ public class Leader {
 			throw new XidRolloverException(msg);
 		}
 		System.out.println("开始处理投票数据包" + request.type + "::" + request.zxid
-				+ request.toString() + request);
+				+ request);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		M2mBinaryOutputArchive boa = M2mBinaryOutputArchive.getArchive(baos);
 		try {

@@ -286,6 +286,7 @@ public class LearnerHandler extends Thread {
 			if (this.getVersion() < 0x10000) {
 				// we are going to have to extrapolate the epoch information
 				long epoch = ZxidUtils.getEpochFromZxid(zxid);
+				System.out.println("我的zxid"+zxid);
 				ss = new StateSummary(epoch, zxid);
 				// fake the message
 				leader.waitForEpochAck(this.getSid(), ss);
@@ -334,7 +335,7 @@ public class LearnerHandler extends Thread {
 						+ Long.toHexString(maxCommittedLog)
 						+ " minCommittedLog=0x"
 						+ Long.toHexString(minCommittedLog)
-						+ " peerLastZxid=0x" + Long.toHexString(peerLastZxid));
+						+ " peerLastZxid=0x" + Long.toHexString(peerLastZxid)+"dfff"+peerLastZxid);
 				// 看看是否还有需要处理的投票
 				LinkedList<Proposal> proposals = leader.zk.getZKDatabase()
 						.getCommittedLog();
@@ -529,6 +530,7 @@ public class LearnerHandler extends Thread {
 							LOG.debug("Received ACK from Observer  " + this.sid);
 						}
 					}
+					System.out.println("开始了"+qp.getZxid());
 					syncLimitCheck.updateAck(qp.getZxid());
 					leader.processAck(this.sid, qp.getZxid(),
 							sock.getLocalSocketAddress());

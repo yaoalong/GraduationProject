@@ -838,16 +838,13 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
 		try {
 			m2mPacket.getRequest().serialize(boa, "request");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		try {
 			baos.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-        System.out.println("xx:"+m2mRequestHeader.getType());
 		M2mRequest m2mRequest = new M2mRequest(ctx, m2mRequestHeader.getXid(),
 				m2mRequestHeader.getType(), ByteBuffer.wrap(baos.toByteArray()));
 		submitRequest(m2mRequest);

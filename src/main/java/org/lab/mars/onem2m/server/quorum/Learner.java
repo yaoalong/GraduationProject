@@ -288,6 +288,7 @@ public class Learner {
 		writePacket(qp, true);
 		readPacket(qp);
 		final long newEpoch = ZxidUtils.getEpochFromZxid(qp.getZxid());
+		System.out.println("learn new Epoch::"+newEpoch);
 		if (qp.getType() == Leader.LEADERINFO) {
 			// we are connected to a 1.0 server so accept the new epoch and read
 			// the next packet

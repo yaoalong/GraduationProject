@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map.Entry;
 
 import javax.management.JMException;
 
@@ -150,17 +149,6 @@ public class QuorumPeerMain {
 				quorumPeer.setClientPortAddress(config.getClientPortAddress());
 				quorumPeer.setTxnFactory(new FileTxnSnapLog(new File(config
 						.getDataLogDir()), new File(config.getDataDir())));
-				System.out.println("大小为:"+m2mQuorumServer.getPositionToServers().size());
-				System.out.println("大小为:"+config.getReplication_factor());
-				for(Entry<Long, HashMap<Long, QuorumServer> > index:m2mQuorumServer.getPositionToServers().entrySet()){
-					System.out.println(index.getKey()+"KK");
-					for(Entry<Long,QuorumServer> k:index.getValue().entrySet()){
-						System.out.println(k.getKey()+"MMM");
-					}
-				}
-				if(m2mQuorumServer.getPositionToServers().get(1)==null){
-					System.out.println("居然为空");
-				}
 				quorumPeer.setQuorumPeers(m2mQuorumServer.getPositionToServers().get(config.getReplication_factor()-1));//设置对应的服务器信息
 				quorumPeer.setElectionType(config.getElectionAlg());
 				quorumPeer.setMyid(config.getServerId());

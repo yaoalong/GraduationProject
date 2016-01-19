@@ -39,8 +39,9 @@ public class SendAckRequestProcessor implements RequestProcessor, Flushable {
     public void processRequest(M2mRequest si) {
         if(si.type != OpCode.sync){
             QuorumPacket qp = new QuorumPacket(Leader.ACK, si.m2mTxnHeader.getZxid(), null);
+            System.out.println(si.m2mTxnHeader.getZxid()+"fasong");
             try {
-                learner.writePacket(qp, false);
+                learner.writePacket(qp, true);
             } catch (IOException e) {
                 LOG.warn("Closing connection to leader, exception during packet send", e);
                 try {
