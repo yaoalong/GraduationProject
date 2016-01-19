@@ -202,7 +202,7 @@ public class QuorumPeerMain {
 						quorumPeer.setMaxSessionTimeout(config.getMaxSessionTimeout());
 						quorumPeer.setInitLimit(config.getInitLimit());
 						quorumPeer.setSyncLimit(config.getSyncLimit());
-						quorumPeer.setQuorumVerifier(config.getQuorumVerifier());
+						quorumPeer.setQuorumVerifier(new QuorumMaj(m2mQuorumServer.getPositionToServers().get(i).size()));
 						quorumPeer.setCnxnFactory(cnxnFactory);
 						quorumPeer.setM2mDataBase(config.m2mDataBase);
 						quorumPeer.setZKDatabase(new ZKDatabase(
