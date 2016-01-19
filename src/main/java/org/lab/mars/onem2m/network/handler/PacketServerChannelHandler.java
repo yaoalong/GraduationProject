@@ -42,8 +42,10 @@ public class PacketServerChannelHandler extends
 
 	@Override
 	public void channelRead0(ChannelHandlerContext ctx, Object msg) {
+		System.out.println("接收到了数据");
 		M2mPacket m2mPacket = (M2mPacket) msg;
 		if (preProcessPacket(m2mPacket)) {
+			System.out.println("开始处理");
 			NettyServerCnxn nettyServerCnxn = ctx.attr(STATE).get();
 			nettyServerCnxn.receiveMessage(ctx, m2mPacket);
 		} else {
@@ -53,6 +55,7 @@ public class PacketServerChannelHandler extends
 
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
+		System.out.println("接收到了新的连接");
 		NettyServerCnxn nettyServerCnxn=new NettyServerCnxn(ctx.channel(), serverCnxnFactory
 				.getZkServers(), serverCnxnFactory);
 		nettyServerCnxn.setNetworkPool(serverCnxnFactory.getNetworkPool());
@@ -89,11 +92,17 @@ public class PacketServerChannelHandler extends
 		if (ipAndChannels.containsKey(server)) {
 			ipAndChannels.get(server).writeAndFlush(m2mPacket);
 		} else {
-			TcpClient tcpClient = new TcpClient();
-			String[] splitStrings=spilitString(server);
-			tcpClient.connectionOne(splitStrings[0], Integer.valueOf(splitStrings[1]));
-			ipAndChannels.put(server, tcpClient.getChannel());
-			tcpClient.write(m2mPacket);
+			try {
+				TcpClient tcpClient = new TcpClient();
+				String[] splitStrings=spilitString(server);
+				tcpClient.connectionOne("localhost", Integer.valueOf(splitStrings[1]));
+				
+				tcpClient.write(m2mPacket);
+				ipAndChannels.put(server, tcpClient.getChannel());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
 
 		}
 		return false;
@@ -119,11 +128,11 @@ public class PacketServerChannelHandler extends
     	long myServerId=networkPool.getServerPosition().get(self);
     	long handlerServerId=networkPool.getServerPosition().get(server);
     	long serverSize=networkPool.getServerPosition().size();
-    	long distance=Math.abs(myServerId-handlerServerId);
-    	if(distance>serverSize/2){
-    		distance=distance-serverSize/2;
+    	long distance=myServerId-handlerServerId;
+    	if(distance>=0&&distance<replicationFactor){
+    		return true;
     	}
-    	if(distance<=(replicationFactor-1)){
+    	if(distance<0&&(distance+serverSize)<replicationFactor){
     		return true;
     	}
     	return false;

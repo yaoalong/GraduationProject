@@ -30,7 +30,6 @@ public class ResourceReflectionTest {
 		m2mDataNode.setZxid(999L);
 		m2mDataNode.setData(1331);
 		byte[] bytes=ResourceReflection.serializeKryo(m2mDataNode);
-		System.out.println("长度是:"+bytes.length);
 	}
 
 }

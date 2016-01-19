@@ -85,8 +85,8 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 	LeaderElectionBean jmxLeaderElectionBean;
 	QuorumCnxManager qcm;
 	M2MDataBase m2mDataBase;
-    RegisterIntoZooKeeper registerIntoZooKeeper;
-    String myIp;
+	RegisterIntoZooKeeper registerIntoZooKeeper;
+	String myIp;
 	/*
 	 * ZKDatabase is a top level member of quorumpeer which will be used in all
 	 * the zookeeperservers instantiated later. Also, it is created once on
@@ -94,20 +94,15 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 	 */
 	private ZKDatabase zkDb;
 
-	
-	
-	private boolean isStart=false;
-	
+	private boolean isStart = false;
+
 	ZooKeeper_Monitor zooKeeper_Monitor;
-	
+
 	/**
 	 * 它所负责的zab server对应的ip
 	 */
-	private String zookeeperServerString;
-	
-	
-	
-	
+	private String handleIp;
+
 	public static class QuorumServer {
 		public QuorumServer(long id, InetSocketAddress addr,
 				InetSocketAddress electionAddr) {
@@ -298,8 +293,6 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 	 */
 	protected boolean quorumListenOnAllIPs = false;
 
-	
-
 	private ServerState state = ServerState.LOOKING;
 
 	public synchronized void setPeerState(ServerState newState) {
@@ -315,7 +308,7 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 	/**
 	 * 我自己的本地addr
 	 */
-	private InetSocketAddress myQuorumAddr; 
+	private InetSocketAddress myQuorumAddr;
 
 	public InetSocketAddress getQuorumAddress() {
 		return myQuorumAddr;
@@ -335,12 +328,11 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 		quorumStats = new QuorumStats(this);
 	}
 
-	
-	
-	public QuorumPeer(Boolean isStart){
-	   this();
-	   this.isStart=isStart;
+	public QuorumPeer(Boolean isStart) {
+		this();
+		this.isStart = isStart;
 	}
+
 	/**
 	 * For backward compatibility purposes, we instantiate QuorumMaj by default.
 	 */
@@ -369,7 +361,8 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 		this.syncLimit = syncLimit;
 		this.quorumListenOnAllIPs = quorumListenOnAllIPs;
 		this.logFactory = new FileTxnSnapLog(dataLogDir, dataDir);
-		this.zkDb = new ZKDatabase(null,m2mDataBase,myIp+":"+(cnxnFactory.getLocalPort()));
+		this.zkDb = new ZKDatabase(null, m2mDataBase, myIp + ":"
+				+ (cnxnFactory.getLocalPort()));
 		this.m2mDataBase = new M2MDataBaseImpl();
 		if (quorumConfig == null)
 			this.quorumConfig = new QuorumMaj(countParticipants(quorumPeers));
@@ -385,22 +378,24 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 	public synchronized void start() {
 		startRegisterAndMonitor();
 		loadDataBase();
-	
+
 		startLeaderElection();
 		super.start();
 	}
+
 	/**
-	 *注册 并监控ZooKeeper信息
+	 * 注册 并监控ZooKeeper信息
 	 */
-    public void startRegisterAndMonitor(){
-    	if(isStart==true){
+	public void startRegisterAndMonitor() {
+		if (isStart == true) {
 			try {
-				registerIntoZooKeeper.register(myIp+":"+(cnxnFactory.getLocalPort()));
+				registerIntoZooKeeper.register(myIp + ":"
+						+ (cnxnFactory.getLocalPort()));
 			} catch (IOException | KeeperException | InterruptedException e) {
 				e.printStackTrace();
 			}
 			registerIntoZooKeeper.start();
-			if(registerIntoZooKeeper!=null){
+			if (registerIntoZooKeeper != null) {
 				try {
 					registerIntoZooKeeper.join();
 				} catch (InterruptedException e) {
@@ -408,19 +403,19 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 					e.printStackTrace();
 				}
 			}
-			try{
+			try {
 				zooKeeper_Monitor.start();
-		    	cnxnFactory.start();
-			}
-			catch(Exception ex){
+				cnxnFactory.start();
+			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
 		}
-    	
-    }
-    /**
-     * 将Zxid写入文件中
-     */
+
+	}
+
+	/**
+	 * 将Zxid写入文件中
+	 */
 	private void loadDataBase() {
 		File updating = new File(getTxnFactory().getSnapDir(),
 				UPDATING_EPOCH_FILENAME);
@@ -452,7 +447,7 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 						CURRENT_EPOCH_FILENAME
 								+ " not found! Creating with a reasonable default of {}. This should only happen when you are upgrading your installation",
 						currentEpoch);
-				//writeLongToFile(CURRENT_EPOCH_FILENAME, currentEpoch);
+				// writeLongToFile(CURRENT_EPOCH_FILENAME, currentEpoch);
 			}
 			if (epochOfZxid > currentEpoch) {
 				throw new IOException("The current epoch, "
@@ -472,21 +467,17 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 						acceptedEpoch);
 				writeLongToFile(ACCEPTED_EPOCH_FILENAME, acceptedEpoch);
 			}
-//			if (acceptedEpoch < currentEpoch) {
-//				throw new IOException("The current epoch, "
-//						+ ZxidUtils.zxidToString(currentEpoch)
-//						+ " is less than the accepted epoch, "
-//						+ ZxidUtils.zxidToString(acceptedEpoch));
-//			}
+			// if (acceptedEpoch < currentEpoch) {
+			// throw new IOException("The current epoch, "
+			// + ZxidUtils.zxidToString(currentEpoch)
+			// + " is less than the accepted epoch, "
+			// + ZxidUtils.zxidToString(acceptedEpoch));
+			// }
 		} catch (IOException ie) {
 			LOG.error("Unable to load database on disk", ie);
 			throw new RuntimeException("Unable to run quorum server ", ie);
 		}
 	}
-
-
-
-
 
 	synchronized public void startLeaderElection() {
 		try {
@@ -642,7 +633,7 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 			MBeanRegistry.getInstance().register(jmxQuorumBean, null);
 			for (QuorumServer s : getView().values()) {
 				ZKMBeanInfo p;
-				if (getId() == s.id&&isStart==true) {
+				if (getId() == s.id && isStart == true) {
 					p = jmxLocalPeerBean = new LocalPeerBean(this);
 					try {
 						MBeanRegistry.getInstance().register(p, jmxQuorumBean);
@@ -684,7 +675,7 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 				case FOLLOWING:
 					try {
 						LOG.info("FOLLOWING");
-						System.out.println("开始启动:"+isStart);
+						System.out.println("开始启动:" + isStart);
 						setFollower(makeFollower(logFactory));
 						follower.followLeader();
 					} catch (Exception e) {
@@ -1124,17 +1115,19 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 
 	public void setCurrentEpoch(long e) throws IOException {
 		currentEpoch = e;
-		//writeLongToFile(CURRENT_EPOCH_FILENAME, e);
+		// writeLongToFile(CURRENT_EPOCH_FILENAME, e);
 
 	}
+
 	/**
 	 * 不用再向文件里面写入epoch
+	 * 
 	 * @param e
 	 * @throws IOException
 	 */
 	public void setAcceptedEpoch(long e) throws IOException {
 		acceptedEpoch = e;
-		//writeLongToFile(ACCEPTED_EPOCH_FILENAME, e);
+		// writeLongToFile(ACCEPTED_EPOCH_FILENAME, e);
 	}
 
 	/**
@@ -1163,7 +1156,8 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 		return registerIntoZooKeeper;
 	}
 
-	public void setRegisterIntoZooKeeper(RegisterIntoZooKeeper registerIntoZooKeeper) {
+	public void setRegisterIntoZooKeeper(
+			RegisterIntoZooKeeper registerIntoZooKeeper) {
 		this.registerIntoZooKeeper = registerIntoZooKeeper;
 	}
 
@@ -1186,13 +1180,12 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
 	public void setClientPort(Integer clientPort) {
 	}
 
-	public String getZookeeperServerString() {
-		return zookeeperServerString;
+	public String getHandleIp() {
+		return handleIp;
 	}
 
-	public void setZookeeperServerString(String zookeeperServerString) {
-		this.zookeeperServerString = zookeeperServerString;
+	public void setHandleIp(String handleIp) {
+		this.handleIp = handleIp;
 	}
-	
 
 }

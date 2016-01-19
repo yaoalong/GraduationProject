@@ -455,7 +455,7 @@ public class Learner {
 						self.setCurrentEpoch(newEpoch);
 					}
 					self.cnxnFactory.addZooKeeperServer(
-							self.getZookeeperServerString(), zk);
+							self.getHandleIp(), zk);
 					break outerLoop;
 				case Leader.NEWLEADER: // it will be NEWLEADER in v1.0
 					// Create updatingEpoch file and remove it after current
@@ -553,7 +553,7 @@ public class Learner {
 	 */
 	public void shutdown() {
 		// set the zookeeper server to null
-		self.cnxnFactory.removeZookeeper(self.getZookeeperServerString());
+		self.cnxnFactory.removeZookeeper(self.getHandleIp());
 		// clear all the connections
 		self.cnxnFactory.closeAll();
 		// shutdown previous zookeeper

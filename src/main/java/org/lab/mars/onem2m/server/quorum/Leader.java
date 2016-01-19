@@ -449,7 +449,7 @@ public class Leader {
 			 */
 			if (!System.getProperty("zookeeper.leaderServes", "yes").equals(
 					"no")) {
-				self.cnxnFactory.addZooKeeperServer(self.getZookeeperServerString(), zk);;
+				self.cnxnFactory.addZooKeeperServer(self.getHandleIp(), zk);;
 			}
 			// Everything is a go, simply start counting the ticks
 			// WARNING: I couldn't find any wait statement on a synchronized
@@ -521,7 +521,7 @@ public class Leader {
 		}
 
 		// NIO should not accept conenctions
-		self.cnxnFactory.removeZookeeper(self.getZookeeperServerString());
+		self.cnxnFactory.removeZookeeper(self.getHandleIp());
 		try {
 			ss.close();
 		} catch (IOException e) {

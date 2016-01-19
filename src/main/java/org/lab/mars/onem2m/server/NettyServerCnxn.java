@@ -12,6 +12,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -615,9 +616,14 @@ public class NettyServerCnxn extends ServerCnxn {
 	public void receiveMessage(ChannelHandlerContext ctx, M2mPacket m2mPacket) {
 		String server = networkPool.getSock(m2mPacket.getM2mRequestHeader()
 				.getKey());
-		if (zookeeperServers.containsKey(server)) {
-			zookeeperServers.get(server).processPacket(ctx, m2mPacket);
+		System.out.println("要处理的server:"+server);
+		for(Entry<String, ZooKeeperServer> entry:zookeeperServers.entrySet()){
+			System.out.println("ent"+entry.getKey());
 		}
+		while(!zookeeperServers.containsKey(server)){
+			server=networkPool.getPositionToServer().get(networkPool.getServerPosition().get(server)+1L%networkPool.getPositionToServer().size());
+		}
+			zookeeperServers.get(server).processPacket(ctx, m2mPacket);
 	}
 
 	@Override

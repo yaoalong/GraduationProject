@@ -33,15 +33,14 @@ public class PacketClientChannelHandler extends
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) {
 		// Send the first message if this handler is a client-side handler.
-		ctx.writeAndFlush(m2mPacket);
-		System.out.println("发送成功");
+		//ctx.writeAndFlush(m2mPacket);
+		//System.out.println("发送成功");
 	}
 
 	@Override
 	public void channelRead0(ChannelHandlerContext ctx, Object msg) {
 		// Echo back the received object to the server.
 		System.out.println("接收到了消息");
-		//ctx.channel().writeAndFlush(m2mPacket);
 	}
 
 	@Override

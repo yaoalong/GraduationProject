@@ -279,15 +279,20 @@ public class FastLeaderElection implements Election {
 
 							// State of peer that sent this message
 							QuorumPeer.ServerState ackstate = QuorumPeer.ServerState.LOOKING;
+							
+						
 							switch (response.buffer.getInt()) {
 							case 0:
 								ackstate = QuorumPeer.ServerState.LOOKING;
+								System.out.println("状态是寻找");
 								break;
 							case 1:
 								ackstate = QuorumPeer.ServerState.FOLLOWING;
+								System.out.println("状态是Following");
 								break;
 							case 2:
 								ackstate = QuorumPeer.ServerState.LEADING;
+								System.out.println("状态是Leading");
 								break;
 							case 3:
 								ackstate = QuorumPeer.ServerState.OBSERVING;
@@ -332,6 +337,8 @@ public class FastLeaderElection implements Election {
 							 */
 
 							if (self.getPeerState() == QuorumPeer.ServerState.LOOKING) {
+								System.out.println("添加le ");
+								printNotification(n);
 								recvqueue.offer(n);
 
 								/*

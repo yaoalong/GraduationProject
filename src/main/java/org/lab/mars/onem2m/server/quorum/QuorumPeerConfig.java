@@ -427,9 +427,6 @@ public class QuorumPeerConfig {
 	 *
 	 */
 	public void setAllReplicationServers() {
-		if(isTemporyAdd==true){
-			return;
-		}
 		networkPool = new NetworkPool();
 	    
 		 List<String> serversStrings = new ArrayList<String>();
@@ -443,38 +440,73 @@ public class QuorumPeerConfig {
 		networkPool.initialize();
 		Long myIdInRing = networkPool.getServerPosition().get(myIp+":"+clientPort);
 		List<String> list = new ArrayList<>();
-		for (long i = 0; i < replication_factor; i++) {
+		if(isTemporyAdd){
 
-			HashMap<Long, QuorumServer> map = new HashMap<Long, QuorumServer>();
-			for (int j = 0; j < replication_factor; j++) {
-				String leftServer = networkPool
-						.getPositionToServer()
-						.get(((myIdInRing - (replication_factor - 1 - j - i)) + serversStrings
-								.size()) % serversStrings.size());// 最左边
-				Long sid = arrayList.get(leftServer);// 找出对应的sid;
-				QuorumServer quorumServer = servers.get(sid);
-				String address = quorumServer.addr.getAddress()
-						.getHostAddress();
-				
-				Integer firstPort = quorumServer.addr.getPort();
-				Integer secondPort = quorumServer.electionAddr.getPort();
-				InetSocketAddress firstInetSocketAddress = new InetSocketAddress(
-						address, firstPort - j);
-				InetSocketAddress secondInetSocketAddress = new InetSocketAddress(
-						address, secondPort - j);
-				QuorumServer myQuorumServer = new QuorumServer(sid,
-						firstInetSocketAddress, secondInetSocketAddress,
-						LearnerType.PARTICIPANT);
-				map.put(sid, myQuorumServer);
-				if (j == 0) {
-					list.add(leftServer);
+				HashMap<Long, QuorumServer> map = new HashMap<Long, QuorumServer>();
+				for (int j = 0; j < replication_factor+1; j++) {
+					String leftServer = networkPool
+							.getPositionToServer()
+							.get(((myIdInRing + j) + serversStrings
+									.size()) % serversStrings.size());// 最左边
+					Long sid = arrayList.get(leftServer);// 找出对应的sid;
+					
+					QuorumServer quorumServer = servers.get(sid);
+					String address = quorumServer.addr.getAddress()
+							.getHostAddress();
+					
+					Integer firstPort = quorumServer.addr.getPort();
+					Integer secondPort = quorumServer.electionAddr.getPort();
+					InetSocketAddress firstInetSocketAddress = new InetSocketAddress(
+							address, j==0?firstPort:firstPort-j+1);
+					InetSocketAddress secondInetSocketAddress = new InetSocketAddress(
+							address,j==0?secondPort:secondPort-j+1);
+					QuorumServer myQuorumServer = new QuorumServer(sid,
+							firstInetSocketAddress, secondInetSocketAddress,
+							LearnerType.PARTICIPANT);
+					map.put(sid, myQuorumServer);
+					if (j == 0) {
+						list.add(leftServer);
+					}
+
 				}
 
-			}
-
-			positionToServers.put(i, map);
-
+				positionToServers.put(0L, map);
 		}
+		else{
+			for (long i = 0; i < replication_factor; i++) {
+
+				HashMap<Long, QuorumServer> map = new HashMap<Long, QuorumServer>();
+				for (int j = 0; j < replication_factor; j++) {
+					String leftServer = networkPool
+							.getPositionToServer()
+							.get(((myIdInRing - (replication_factor - 1 - j - i)) + serversStrings
+									.size()) % serversStrings.size());// 最左边
+					Long sid = arrayList.get(leftServer);// 找出对应的sid;
+					QuorumServer quorumServer = servers.get(sid);
+					String address = quorumServer.addr.getAddress()
+							.getHostAddress();
+					
+					Integer firstPort = quorumServer.addr.getPort();
+					Integer secondPort = quorumServer.electionAddr.getPort();
+					InetSocketAddress firstInetSocketAddress = new InetSocketAddress(
+							address, firstPort - j);
+					InetSocketAddress secondInetSocketAddress = new InetSocketAddress(
+							address, secondPort - j);
+					QuorumServer myQuorumServer = new QuorumServer(sid,
+							firstInetSocketAddress, secondInetSocketAddress,
+							LearnerType.PARTICIPANT);
+					map.put(sid, myQuorumServer);
+					if (j == 0) {
+						list.add(leftServer);
+					}
+
+				}
+
+				positionToServers.put(i, map);
+
+			}
+		}
+	
 
 		m2mQuorumServers.setPositionToServers(positionToServers);
 		m2mQuorumServers.setServers(list);
