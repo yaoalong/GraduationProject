@@ -18,48 +18,45 @@
 
 package org.lab.mars.onem2m.server.util;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.OperatingSystemMXBean;
-import java.lang.management.RuntimeMXBean;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
+import java.lang.management.RuntimeMXBean;
+import java.lang.reflect.Method;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.lang.reflect.Method;
 
 /**
  * This class is a wrapper for the implementation of
- * com.sun.management.UnixOperatingSystemMXBean
- * It will decide to use the sun api or its own implementation
- * depending on the runtime (vendor) used.
+ * com.sun.management.UnixOperatingSystemMXBean It will decide to use the sun
+ * api or its own implementation depending on the runtime (vendor) used.
  */
-public class OSMXBean
-{
+public class OSMXBean {
     static final Logger LOG = LoggerFactory.getLogger(OSMXBean.class);
 
     private OperatingSystemMXBean osMbean;
 
-    private static final boolean ibmvendor =
-        System.getProperty("java.vendor").contains("IBM");
-    private static final boolean windows = 
-        System.getProperty("os.name").startsWith("Windows");
-    private static final boolean linux =
-        System.getProperty("os.name").startsWith("Linux");
+    private static final boolean ibmvendor = System.getProperty("java.vendor")
+            .contains("IBM");
+    private static final boolean windows = System.getProperty("os.name")
+            .startsWith("Windows");
+    private static final boolean linux = System.getProperty("os.name")
+            .startsWith("Linux");
 
     /**
      * Constructor. Get the running Operating System instance
      */
-    public OSMXBean () {
+    public OSMXBean() {
         this.osMbean = ManagementFactory.getOperatingSystemMXBean();
     }
- 
+
     /**
-     * Check if the OS is unix. If using the IBM java runtime, this
-     * will only work for linux.
+     * Check if the OS is unix. If using the IBM java runtime, this will only
+     * work for linux.
      * 
      * @return whether this is unix or not.
      */
@@ -71,56 +68,60 @@ public class OSMXBean
     }
 
     /**
-     * Load the implementation of UnixOperatingSystemMXBean for sun jvm
-     * and runs the desired method. 
-     * @param mBeanMethodName : method to run from the interface UnixOperatingSystemMXBean
+     * Load the implementation of UnixOperatingSystemMXBean for sun jvm and runs
+     * the desired method.
+     * 
+     * @param mBeanMethodName
+     *            : method to run from the interface UnixOperatingSystemMXBean
      * @return the method result
      */
-    private Long getOSUnixMXBeanMethod (String mBeanMethodName)
-    {
+    private Long getOSUnixMXBeanMethod(String mBeanMethodName) {
         Object unixos;
         Class<?> classRef;
         Method mBeanMethod;
 
         try {
-            classRef = Class.forName("com.sun.management.UnixOperatingSystemMXBean");
+            classRef = Class
+                    .forName("com.sun.management.UnixOperatingSystemMXBean");
             if (classRef.isInstance(osMbean)) {
                 mBeanMethod = classRef.getDeclaredMethod(mBeanMethodName,
-                new Class[0]);
+                        new Class[0]);
                 unixos = classRef.cast(osMbean);
-                return (Long)mBeanMethod.invoke(unixos);
+                return (Long) mBeanMethod.invoke(unixos);
             }
-        } catch(Exception e) {
-            LOG.warn("Not able to load class or method for com.sun.managment.UnixOperatingSystemMXBean.", e);
+        } catch (Exception e) {
+            LOG.warn(
+                    "Not able to load class or method for com.sun.managment.UnixOperatingSystemMXBean.",
+                    e);
         }
         return null;
     }
 
     /**
-     * Get the number of opened filed descriptor for the runtime jvm.
-     * If sun java, it will use the com.sun.management interfaces.
-     * Otherwise, this methods implements it (linux only).  
+     * Get the number of opened filed descriptor for the runtime jvm. If sun
+     * java, it will use the com.sun.management interfaces. Otherwise, this
+     * methods implements it (linux only).
+     * 
      * @return number of open file descriptors for the jvm
      */
-    public long getOpenFileDescriptorCount() 
-    {
+    public long getOpenFileDescriptorCount() {
         Long ofdc;
-    
+
         if (!ibmvendor) {
             ofdc = getOSUnixMXBeanMethod("getOpenFileDescriptorCount");
-            return (ofdc != null ? ofdc.longValue () : -1);
+            return (ofdc != null ? ofdc.longValue() : -1);
         }
-        
+
         try {
-            //need to get the PID number of the process first
+            // need to get the PID number of the process first
             RuntimeMXBean rtmbean = ManagementFactory.getRuntimeMXBean();
             String rtname = rtmbean.getName();
             String[] pidhost = rtname.split("@");
 
-            //using linux bash commands to retrieve info
+            // using linux bash commands to retrieve info
             Process p = Runtime.getRuntime().exec(
                     new String[] { "bash", "-c",
-                    "ls /proc/" + pidhost[0] + "/fdinfo | wc -l" });
+                            "ls /proc/" + pidhost[0] + "/fdinfo | wc -l" });
             InputStream in = p.getInputStream();
             BufferedReader output = new BufferedReader(
                     new InputStreamReader(in));
@@ -142,22 +143,22 @@ public class OSMXBean
     }
 
     /**
-     * Get the number of the maximum file descriptors the system can use.
-     * If sun java, it will use the com.sun.management interfaces.
-     * Otherwise, this methods implements it (linux only).  
+     * Get the number of the maximum file descriptors the system can use. If sun
+     * java, it will use the com.sun.management interfaces. Otherwise, this
+     * methods implements it (linux only).
+     * 
      * @return max number of file descriptors the operating system can use.
      */
-    public long getMaxFileDescriptorCount()
-    {
+    public long getMaxFileDescriptorCount() {
         Long mfdc;
 
         if (!ibmvendor) {
             mfdc = getOSUnixMXBeanMethod("getMaxFileDescriptorCount");
-            return (mfdc != null ? mfdc.longValue () : -1);
+            return (mfdc != null ? mfdc.longValue() : -1);
         }
-        
+
         try {
-            //using linux bash commands to retrieve info
+            // using linux bash commands to retrieve info
             Process p = Runtime.getRuntime().exec(
                     new String[] { "bash", "-c", "ulimit -n" });
             InputStream in = p.getInputStream();
@@ -178,5 +179,5 @@ public class OSMXBean
             LOG.warn("Not able to get the max number of file descriptors", ie);
         }
         return -1;
-    }  
+    }
 }

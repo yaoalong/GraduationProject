@@ -19,13 +19,9 @@
 package org.lab.mars.onem2m.server.quorum;
 
 import org.lab.mars.onem2m.server.quorum.QuorumPeer.ServerState;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 public class Vote {
-    private static final Logger LOG = LoggerFactory.getLogger(Vote.class);
-    
     public Vote(long id, 
                     long zxid) {
         this.version = 0x0;

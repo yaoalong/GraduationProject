@@ -1,12 +1,11 @@
 package org.lab.mars.onem2m.network.handler;
 
-import java.io.IOException;
-
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
+import java.io.IOException;
+
 import org.lab.mars.onem2m.KeeperException;
-import org.lab.mars.onem2m.proto.M2mPacket;
 import org.lab.mars.onem2m.test.Test;
 
 
@@ -15,15 +14,13 @@ import org.lab.mars.onem2m.test.Test;
  */
 public class PacketClientChannelHandler extends
 		SimpleChannelInboundHandler<Object> {
-	private M2mPacket m2mPacket;
-   
 	/**
 	 * Creates a client-side handler.
 	 */
 	public PacketClientChannelHandler() throws KeeperException,
 			InterruptedException {
 		try {
-			m2mPacket=Test.createM2mCreatePacket();
+			Test.createM2mCreatePacket();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

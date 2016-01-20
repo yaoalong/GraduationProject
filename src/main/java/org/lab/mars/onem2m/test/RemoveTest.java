@@ -10,7 +10,8 @@ import java.io.PrintWriter;
 
 public class RemoveTest {
 
-    public void removeLinesStartsWith(String file, String startsWith, Boolean keepOrigFile) {
+    public void removeLinesStartsWith(String file, String startsWith,
+            Boolean keepOrigFile) {
         String line = null;
         BufferedReader rd = null;
         PrintWriter wt = null;
@@ -29,7 +30,7 @@ public class RemoveTest {
 
             tempFile = new File(file + "_OUTPUT");
 
-            //Read input file and Write to tempFile
+            // Read input file and Write to tempFile
 
             rd = new BufferedReader(new FileReader(inputFile));
             wt = new PrintWriter(new FileWriter(tempFile));
@@ -69,8 +70,9 @@ public class RemoveTest {
         }
 
     }
-    public static void main(String args[]){
-    	RemoveTest removeTest=new RemoveTest();
-    	removeTest.removeLinesStartsWith("yaoalong.txt", "123", false);
+
+    public static void main(String args[]) {
+        RemoveTest removeTest = new RemoveTest();
+        removeTest.removeLinesStartsWith("yaoalong.txt", "123", false);
     }
 }

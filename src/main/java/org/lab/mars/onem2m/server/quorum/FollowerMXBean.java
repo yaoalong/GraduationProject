@@ -28,12 +28,12 @@ public interface FollowerMXBean extends ZooKeeperServerMXBean {
      * @return socket address
      */
     public String getQuorumAddress();
-    
+
     /**
      * @return last queued zxid
      */
     public String getLastQueuedZxid();
-    
+
     /**
      * @return count of pending revalidations
      */

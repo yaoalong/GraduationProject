@@ -29,13 +29,14 @@ public class VerGen {
     private static final String TYPE_NAME = "Info";
 
     static void printUsage() {
-        System.out.print("Usage:\tjava  -cp <classpath> org.apache.zookeeper."
-                + "version.util.VerGen maj.min.micro[-qualifier] rev buildDate");
+        System.out
+                .print("Usage:\tjava  -cp <classpath> org.apache.zookeeper."
+                        + "version.util.VerGen maj.min.micro[-qualifier] rev buildDate");
         System.exit(1);
     }
 
-    public static void generateFile(File outputDir, Version version, int rev, String buildDate)
-    {
+    public static void generateFile(File outputDir, Version version, int rev,
+            String buildDate) {
         String path = PACKAGE_NAME.replaceAll("\\.", "/");
         File pkgdir = new File(outputDir, path);
         if (!pkgdir.exists()) {
@@ -78,11 +79,11 @@ public class VerGen {
             w.write("public interface " + TYPE_NAME + " {\n");
             w.write("    public static final int MAJOR=" + version.maj + ";\n");
             w.write("    public static final int MINOR=" + version.min + ";\n");
-            w.write("    public static final int MICRO=" + version.micro + ";\n");
-            w.write("    public static final String QUALIFIER="
-                    + (version.qualifier == null ? null :
-                        "\"" + version.qualifier + "\"")
+            w.write("    public static final int MICRO=" + version.micro
                     + ";\n");
+            w.write("    public static final String QUALIFIER="
+                    + (version.qualifier == null ? null : "\""
+                            + version.qualifier + "\"") + ";\n");
             if (rev < 0) {
                 System.out.println("Unknown REVISION number, using " + rev);
             }
@@ -116,7 +117,8 @@ public class VerGen {
     public static Version parseVersionString(String input) {
         Version result = new Version();
 
-        Pattern p = Pattern.compile("^(\\d+)\\.(\\d+)\\.(\\d+)((\\.\\d+)*)(-(.+))?$");
+        Pattern p = Pattern
+                .compile("^(\\d+)\\.(\\d+)\\.(\\d+)((\\.\\d+)*)(-(.+))?$");
         Matcher m = p.matcher(input);
 
         if (!m.matches()) {
@@ -137,15 +139,16 @@ public class VerGen {
      * Emits a org.apache.zookeeper.version.Info interface file with version and
      * revision information constants set to the values passed in as command
      * line parameters. The file is created in the current directory. <br>
-     * Usage: java org.apache.zookeeper.version.util.VerGen maj.min.micro[-qualifier]
-     * rev buildDate
+     * Usage: java org.apache.zookeeper.version.util.VerGen
+     * maj.min.micro[-qualifier] rev buildDate
      *
      * @param args
      *            <ul>
      *            <li>maj - major version number
      *            <li>min - minor version number
      *            <li>micro - minor minor version number
-     *            <li>qualifier - optional qualifier (dash followed by qualifier text)
+     *            <li>qualifier - optional qualifier (dash followed by qualifier
+     *            text)
      *            <li>rev - current SVN revision number
      *            <li>buildDate - date the build
      *            </ul>
@@ -156,8 +159,8 @@ public class VerGen {
         try {
             Version version = parseVersionString(args[0]);
             if (version == null) {
-                System.err.println(
-                        "Invalid version number format, must be \"x.y.z(-.*)?\"");
+                System.err
+                        .println("Invalid version number format, must be \"x.y.z(-.*)?\"");
                 System.exit(1);
             }
             int rev;
@@ -168,8 +171,8 @@ public class VerGen {
             }
             generateFile(new File("."), version, rev, args[2]);
         } catch (NumberFormatException e) {
-            System.err.println(
-                    "All version-related parameters must be valid integers!");
+            System.err
+                    .println("All version-related parameters must be valid integers!");
             throw e;
         }
     }

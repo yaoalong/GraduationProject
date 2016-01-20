@@ -31,7 +31,7 @@ public class FollowerBean extends ZooKeeperServerBean implements FollowerMXBean 
         super(zks);
         this.follower = follower;
     }
-    
+
     public String getName() {
         return "Follower";
     }
@@ -39,11 +39,11 @@ public class FollowerBean extends ZooKeeperServerBean implements FollowerMXBean 
     public String getQuorumAddress() {
         return follower.sock.toString();
     }
-    
+
     public String getLastQueuedZxid() {
         return "0x" + Long.toHexString(follower.getLastQueued());
     }
-    
+
     public int getPendingRevalidationCount() {
         return follower.getPendingRevalidationsCount();
     }

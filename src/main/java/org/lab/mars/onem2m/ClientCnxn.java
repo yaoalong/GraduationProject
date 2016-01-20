@@ -85,19 +85,20 @@ import org.slf4j.LoggerFactory;
 public class ClientCnxn {
     private static final Logger LOG = LoggerFactory.getLogger(ClientCnxn.class);
 
-    private static final String ZK_SASL_CLIENT_USERNAME =
-        "zookeeper.sasl.client.username";
+    private static final String ZK_SASL_CLIENT_USERNAME = "zookeeper.sasl.client.username";
 
-    /** This controls whether automatic watch resetting is enabled.
-     * Clients automatically reset watches during session reconnect, this
-     * option allows the client to turn off this behavior by setting
-     * the environment variable "zookeeper.disableAutoWatchReset" to "true" */
+    /**
+     * This controls whether automatic watch resetting is enabled. Clients
+     * automatically reset watches during session reconnect, this option allows
+     * the client to turn off this behavior by setting the environment variable
+     * "zookeeper.disableAutoWatchReset" to "true"
+     */
     private static boolean disableAutoWatchReset;
     static {
         // this var should not be public, but otw there is no easy way
         // to test
-        disableAutoWatchReset =
-            Boolean.getBoolean("zookeeper.disableAutoWatchReset");
+        disableAutoWatchReset = Boolean
+                .getBoolean("zookeeper.disableAutoWatchReset");
         if (LOG.isDebugEnabled()) {
             LOG.debug("zookeeper.disableAutoWatchReset is "
                     + disableAutoWatchReset);
@@ -170,7 +171,7 @@ public class ClientCnxn {
      * operation)
      */
     private volatile boolean closing = false;
-    
+
     /**
      * A set of ZooKeeper hosts this client could connect to.
      */
@@ -191,7 +192,6 @@ public class ClientCnxn {
      */
     volatile boolean seenRwServerBefore = false;
 
-
     public ZooKeeperSaslClient zooKeeperSaslClient;
 
     public long getSessionId() {
@@ -210,19 +210,21 @@ public class ClientCnxn {
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        SocketAddress local = sendThread.getClientCnxnSocket().getLocalSocketAddress();
-        SocketAddress remote = sendThread.getClientCnxnSocket().getRemoteSocketAddress();
-        sb
-            .append("sessionid:0x").append(Long.toHexString(getSessionId()))
-            .append(" local:").append(local)
-            .append(" remoteserver:").append(remote)
-            .append(" lastZxid:").append(lastZxid)
-            .append(" xid:").append(xid)
-            .append(" sent:").append(sendThread.getClientCnxnSocket().getSentCount())
-            .append(" recv:").append(sendThread.getClientCnxnSocket().getRecvCount())
-            .append(" queuedpkts:").append(outgoingQueue.size())
-            .append(" pendingresp:").append(pendingQueue.size())
-            .append(" queuedevents:").append(eventThread.waitingEvents.size());
+        SocketAddress local = sendThread.getClientCnxnSocket()
+                .getLocalSocketAddress();
+        SocketAddress remote = sendThread.getClientCnxnSocket()
+                .getRemoteSocketAddress();
+        sb.append("sessionid:0x").append(Long.toHexString(getSessionId()))
+                .append(" local:").append(local).append(" remoteserver:")
+                .append(remote).append(" lastZxid:").append(lastZxid)
+                .append(" xid:").append(xid).append(" sent:")
+                .append(sendThread.getClientCnxnSocket().getSentCount())
+                .append(" recv:")
+                .append(sendThread.getClientCnxnSocket().getRecvCount())
+                .append(" queuedpkts:").append(outgoingQueue.size())
+                .append(" pendingresp:").append(pendingQueue.size())
+                .append(" queuedevents:")
+                .append(eventThread.waitingEvents.size());
 
         return sb.toString();
     }
@@ -258,15 +260,15 @@ public class ClientCnxn {
 
         /** Convenience ctor */
         Packet(RequestHeader requestHeader, ReplyHeader replyHeader,
-               Record request, Record response,
-               WatchRegistration watchRegistration) {
+                Record request, Record response,
+                WatchRegistration watchRegistration) {
             this(requestHeader, replyHeader, request, response,
-                 watchRegistration, false);
+                    watchRegistration, false);
         }
 
         Packet(RequestHeader requestHeader, ReplyHeader replyHeader,
-               Record request, Record response,
-               WatchRegistration watchRegistration, boolean readOnly) {
+                Record request, Record response,
+                WatchRegistration watchRegistration, boolean readOnly) {
 
             this.requestHeader = requestHeader;
             this.replyHeader = replyHeader;
@@ -323,26 +325,30 @@ public class ClientCnxn {
      * established until needed. The start() instance method must be called
      * subsequent to construction.
      *
-     * @param chrootPath - the chroot of this client. Should be removed from this Class in ZOOKEEPER-838
+     * @param chrootPath
+     *            - the chroot of this client. Should be removed from this Class
+     *            in ZOOKEEPER-838
      * @param hostProvider
-     *                the list of ZooKeeper servers to connect to
+     *            the list of ZooKeeper servers to connect to
      * @param sessionTimeout
-     *                the timeout for connections.
+     *            the timeout for connections.
      * @param zooKeeper
-     *                the zookeeper object that this connection is related to.
-     * @param watcher watcher for this connection
+     *            the zookeeper object that this connection is related to.
+     * @param watcher
+     *            watcher for this connection
      * @param clientCnxnSocket
-     *                the socket implementation used (e.g. NIO/Netty)
+     *            the socket implementation used (e.g. NIO/Netty)
      * @param canBeReadOnly
-     *                whether the connection is allowed to go to read-only
-     *                mode in case of partitioning
+     *            whether the connection is allowed to go to read-only mode in
+     *            case of partitioning
      * @throws IOException
      */
-    public ClientCnxn(String chrootPath, HostProvider hostProvider, int sessionTimeout, ZooKeeper zooKeeper,
-            ClientWatchManager watcher, ClientCnxnSocket clientCnxnSocket, boolean canBeReadOnly)
-            throws IOException {
+    public ClientCnxn(String chrootPath, HostProvider hostProvider,
+            int sessionTimeout, ZooKeeper zooKeeper,
+            ClientWatchManager watcher, ClientCnxnSocket clientCnxnSocket,
+            boolean canBeReadOnly) throws IOException {
         this(chrootPath, hostProvider, sessionTimeout, zooKeeper, watcher,
-             clientCnxnSocket, 0, new byte[16], canBeReadOnly);
+                clientCnxnSocket, 0, new byte[16], canBeReadOnly);
     }
 
     /**
@@ -350,24 +356,30 @@ public class ClientCnxn {
      * established until needed. The start() instance method must be called
      * subsequent to construction.
      *
-     * @param chrootPath - the chroot of this client. Should be removed from this Class in ZOOKEEPER-838
+     * @param chrootPath
+     *            - the chroot of this client. Should be removed from this Class
+     *            in ZOOKEEPER-838
      * @param hostProvider
-     *                the list of ZooKeeper servers to connect to
+     *            the list of ZooKeeper servers to connect to
      * @param sessionTimeout
-     *                the timeout for connections.
+     *            the timeout for connections.
      * @param zooKeeper
-     *                the zookeeper object that this connection is related to.
-     * @param watcher watcher for this connection
+     *            the zookeeper object that this connection is related to.
+     * @param watcher
+     *            watcher for this connection
      * @param clientCnxnSocket
-     *                the socket implementation used (e.g. NIO/Netty)
-     * @param sessionId session id if re-establishing session
-     * @param sessionPasswd session passwd if re-establishing session
+     *            the socket implementation used (e.g. NIO/Netty)
+     * @param sessionId
+     *            session id if re-establishing session
+     * @param sessionPasswd
+     *            session passwd if re-establishing session
      * @param canBeReadOnly
-     *                whether the connection is allowed to go to read-only
-     *                mode in case of partitioning
+     *            whether the connection is allowed to go to read-only mode in
+     *            case of partitioning
      * @throws IOException
      */
-    public ClientCnxn(String chrootPath, HostProvider hostProvider, int sessionTimeout, ZooKeeper zooKeeper,
+    public ClientCnxn(String chrootPath, HostProvider hostProvider,
+            int sessionTimeout, ZooKeeper zooKeeper,
             ClientWatchManager watcher, ClientCnxnSocket clientCnxnSocket,
             long sessionId, byte[] sessionPasswd, boolean canBeReadOnly) {
         this.zooKeeper = zooKeeper;
@@ -389,18 +401,23 @@ public class ClientCnxn {
 
     /**
      * tests use this to check on reset of watches
+     * 
      * @return if the auto reset of watches are disabled
      */
     public static boolean getDisableAutoResetWatch() {
         return disableAutoWatchReset;
     }
+
     /**
      * tests use this to set the auto reset
-     * @param b the value to set disable watches to
+     * 
+     * @param b
+     *            the value to set disable watches to
      */
     public static void setDisableAutoResetWatch(boolean b) {
         disableAutoWatchReset = b;
     }
+
     public void start() {
         sendThread.start();
         eventThread.start();
@@ -427,27 +444,27 @@ public class ClientCnxn {
 
     /**
      * Guard against creating "-EventThread-EventThread-EventThread-..." thread
-     * names when ZooKeeper object is being created from within a watcher.
-     * See ZOOKEEPER-795 for details.
+     * names when ZooKeeper object is being created from within a watcher. See
+     * ZOOKEEPER-795 for details.
      */
     private static String makeThreadName(String suffix) {
-        String name = Thread.currentThread().getName().
-            replaceAll("-EventThread", "");
+        String name = Thread.currentThread().getName()
+                .replaceAll("-EventThread", "");
         return name + suffix;
     }
 
     class EventThread extends Thread {
-        private final LinkedBlockingQueue<Object> waitingEvents =
-            new LinkedBlockingQueue<Object>();
+        private final LinkedBlockingQueue<Object> waitingEvents = new LinkedBlockingQueue<Object>();
 
-        /** This is really the queued session state until the event
-         * thread actually processes the event and hands it to the watcher.
-         * But for all intents and purposes this is the state.
+        /**
+         * This is really the queued session state until the event thread
+         * actually processes the event and hands it to the watcher. But for all
+         * intents and purposes this is the state.
          */
         private volatile KeeperState sessionState = KeeperState.Disconnected;
 
-       private volatile boolean wasKilled = false;
-       private volatile boolean isRunning = false;
+        private volatile boolean wasKilled = false;
+        private volatile boolean isRunning = false;
 
         EventThread() {
             super(makeThreadName("-EventThread"));
@@ -465,22 +482,23 @@ public class ClientCnxn {
             // materialize the watchers based on the event
             WatcherSetEventPair pair = new WatcherSetEventPair(
                     watcher.materialize(event.getState(), event.getType(),
-                            event.getPath()),
-                            event);
+                            event.getPath()), event);
             // queue the pair (watch set & event) for later processing
             waitingEvents.add(pair);
         }
 
-       public void queuePacket(Packet packet) {
-          if (wasKilled) {
-             synchronized (waitingEvents) {
-                if (isRunning) waitingEvents.add(packet);
-                else processEvent(packet);
-             }
-          } else {
-             waitingEvents.add(packet);
-          }
-       }
+        public void queuePacket(Packet packet) {
+            if (wasKilled) {
+                synchronized (waitingEvents) {
+                    if (isRunning)
+                        waitingEvents.add(packet);
+                    else
+                        processEvent(packet);
+                }
+            } else {
+                waitingEvents.add(packet);
+            }
+        }
 
         public void queueEventOfDeath() {
             waitingEvents.add(eventOfDeath);
@@ -488,131 +506,129 @@ public class ClientCnxn {
 
         @Override
         public void run() {
-           try {
-              isRunning = true;
-              while (true) {
-                 Object event = waitingEvents.take();
-                 if (event == eventOfDeath) {
-                    wasKilled = true;
-                 } else {
-                    processEvent(event);
-                 }
-                 if (wasKilled)
-                    synchronized (waitingEvents) {
-                       if (waitingEvents.isEmpty()) {
-                          isRunning = false;
-                          break;
-                       }
+            try {
+                isRunning = true;
+                while (true) {
+                    Object event = waitingEvents.take();
+                    if (event == eventOfDeath) {
+                        wasKilled = true;
+                    } else {
+                        processEvent(event);
                     }
-              }
-           } catch (InterruptedException e) {
-              LOG.error("Event thread exiting due to interruption", e);
-           }
+                    if (wasKilled)
+                        synchronized (waitingEvents) {
+                            if (waitingEvents.isEmpty()) {
+                                isRunning = false;
+                                break;
+                            }
+                        }
+                }
+            } catch (InterruptedException e) {
+                LOG.error("Event thread exiting due to interruption", e);
+            }
 
             LOG.info("EventThread shut down");
         }
 
-       private void processEvent(Object event) {
-          try {
-              if (event instanceof WatcherSetEventPair) {
-                  // each watcher will process the event
-                  WatcherSetEventPair pair = (WatcherSetEventPair) event;
-                  for (Watcher watcher : pair.watchers) {
-                      try {
-                          watcher.process(pair.event);
-                      } catch (Throwable t) {
-                          LOG.error("Error while calling watcher ", t);
-                      }
-                  }
-              } else {
-                  Packet p = (Packet) event;
-                  int rc = 0;
-                  String clientPath = p.clientPath;
-                  if (p.replyHeader.getErr() != 0) {
-                      rc = p.replyHeader.getErr();
-                  }
-                  if (p.cb == null) {
-                      LOG.warn("Somehow a null cb got to EventThread!");
-                  } else if (p.response instanceof ExistsResponse
-                          || p.response instanceof SetDataResponse
-                          || p.response instanceof SetACLResponse) {
-                      StatCallback cb = (StatCallback) p.cb;
-                      if (rc == 0) {
-                          if (p.response instanceof ExistsResponse) {
-                              cb.processResult(rc, clientPath, p.ctx,
-                                      ((ExistsResponse) p.response)
-                                              .getStat());
-                          } else if (p.response instanceof SetDataResponse) {
-                              cb.processResult(rc, clientPath, p.ctx,
-                                      ((SetDataResponse) p.response)
-                                              .getStat());
-                          } else if (p.response instanceof SetACLResponse) {
-                              cb.processResult(rc, clientPath, p.ctx,
-                                      ((SetACLResponse) p.response)
-                                              .getStat());
-                          }
-                      } else {
-                          cb.processResult(rc, clientPath, p.ctx, null);
-                      }
-                  } else if (p.response instanceof GetDataResponse) {
-                      DataCallback cb = (DataCallback) p.cb;
-                      GetDataResponse rsp = (GetDataResponse) p.response;
-                      if (rc == 0) {
-                          cb.processResult(rc, clientPath, p.ctx, rsp
-                                  .getData(), rsp.getStat());
-                      } else {
-                          cb.processResult(rc, clientPath, p.ctx, null,
-                                  null);
-                      }
-                  } else if (p.response instanceof GetACLResponse) {
-                      ACLCallback cb = (ACLCallback) p.cb;
-                      GetACLResponse rsp = (GetACLResponse) p.response;
-                      if (rc == 0) {
-                          cb.processResult(rc, clientPath, p.ctx, rsp
-                                  .getAcl(), rsp.getStat());
-                      } else {
-                          cb.processResult(rc, clientPath, p.ctx, null,
-                                  null);
-                      }
-                  } else if (p.response instanceof GetChildrenResponse) {
-                      ChildrenCallback cb = (ChildrenCallback) p.cb;
-                      GetChildrenResponse rsp = (GetChildrenResponse) p.response;
-                      if (rc == 0) {
-                          cb.processResult(rc, clientPath, p.ctx, rsp
-                                  .getChildren());
-                      } else {
-                          cb.processResult(rc, clientPath, p.ctx, null);
-                      }
-                  } else if (p.response instanceof GetChildren2Response) {
-                      Children2Callback cb = (Children2Callback) p.cb;
-                      GetChildren2Response rsp = (GetChildren2Response) p.response;
-                      if (rc == 0) {
-                          cb.processResult(rc, clientPath, p.ctx, rsp
-                                  .getChildren(), rsp.getStat());
-                      } else {
-                          cb.processResult(rc, clientPath, p.ctx, null, null);
-                      }
-                  } else if (p.response instanceof CreateResponse) {
-                      StringCallback cb = (StringCallback) p.cb;
-                      CreateResponse rsp = (CreateResponse) p.response;
-                      if (rc == 0) {
-                          cb.processResult(rc, clientPath, p.ctx,
-                                  (chrootPath == null
-                                          ? rsp.getPath()
-                                          : rsp.getPath()
-                                    .substring(chrootPath.length())));
-                      } else {
-                          cb.processResult(rc, clientPath, p.ctx, null);
-                      }
-                  } else if (p.cb instanceof VoidCallback) {
-                      VoidCallback cb = (VoidCallback) p.cb;
-                      cb.processResult(rc, clientPath, p.ctx);
-                  }
-              }
-          } catch (Throwable t) {
-              LOG.error("Caught unexpected throwable", t);
-          }
-       }
+        private void processEvent(Object event) {
+            try {
+                if (event instanceof WatcherSetEventPair) {
+                    // each watcher will process the event
+                    WatcherSetEventPair pair = (WatcherSetEventPair) event;
+                    for (Watcher watcher : pair.watchers) {
+                        try {
+                            watcher.process(pair.event);
+                        } catch (Throwable t) {
+                            LOG.error("Error while calling watcher ", t);
+                        }
+                    }
+                } else {
+                    Packet p = (Packet) event;
+                    int rc = 0;
+                    String clientPath = p.clientPath;
+                    if (p.replyHeader.getErr() != 0) {
+                        rc = p.replyHeader.getErr();
+                    }
+                    if (p.cb == null) {
+                        LOG.warn("Somehow a null cb got to EventThread!");
+                    } else if (p.response instanceof ExistsResponse
+                            || p.response instanceof SetDataResponse
+                            || p.response instanceof SetACLResponse) {
+                        StatCallback cb = (StatCallback) p.cb;
+                        if (rc == 0) {
+                            if (p.response instanceof ExistsResponse) {
+                                cb.processResult(rc, clientPath, p.ctx,
+                                        ((ExistsResponse) p.response).getStat());
+                            } else if (p.response instanceof SetDataResponse) {
+                                cb.processResult(rc, clientPath, p.ctx,
+                                        ((SetDataResponse) p.response)
+                                                .getStat());
+                            } else if (p.response instanceof SetACLResponse) {
+                                cb.processResult(rc, clientPath, p.ctx,
+                                        ((SetACLResponse) p.response).getStat());
+                            }
+                        } else {
+                            cb.processResult(rc, clientPath, p.ctx, null);
+                        }
+                    } else if (p.response instanceof GetDataResponse) {
+                        DataCallback cb = (DataCallback) p.cb;
+                        GetDataResponse rsp = (GetDataResponse) p.response;
+                        if (rc == 0) {
+                            cb.processResult(rc, clientPath, p.ctx,
+                                    rsp.getData(), rsp.getStat());
+                        } else {
+                            cb.processResult(rc, clientPath, p.ctx, null, null);
+                        }
+                    } else if (p.response instanceof GetACLResponse) {
+                        ACLCallback cb = (ACLCallback) p.cb;
+                        GetACLResponse rsp = (GetACLResponse) p.response;
+                        if (rc == 0) {
+                            cb.processResult(rc, clientPath, p.ctx,
+                                    rsp.getAcl(), rsp.getStat());
+                        } else {
+                            cb.processResult(rc, clientPath, p.ctx, null, null);
+                        }
+                    } else if (p.response instanceof GetChildrenResponse) {
+                        ChildrenCallback cb = (ChildrenCallback) p.cb;
+                        GetChildrenResponse rsp = (GetChildrenResponse) p.response;
+                        if (rc == 0) {
+                            cb.processResult(rc, clientPath, p.ctx,
+                                    rsp.getChildren());
+                        } else {
+                            cb.processResult(rc, clientPath, p.ctx, null);
+                        }
+                    } else if (p.response instanceof GetChildren2Response) {
+                        Children2Callback cb = (Children2Callback) p.cb;
+                        GetChildren2Response rsp = (GetChildren2Response) p.response;
+                        if (rc == 0) {
+                            cb.processResult(rc, clientPath, p.ctx,
+                                    rsp.getChildren(), rsp.getStat());
+                        } else {
+                            cb.processResult(rc, clientPath, p.ctx, null, null);
+                        }
+                    } else if (p.response instanceof CreateResponse) {
+                        StringCallback cb = (StringCallback) p.cb;
+                        CreateResponse rsp = (CreateResponse) p.response;
+                        if (rc == 0) {
+                            cb.processResult(
+                                    rc,
+                                    clientPath,
+                                    p.ctx,
+                                    (chrootPath == null ? rsp.getPath() : rsp
+                                            .getPath().substring(
+                                                    chrootPath.length())));
+                        } else {
+                            cb.processResult(rc, clientPath, p.ctx, null);
+                        }
+                    } else if (p.cb instanceof VoidCallback) {
+                        VoidCallback cb = (VoidCallback) p.cb;
+                        cb.processResult(rc, clientPath, p.ctx);
+                    }
+                }
+            } catch (Throwable t) {
+                LOG.error("Caught unexpected throwable", t);
+            }
+        }
     }
 
     private void finishPacket(Packet p) {
@@ -640,10 +656,12 @@ public class ClientCnxn {
             p.replyHeader.setErr(KeeperException.Code.AUTHFAILED.intValue());
             break;
         case CLOSED:
-            p.replyHeader.setErr(KeeperException.Code.SESSIONEXPIRED.intValue());
+            p.replyHeader
+                    .setErr(KeeperException.Code.SESSIONEXPIRED.intValue());
             break;
         default:
-            p.replyHeader.setErr(KeeperException.Code.CONNECTIONLOSS.intValue());
+            p.replyHeader
+                    .setErr(KeeperException.Code.CONNECTIONLOSS.intValue());
         }
         finishPacket(p);
     }
@@ -660,7 +678,7 @@ public class ClientCnxn {
         public EndOfStreamException(String msg) {
             super(msg);
         }
-        
+
         @Override
         public String toString() {
             return "EndOfStreamException: " + getMessage();
@@ -674,7 +692,7 @@ public class ClientCnxn {
             super(msg);
         }
     }
-    
+
     private static class SessionExpiredException extends IOException {
         private static final long serialVersionUID = -1388816932076193249L;
 
@@ -690,7 +708,7 @@ public class ClientCnxn {
             super(msg);
         }
     }
-    
+
     public static final int packetLen = Integer.getInteger("jute.maxbuffer",
             4096 * 1024);
 
@@ -701,7 +719,7 @@ public class ClientCnxn {
     class SendThread extends Thread {
         private long lastPingSentNs;
         private final ClientCnxnSocket clientCnxnSocket;
-        private Random r = new Random(System.nanoTime());        
+        private Random r = new Random(System.nanoTime());
         private boolean isFirstConnect = true;
 
         void readResponse(ByteBuffer incomingBuffer) throws IOException {
@@ -715,19 +733,20 @@ public class ClientCnxn {
                 // -2 is the xid for pings
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Got ping response for sessionid: 0x"
-                            + Long.toHexString(sessionId)
-                            + " after "
+                            + Long.toHexString(sessionId) + " after "
                             + ((System.nanoTime() - lastPingSentNs) / 1000000)
                             + "ms");
                 }
                 return;
             }
             if (replyHdr.getXid() == -4) {
-                // -4 is the xid for AuthPacket               
-                if(replyHdr.getErr() == KeeperException.Code.AUTHFAILED.intValue()) {
-                    state = States.AUTH_FAILED;                    
-                    eventThread.queueEvent( new WatchedEvent(Watcher.Event.EventType.None, 
-                            Watcher.Event.KeeperState.AuthFailed, null) );            		            		
+                // -4 is the xid for AuthPacket
+                if (replyHdr.getErr() == KeeperException.Code.AUTHFAILED
+                        .intValue()) {
+                    state = States.AUTH_FAILED;
+                    eventThread.queueEvent(new WatchedEvent(
+                            Watcher.Event.EventType.None,
+                            Watcher.Event.KeeperState.AuthFailed, null));
                 }
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Got auth sessionid:0x"
@@ -739,7 +758,7 @@ public class ClientCnxn {
                 // -1 means notification
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Got notification sessionid:0x"
-                        + Long.toHexString(sessionId));
+                            + Long.toHexString(sessionId));
                 }
                 WatcherEvent event = new WatcherEvent();
                 event.deserialize(bbia, "response");
@@ -747,14 +766,14 @@ public class ClientCnxn {
                 // convert from a server path to a client path
                 if (chrootPath != null) {
                     String serverPath = event.getPath();
-                    if(serverPath.compareTo(chrootPath)==0)
+                    if (serverPath.compareTo(chrootPath) == 0)
                         event.setPath("/");
                     else if (serverPath.length() > chrootPath.length())
                         event.setPath(serverPath.substring(chrootPath.length()));
                     else {
-                    	LOG.warn("Got server path " + event.getPath()
-                    			+ " which is too short for chroot path "
-                    			+ chrootPath);
+                        LOG.warn("Got server path " + event.getPath()
+                                + " which is too short for chroot path "
+                                + chrootPath);
                     }
                 }
 
@@ -764,7 +783,7 @@ public class ClientCnxn {
                             + Long.toHexString(sessionId));
                 }
 
-                eventThread.queueEvent( we );
+                eventThread.queueEvent(we);
                 return;
             }
 
@@ -773,9 +792,9 @@ public class ClientCnxn {
             // response as with other packets.
             if (clientTunneledAuthenticationInProgress()) {
                 GetSASLRequest request = new GetSASLRequest();
-                request.deserialize(bbia,"token");
+                request.deserialize(bbia, "token");
                 zooKeeperSaslClient.respondToServer(request.getToken(),
-                  ClientCnxn.this);
+                        ClientCnxn.this);
                 return;
             }
 
@@ -793,15 +812,14 @@ public class ClientCnxn {
              */
             try {
                 if (packet.requestHeader.getXid() != replyHdr.getXid()) {
-                    packet.replyHeader.setErr(
-                            KeeperException.Code.CONNECTIONLOSS.intValue());
+                    packet.replyHeader
+                            .setErr(KeeperException.Code.CONNECTIONLOSS
+                                    .intValue());
                     throw new IOException("Xid out of order. Got Xid "
-                            + replyHdr.getXid() + " with err " +
-                            + replyHdr.getErr() +
-                            " expected Xid "
+                            + replyHdr.getXid() + " with err "
+                            + +replyHdr.getErr() + " expected Xid "
                             + packet.requestHeader.getXid()
-                            + " for a packet with details: "
-                            + packet );
+                            + " for a packet with details: " + packet);
                 }
 
                 packet.replyHeader.setXid(replyHdr.getXid());
@@ -816,7 +834,8 @@ public class ClientCnxn {
 
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Reading reply sessionid:0x"
-                            + Long.toHexString(sessionId) + ", packet:: " + packet);
+                            + Long.toHexString(sessionId) + ", packet:: "
+                            + packet);
                 }
             } finally {
                 finishPacket(packet);
@@ -850,8 +869,8 @@ public class ClientCnxn {
 
         void primeConnection() throws IOException {
             LOG.info("Socket connection established to "
-                     + clientCnxnSocket.getRemoteSocketAddress()
-                     + ", initiating session");
+                    + clientCnxnSocket.getRemoteSocketAddress()
+                    + ", initiating session");
             isFirstConnect = false;
             long sessId = (seenRwServerBefore) ? sessionId : 0;
             ConnectRequest conReq = new ConnectRequest(0, lastZxid,
@@ -865,8 +884,8 @@ public class ClientCnxn {
                     List<String> dataWatches = zooKeeper.getDataWatches();
                     List<String> existWatches = zooKeeper.getExistWatches();
                     List<String> childWatches = zooKeeper.getChildWatches();
-                    if (!dataWatches.isEmpty()
-                                || !existWatches.isEmpty() || !childWatches.isEmpty()) {
+                    if (!dataWatches.isEmpty() || !existWatches.isEmpty()
+                            || !childWatches.isEmpty()) {
                         SetWatches sw = new SetWatches(lastZxid,
                                 prependChroot(dataWatches),
                                 prependChroot(existWatches),
@@ -874,7 +893,8 @@ public class ClientCnxn {
                         RequestHeader h = new RequestHeader();
                         h.setType(ZooDefs.OpCode.setWatches);
                         h.setXid(-8);
-                        Packet packet = new Packet(h, new ReplyHeader(), sw, null, null);
+                        Packet packet = new Packet(h, new ReplyHeader(), sw,
+                                null, null);
                         outgoingQueue.addFirst(packet);
                     }
                 }
@@ -884,8 +904,8 @@ public class ClientCnxn {
                             OpCode.auth), null, new AuthPacket(0, id.scheme,
                             id.data), null, null));
                 }
-                outgoingQueue.addFirst(new Packet(null, null, conReq,
-                            null, null, readOnly));
+                outgoingQueue.addFirst(new Packet(null, null, conReq, null,
+                        null, readOnly));
             }
             clientCnxnSocket.enableReadWriteOnly();
             if (LOG.isDebugEnabled()) {
@@ -946,19 +966,23 @@ public class ClientCnxn {
                 try {
                     String principalUserName = System.getProperty(
                             ZK_SASL_CLIENT_USERNAME, "zookeeper");
-                    zooKeeperSaslClient =
-                        new ZooKeeperSaslClient(
-                                principalUserName+"/"+addr.getHostName());
+                    zooKeeperSaslClient = new ZooKeeperSaslClient(
+                            principalUserName + "/" + addr.getHostName());
                 } catch (LoginException e) {
-                    // An authentication error occurred when the SASL client tried to initialize:
-                    // for Kerberos this means that the client failed to authenticate with the KDC.
-                    // This is different from an authentication error that occurs during communication
+                    // An authentication error occurred when the SASL client
+                    // tried to initialize:
+                    // for Kerberos this means that the client failed to
+                    // authenticate with the KDC.
+                    // This is different from an authentication error that
+                    // occurs during communication
                     // with the Zookeeper server, which is handled below.
-                    LOG.warn("SASL configuration failed: " + e + " Will continue connection to Zookeeper server without "
-                      + "SASL authentication, if Zookeeper server allows it.");
+                    LOG.warn("SASL configuration failed: "
+                            + e
+                            + " Will continue connection to Zookeeper server without "
+                            + "SASL authentication, if Zookeeper server allows it.");
                     eventThread.queueEvent(new WatchedEvent(
-                      Watcher.Event.EventType.None,
-                      Watcher.Event.KeeperState.AuthFailed, null));
+                            Watcher.Event.EventType.None,
+                            Watcher.Event.KeeperState.AuthFailed, null));
                     saslLoginFailed = true;
                 }
             }
@@ -970,26 +994,25 @@ public class ClientCnxn {
         private void logStartConnect(InetSocketAddress addr) {
             String msg = "Opening socket connection to server " + addr;
             if (zooKeeperSaslClient != null) {
-              msg += ". " + zooKeeperSaslClient.getConfigStatus();
+                msg += ". " + zooKeeperSaslClient.getConfigStatus();
             }
             LOG.info(msg);
         }
 
-        private static final String RETRY_CONN_MSG =
-            ", closing socket connection and attempting reconnect";
-        
+        private static final String RETRY_CONN_MSG = ", closing socket connection and attempting reconnect";
+
         @Override
         public void run() {
-            clientCnxnSocket.introduce(this,sessionId);
+            clientCnxnSocket.introduce(this, sessionId);
             clientCnxnSocket.updateNow();
             clientCnxnSocket.updateLastSendAndHeard();
             int to;
             long lastPingRwServer = System.currentTimeMillis();
-            final int MAX_SEND_PING_INTERVAL = 10000; //10 seconds
+            final int MAX_SEND_PING_INTERVAL = 10000; // 10 seconds
             while (state.isAlive()) {
                 try {
                     if (!clientCnxnSocket.isConnected()) {
-                        if(!isFirstConnect){
+                        if (!isFirstConnect) {
                             try {
                                 Thread.sleep(r.nextInt(1000));
                             } catch (InterruptedException e) {
@@ -1005,22 +1028,27 @@ public class ClientCnxn {
                     }
 
                     if (state.isConnected()) {
-                        // determine whether we need to send an AuthFailed event.
+                        // determine whether we need to send an AuthFailed
+                        // event.
                         if (zooKeeperSaslClient != null) {
                             boolean sendAuthEvent = false;
                             if (zooKeeperSaslClient.getSaslState() == ZooKeeperSaslClient.SaslState.INITIAL) {
                                 try {
-                                    zooKeeperSaslClient.initialize(ClientCnxn.this);
+                                    zooKeeperSaslClient
+                                            .initialize(ClientCnxn.this);
                                 } catch (SaslException e) {
-                                   LOG.error("SASL authentication with Zookeeper Quorum member failed: " + e);
+                                    LOG.error("SASL authentication with Zookeeper Quorum member failed: "
+                                            + e);
                                     state = States.AUTH_FAILED;
                                     sendAuthEvent = true;
                                 }
                             }
-                            KeeperState authState = zooKeeperSaslClient.getKeeperState();
+                            KeeperState authState = zooKeeperSaslClient
+                                    .getKeeperState();
                             if (authState != null) {
                                 if (authState == KeeperState.AuthFailed) {
-                                    // An authentication error occurred during authentication with the Zookeeper Server.
+                                    // An authentication error occurred during
+                                    // authentication with the Zookeeper Server.
                                     state = States.AUTH_FAILED;
                                     sendAuthEvent = true;
                                 } else {
@@ -1032,15 +1060,15 @@ public class ClientCnxn {
 
                             if (sendAuthEvent == true) {
                                 eventThread.queueEvent(new WatchedEvent(
-                                      Watcher.Event.EventType.None,
-                                      authState,null));
+                                        Watcher.Event.EventType.None,
+                                        authState, null));
                             }
                         }
                         to = readTimeout - clientCnxnSocket.getIdleRecv();
                     } else {
                         to = connectTimeout - clientCnxnSocket.getIdleRecv();
                     }
-                    
+
                     if (to <= 0) {
                         throw new SessionTimeoutException(
                                 "Client session timed out, have not heard from server in "
@@ -1049,12 +1077,19 @@ public class ClientCnxn {
                                         + Long.toHexString(sessionId));
                     }
                     if (state.isConnected()) {
-                    	//1000(1 second) is to prevent race condition missing to send the second ping
-                    	//also make sure not to send too many pings when readTimeout is small 
-                        int timeToNextPing = readTimeout / 2 - clientCnxnSocket.getIdleSend() - 
-                        		((clientCnxnSocket.getIdleSend() > 1000) ? 1000 : 0);
-                        //send a ping request either time is due or no packet sent out within MAX_SEND_PING_INTERVAL
-                        if (timeToNextPing <= 0 || clientCnxnSocket.getIdleSend() > MAX_SEND_PING_INTERVAL) {
+                        // 1000(1 second) is to prevent race condition missing
+                        // to send the second ping
+                        // also make sure not to send too many pings when
+                        // readTimeout is small
+                        int timeToNextPing = readTimeout
+                                / 2
+                                - clientCnxnSocket.getIdleSend()
+                                - ((clientCnxnSocket.getIdleSend() > 1000) ? 1000
+                                        : 0);
+                        // send a ping request either time is due or no packet
+                        // sent out within MAX_SEND_PING_INTERVAL
+                        if (timeToNextPing <= 0
+                                || clientCnxnSocket.getIdleSend() > MAX_SEND_PING_INTERVAL) {
                             sendPing();
                             clientCnxnSocket.updateLastSend();
                         } else {
@@ -1071,27 +1106,30 @@ public class ClientCnxn {
                         if (idlePingRwServer >= pingRwTimeout) {
                             lastPingRwServer = now;
                             idlePingRwServer = 0;
-                            pingRwTimeout =
-                                Math.min(2*pingRwTimeout, maxPingRwTimeout);
+                            pingRwTimeout = Math.min(2 * pingRwTimeout,
+                                    maxPingRwTimeout);
                             pingRwServer();
                         }
                         to = Math.min(to, pingRwTimeout - idlePingRwServer);
                     }
 
-                    clientCnxnSocket.doTransport(to, pendingQueue, outgoingQueue, ClientCnxn.this);
+                    clientCnxnSocket.doTransport(to, pendingQueue,
+                            outgoingQueue, ClientCnxn.this);
                 } catch (Throwable e) {
                     if (closing) {
                         if (LOG.isDebugEnabled()) {
                             // closing so this is expected
                             LOG.debug("An exception was thrown while closing send thread for session 0x"
                                     + Long.toHexString(getSessionId())
-                                    + " : " + e.getMessage());
+                                    + " : "
+                                    + e.getMessage());
                         }
                         break;
                     } else {
                         // this is ugly, you have a better way speak up
                         if (e instanceof SessionExpiredException) {
-                            LOG.info(e.getMessage() + ", closing socket connection");
+                            LOG.info(e.getMessage()
+                                    + ", closing socket connection");
                         } else if (e instanceof SessionTimeoutException) {
                             LOG.info(e.getMessage() + RETRY_CONN_MSG);
                         } else if (e instanceof EndOfStreamException) {
@@ -1103,7 +1141,8 @@ public class ClientCnxn {
                                     "Session 0x"
                                             + Long.toHexString(getSessionId())
                                             + " for server "
-                                            + clientCnxnSocket.getRemoteSocketAddress()
+                                            + clientCnxnSocket
+                                                    .getRemoteSocketAddress()
                                             + ", unexpected error"
                                             + RETRY_CONN_MSG, e);
                         }
@@ -1111,8 +1150,7 @@ public class ClientCnxn {
                         if (state.isAlive()) {
                             eventThread.queueEvent(new WatchedEvent(
                                     Event.EventType.None,
-                                    Event.KeeperState.Disconnected,
-                                    null));
+                                    Event.KeeperState.Disconnected, null));
                         }
                         clientCnxnSocket.updateNow();
                         clientCnxnSocket.updateLastSendAndHeard();
@@ -1126,14 +1164,14 @@ public class ClientCnxn {
                         Event.KeeperState.Disconnected, null));
             }
             ZooTrace.logTraceMessage(LOG, ZooTrace.getTextTraceLevel(),
-                                     "SendThread exitedloop.");
+                    "SendThread exitedloop.");
         }
 
         private void pingRwServer() throws RWServerFoundException {
             String result = null;
             InetSocketAddress addr = hostProvider.next(0);
-            LOG.info("Checking server " + addr + " for being r/w." +
-                    " Timeout " + pingRwTimeout);
+            LOG.info("Checking server " + addr + " for being r/w."
+                    + " Timeout " + pingRwTimeout);
 
             Socket sock = null;
             BufferedReader br = null;
@@ -1145,15 +1183,16 @@ public class ClientCnxn {
                 sock.getOutputStream().write("isro".getBytes());
                 sock.getOutputStream().flush();
                 sock.shutdownOutput();
-                br = new BufferedReader(
-                        new InputStreamReader(sock.getInputStream()));
+                br = new BufferedReader(new InputStreamReader(
+                        sock.getInputStream()));
                 result = br.readLine();
             } catch (ConnectException e) {
                 // ignore, this just means server is not up
             } catch (IOException e) {
                 // some unexpected error, warn about it
-                LOG.warn("Exception while seeking for r/w server " +
-                        e.getMessage(), e);
+                LOG.warn(
+                        "Exception while seeking for r/w server "
+                                + e.getMessage(), e);
             } finally {
                 if (sock != null) {
                     try {
@@ -1229,19 +1268,17 @@ public class ClientCnxn {
             hostProvider.onConnected();
             sessionId = _sessionId;
             sessionPasswd = _sessionPasswd;
-            state = (isRO) ?
-                    States.CONNECTEDREADONLY : States.CONNECTED;
+            state = (isRO) ? States.CONNECTEDREADONLY : States.CONNECTED;
             seenRwServerBefore |= !isRO;
             LOG.info("Session establishment complete on server "
                     + clientCnxnSocket.getRemoteSocketAddress()
                     + ", sessionid = 0x" + Long.toHexString(sessionId)
                     + ", negotiated timeout = " + negotiatedSessionTimeout
                     + (isRO ? " (READ-ONLY mode)" : ""));
-            KeeperState eventState = (isRO) ?
-                    KeeperState.ConnectedReadOnly : KeeperState.SyncConnected;
+            KeeperState eventState = (isRO) ? KeeperState.ConnectedReadOnly
+                    : KeeperState.SyncConnected;
             eventThread.queueEvent(new WatchedEvent(
-                    Watcher.Event.EventType.None,
-                    eventState, null));
+                    Watcher.Event.EventType.None, eventState, null));
         }
 
         void close() {
@@ -1265,7 +1302,8 @@ public class ClientCnxn {
             }
 
             // 3. SendThread has not created the authenticating object yet,
-            // therefore authentication is (at the earliest stage of being) in progress.
+            // therefore authentication is (at the earliest stage of being) in
+            // progress.
             if (zooKeeperSaslClient == null) {
                 return true;
             }
@@ -1288,7 +1326,7 @@ public class ClientCnxn {
     public void disconnect() {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Disconnecting client for session: 0x"
-                      + Long.toHexString(getSessionId()));
+                    + Long.toHexString(getSessionId()));
         }
 
         sendThread.close();
@@ -1304,7 +1342,7 @@ public class ClientCnxn {
     public void close() throws IOException {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Closing client for session: 0x"
-                      + Long.toHexString(getSessionId()));
+                    + Long.toHexString(getSessionId()));
         }
 
         try {
@@ -1324,8 +1362,8 @@ public class ClientCnxn {
     private volatile States state = States.NOT_CONNECTED;
 
     /*
-     * getXid() is called externally by ClientCnxnNIO::doIO() when packets are sent from the outgoingQueue to
-     * the server. Thus, getXid() must be public.
+     * getXid() is called externally by ClientCnxnNIO::doIO() when packets are
+     * sent from the outgoingQueue to the server. Thus, getXid() must be public.
      */
     synchronized public int getXid() {
         return xid++;
@@ -1336,7 +1374,7 @@ public class ClientCnxn {
             throws InterruptedException {
         ReplyHeader r = new ReplyHeader();
         Packet packet = queuePacket(h, r, request, response, null, null, null,
-                    null, watchRegistration);
+                null, watchRegistration);
         synchronized (packet) {
             while (!packet.finished) {
                 packet.wait();
@@ -1349,8 +1387,8 @@ public class ClientCnxn {
         sendThread.getClientCnxnSocket().enableWrite();
     }
 
-    public void sendPacket(Record request, Record response, AsyncCallback cb, int opCode)
-    throws IOException {
+    public void sendPacket(Record request, Record response, AsyncCallback cb,
+            int opCode) throws IOException {
         // Generate Xid now because it will be sent immediately,
         // by call to sendThread.sendPacket() below.
         int xid = getXid();
@@ -1368,12 +1406,12 @@ public class ClientCnxn {
 
     Packet queuePacket(RequestHeader h, ReplyHeader r, Record request,
             Record response, AsyncCallback cb, String clientPath,
-            String serverPath, Object ctx, WatchRegistration watchRegistration)
-    {
+            String serverPath, Object ctx, WatchRegistration watchRegistration) {
         Packet packet = null;
 
         // Note that we do not generate the Xid for the packet yet. It is
-        // generated later at send-time, by an implementation of ClientCnxnSocket::doIO(),
+        // generated later at send-time, by an implementation of
+        // ClientCnxnSocket::doIO(),
         // where the packet is actually sent.
         synchronized (outgoingQueue) {
             packet = new Packet(h, r, request, response, watchRegistration);
@@ -1401,9 +1439,8 @@ public class ClientCnxn {
             return;
         }
         authInfo.add(new AuthData(scheme, auth));
-        queuePacket(new RequestHeader(-4, OpCode.auth), null,
-                new AuthPacket(0, scheme, auth), null, null, null, null,
-                null, null);
+        queuePacket(new RequestHeader(-4, OpCode.auth), null, new AuthPacket(0,
+                scheme, auth), null, null, null, null, null, null);
     }
 
     States getState() {

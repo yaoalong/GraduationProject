@@ -34,7 +34,7 @@ public class Profiler {
         T res = op.execute();
         long end = System.currentTimeMillis();
         if (end - start > timeout) {
-            LOG.info("Elapsed "+(end - start) + " ms: " + message);
+            LOG.info("Elapsed " + (end - start) + " ms: " + message);
         }
         return res;
     }

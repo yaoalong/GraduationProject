@@ -21,39 +21,37 @@ package org.lab.mars.onem2m.server.quorum.flexible;
 import java.util.HashSet;
 
 /**
- * This class implements a validator for majority quorums. The 
- * implementation is straightforward.
+ * This class implements a validator for majority quorums. The implementation is
+ * straightforward.
  *
  */
 public class QuorumMaj implements QuorumVerifier {
     int half;
-    
+
     /**
      * Defines a majority to avoid computing it every time.
      * 
-     * @param n number of servers
+     * @param n
+     *            number of servers
      */
-    public QuorumMaj(int n){
-    	System.out.println("ha"+n);
-        this.half = n/2;
+    public QuorumMaj(int n) {
+        this.half = n / 2;
     }
-    
+
     /**
      * Returns weight of 1 by default.
      * 
-     * @param id 
+     * @param id
      */
-    public long getWeight(long id){
+    public long getWeight(long id) {
         return (long) 1;
     }
-    
+
     /**
      * Verifies if a set is a majority.
      */
-    public boolean containsQuorum(HashSet<Long> set){
-    	System.out.println("half:"+half);
-    	System.out.println("set size:"+set.size());
+    public boolean containsQuorum(HashSet<Long> set) {
         return (set.size() > half);
     }
-    
+
 }

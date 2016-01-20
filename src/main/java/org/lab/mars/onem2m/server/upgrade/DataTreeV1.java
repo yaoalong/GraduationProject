@@ -28,9 +28,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.lab.mars.onem2m.KeeperException;
-import org.lab.mars.onem2m.Watcher;
 import org.lab.mars.onem2m.KeeperException.Code;
 import org.lab.mars.onem2m.KeeperException.NoNodeException;
+import org.lab.mars.onem2m.Watcher;
 import org.lab.mars.onem2m.Watcher.Event;
 import org.lab.mars.onem2m.Watcher.Event.EventType;
 import org.lab.mars.onem2m.ZooDefs.OpCode;
@@ -79,16 +79,17 @@ public class DataTreeV1 {
 
     /**
      * return the ephemerals for this tree
+     * 
      * @return the ephemerals for this tree
      */
-    public Map<Long, HashSet<String>>  getEphemeralsMap() {
+    public Map<Long, HashSet<String>> getEphemeralsMap() {
         return this.ephemerals;
     }
-    
+
     public void setEphemeralsMap(Map<Long, HashSet<String>> ephemerals) {
         this.ephemerals = ephemerals;
     }
-    
+
     @SuppressWarnings("unchecked")
     public HashSet<String> getEphemerals(long sessionId) {
         HashSet<String> retv = ephemerals.get(sessionId);
@@ -96,12 +97,12 @@ public class DataTreeV1 {
             return new HashSet<String>();
         }
         HashSet<String> cloned = null;
-        synchronized(retv) {
-            cloned =  (HashSet<String>) retv.clone();
+        synchronized (retv) {
+            cloned = (HashSet<String>) retv.clone();
         }
         return cloned;
     }
-    
+
     public Collection<Long> getSessions() {
         return ephemerals.keySet();
     }
@@ -114,7 +115,8 @@ public class DataTreeV1 {
      * This is a pointer to the root of the DataTree. It is the source of truth,
      * but we usually use the nodes hashmap to find nodes in the tree.
      */
-    private DataNodeV1 root = new DataNodeV1(null, new byte[0], null, new StatPersistedV1());
+    private DataNodeV1 root = new DataNodeV1(null, new byte[0], null,
+            new StatPersistedV1());
 
     public DataTreeV1() {
         /* Rather than fight it, let root have an alias */
@@ -122,7 +124,8 @@ public class DataTreeV1 {
         nodes.put("/", root);
     }
 
-    static public void copyStatPersisted(StatPersistedV1 from, StatPersistedV1 to) {
+    static public void copyStatPersisted(StatPersistedV1 from,
+            StatPersistedV1 to) {
         to.setAversion(from.getAversion());
         to.setCtime(from.getCtime());
         to.setCversion(from.getCversion());
@@ -146,7 +149,6 @@ public class DataTreeV1 {
         to.setNumChildren(from.getNumChildren());
     }
 
-
     // public void remooveInterest(String path, Watcher nw) {
     // DataNode n = nodes.get(path);
     // if (n == null) {
@@ -168,16 +170,17 @@ public class DataTreeV1 {
      * @param data
      * @param acl
      * @param ephemeralOwner
-     *                the session id that owns this node. -1 indicates this is
-     *                not an ephemeral node.
+     *            the session id that owns this node. -1 indicates this is not
+     *            an ephemeral node.
      * @param zxid
      * @param time
      * @return the patch of the created node
      * @throws KeeperException
      */
     public String createNode(String path, byte data[], List<ACL> acl,
-            long ephemeralOwner, long zxid, long time) 
-            throws KeeperException.NoNodeException, KeeperException.NodeExistsException {
+            long ephemeralOwner, long zxid, long time)
+            throws KeeperException.NoNodeException,
+            KeeperException.NodeExistsException {
         int lastSlash = path.lastIndexOf('/');
         String parentName = path.substring(0, lastSlash);
         String childName = path.substring(lastSlash + 1);
@@ -209,13 +212,14 @@ public class DataTreeV1 {
                     list = new HashSet<String>();
                     ephemerals.put(ephemeralOwner, list);
                 }
-                synchronized(list) {
+                synchronized (list) {
                     list.add(path);
                 }
             }
         }
         dataWatches.triggerWatch(path, Event.EventType.NodeCreated);
-        childWatches.triggerWatch(parentName.equals("")?"/":parentName, Event.EventType.NodeChildrenChanged);
+        childWatches.triggerWatch(parentName.equals("") ? "/" : parentName,
+                Event.EventType.NodeChildrenChanged);
         return path;
     }
 
@@ -239,17 +243,18 @@ public class DataTreeV1 {
             if (eowner != 0) {
                 HashSet<String> nodes = ephemerals.get(eowner);
                 if (nodes != null) {
-                    synchronized(nodes) {
+                    synchronized (nodes) {
                         nodes.remove(path);
                     }
                 }
             }
             node.parent = null;
         }
-        Set<Watcher> processed =
-        dataWatches.triggerWatch(path, EventType.NodeDeleted);
+        Set<Watcher> processed = dataWatches.triggerWatch(path,
+                EventType.NodeDeleted);
         childWatches.triggerWatch(path, EventType.NodeDeleted, processed);
-        childWatches.triggerWatch(parentName.equals("")?"/":parentName, EventType.NodeChildrenChanged);
+        childWatches.triggerWatch(parentName.equals("") ? "/" : parentName,
+                EventType.NodeChildrenChanged);
     }
 
     public Stat setData(String path, byte data[], int version, long zxid,
@@ -270,7 +275,8 @@ public class DataTreeV1 {
         return s;
     }
 
-    public byte[] getData(String path, Stat stat, Watcher watcher) throws KeeperException.NoNodeException {
+    public byte[] getData(String path, Stat stat, Watcher watcher)
+            throws KeeperException.NoNodeException {
         DataNodeV1 n = nodes.get(path);
         if (n == null) {
             throw new KeeperException.NoNodeException();
@@ -284,7 +290,8 @@ public class DataTreeV1 {
         }
     }
 
-    public Stat statNode(String path, Watcher watcher) throws KeeperException.NoNodeException {
+    public Stat statNode(String path, Watcher watcher)
+            throws KeeperException.NoNodeException {
         Stat stat = new Stat();
         DataNodeV1 n = nodes.get(path);
         if (watcher != null) {
@@ -299,7 +306,8 @@ public class DataTreeV1 {
         }
     }
 
-    public ArrayList<String> getChildren(String path, Stat stat, Watcher watcher) throws KeeperException.NoNodeException {
+    public ArrayList<String> getChildren(String path, Stat stat, Watcher watcher)
+            throws KeeperException.NoNodeException {
         DataNodeV1 n = nodes.get(path);
         if (n == null) {
             throw new KeeperException.NoNodeException();
@@ -314,7 +322,8 @@ public class DataTreeV1 {
         }
     }
 
-    public Stat setACL(String path, List<ACL> acl, int version) throws KeeperException.NoNodeException {
+    public Stat setACL(String path, List<ACL> acl, int version)
+            throws KeeperException.NoNodeException {
         Stat stat = new Stat();
         DataNodeV1 n = nodes.get(path);
         if (n == null) {
@@ -328,7 +337,8 @@ public class DataTreeV1 {
         }
     }
 
-    public List<ACL> getACL(String path, Stat stat) throws KeeperException.NoNodeException {
+    public List<ACL> getACL(String path, Stat stat)
+            throws KeeperException.NoNodeException {
         DataNodeV1 n = nodes.get(path);
         if (n == null) {
             throw new KeeperException.NoNodeException();
@@ -401,9 +411,10 @@ public class DataTreeV1 {
             case OpCode.create:
                 CreateTxn createTxn = (CreateTxn) txn;
                 debug = "Create transaction for " + createTxn.getPath();
-                createNode(createTxn.getPath(), createTxn.getData(), createTxn
-                        .getAcl(), createTxn.getEphemeral() ? header
-                        .getClientId() : 0, header.getZxid(), header.getTime());
+                createNode(createTxn.getPath(), createTxn.getData(),
+                        createTxn.getAcl(),
+                        createTxn.getEphemeral() ? header.getClientId() : 0,
+                        header.getZxid(), header.getTime());
                 rc.path = createTxn.getPath();
                 break;
             case OpCode.delete:
@@ -415,8 +426,8 @@ public class DataTreeV1 {
                 SetDataTxn setDataTxn = (SetDataTxn) txn;
                 debug = "Set data for  transaction for " + setDataTxn.getPath();
                 rc.stat = setData(setDataTxn.getPath(), setDataTxn.getData(),
-                        setDataTxn.getVersion(), header.getZxid(), header
-                                .getTime());
+                        setDataTxn.getVersion(), header.getZxid(),
+                        header.getTime());
                 break;
             case OpCode.setACL:
                 SetACLTxn setACLTxn = (SetACLTxn) txn;
@@ -435,8 +446,7 @@ public class DataTreeV1 {
         } catch (KeeperException e) {
             // These are expected errors since we take a lazy snapshot
             if (initialized
-                    || (e.code() != Code.NONODE 
-                            && e.code() != Code.NODEEXISTS)) {
+                    || (e.code() != Code.NONODE && e.code() != Code.NODEEXISTS)) {
                 LOG.warn("Failed:" + debug, e);
             }
         }
@@ -457,8 +467,7 @@ public class DataTreeV1 {
                     deleteNode(path);
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Deleting ephemeral node " + path
-                                + " for session 0x"
-                                + Long.toHexString(session));
+                                + " for session 0x" + Long.toHexString(session));
                     }
                 } catch (NoNodeException e) {
                     LOG.warn("Ignoring NoNodeException for path " + path
@@ -470,11 +479,13 @@ public class DataTreeV1 {
     }
 
     /**
-     * this method uses a stringbuilder to create a new
-     * path for children. This is faster than string
-     * appends ( str1 + str2).
-     * @param oa OutputArchive to write to.
-     * @param path a string builder.
+     * this method uses a stringbuilder to create a new path for children. This
+     * is faster than string appends ( str1 + str2).
+     * 
+     * @param oa
+     *            OutputArchive to write to.
+     * @param path
+     *            a string builder.
      * @throws IOException
      * @throws InterruptedException
      */
@@ -496,7 +507,7 @@ public class DataTreeV1 {
         int off = path.length();
         if (children != null) {
             for (String child : children) {
-                //since this is single buffer being resused
+                // since this is single buffer being resused
                 // we need
                 // to truncate the previous bytes of string.
                 path.delete(off, Integer.MAX_VALUE);
@@ -558,7 +569,7 @@ public class DataTreeV1 {
             sb.append("0x" + Long.toHexString(k));
             sb.append(":\n");
             HashSet<String> tmp = ephemerals.get(k);
-            synchronized(tmp) {
+            synchronized (tmp) {
                 for (String path : tmp) {
                     sb.append("\t" + path + "\n");
                 }
