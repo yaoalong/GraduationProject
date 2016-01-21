@@ -26,18 +26,10 @@ public class WebServerChannelHandler extends
         SimpleChannelInboundHandler<Object> {
     private static Logger LOG = LoggerFactory
             .getLogger(WebServerChannelHandler.class);
-    private ServerCnxnFactory serverCnxnFactory;
-    private ConcurrentHashMap<String, Channel> ipAndChannels = new ConcurrentHashMap<>();
-    private String self;
     private NetworkPool networkPool;
-    private Integer replicationFactor;
-    private List<String> allServers;
 
     public WebServerChannelHandler(ServerCnxnFactory serverCnxnFactory) {
-        this.serverCnxnFactory = serverCnxnFactory;
-        this.self = serverCnxnFactory.getMyIp();
         this.networkPool = serverCnxnFactory.getNetworkPool();
-        this.replicationFactor = serverCnxnFactory.getReplicationFactor();
 
     }
 
@@ -68,6 +60,8 @@ public class WebServerChannelHandler extends
         List<M2mServerStatusDO> m2mServerStatusDOs = new ArrayList<>();
         for (Entry<Long, String> survivalServer : survivalServers.entrySet()) {
             M2mServerStatusDO m2mServerStatusDO = new M2mServerStatusDO();
+            System.out.println("key:" + survivalServer.getKey());
+            System.out.println("value" + survivalServer.getValue());
             m2mServerStatusDO.setId(survivalServer.getKey());
             m2mServerStatusDO.setIp(survivalServer.getValue());
             m2mServerStatusDO.setStatus(1);
@@ -106,13 +100,4 @@ public class WebServerChannelHandler extends
         }
         ctx.close();
     }
-
-    /*
-     * 将server拆分为ip以及port
-     */
-    private String[] spilitString(String ip) {
-        String[] splitMessage = ip.split(":");
-        return splitMessage;
-    }
-
 }

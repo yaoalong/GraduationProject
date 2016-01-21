@@ -37,6 +37,7 @@ import org.lab.mars.onem2m.server.quorum.QuorumPeerConfig.ConfigException;
 import org.lab.mars.onem2m.server.quorum.flexible.QuorumMaj;
 import org.lab.mars.onem2m.servers.monitor.RegisterIntoZooKeeper;
 import org.lab.mars.onem2m.servers.monitor.ZooKeeper_Monitor;
+import org.lab.mars.onem2m.web.network.WebTcpServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -236,7 +237,8 @@ public class QuorumPeerMain {
                     quorumPeers.add(quorumPeer);
                 }
             }
-
+            WebTcpServer webTcpServer = new WebTcpServer(cnxnFactory);
+            webTcpServer.bind("localhost", config.getWebPort());
             for (QuorumPeer quorumPeer : quorumPeers) {
                 quorumPeer.join();
             }
