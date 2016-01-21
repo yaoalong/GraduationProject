@@ -7,8 +7,8 @@ import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 
-import org.lab.mars.onem2m.network.handler.PacketServerChannelHandler;
 import org.lab.mars.onem2m.server.ServerCnxnFactory;
+import org.lab.mars.onem2m.web.network.handler.WebServerChannelHandler;
 
 public class WebServerChannelInitializer extends
         ChannelInitializer<SocketChannel> {
@@ -24,7 +24,6 @@ public class WebServerChannelInitializer extends
         channelPipeline.addLast(new ObjectEncoder());
         channelPipeline.addLast(new ObjectDecoder(ClassResolvers
                 .cacheDisabled(null)));
-        channelPipeline.addLast(new PacketServerChannelHandler(
-                serverCnxnFactory));
+        channelPipeline.addLast(new WebServerChannelHandler(serverCnxnFactory));
     }
 }

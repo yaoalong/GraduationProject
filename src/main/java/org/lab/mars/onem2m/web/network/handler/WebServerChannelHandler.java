@@ -5,13 +5,20 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.AttributeKey;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.lab.mars.onem2m.consistent.hash.NetworkPool;
-import org.lab.mars.onem2m.network.TcpClient;
-import org.lab.mars.onem2m.proto.M2mPacket;
-import org.lab.mars.onem2m.server.NettyServerCnxn;
+import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.server.ServerCnxnFactory;
+import org.lab.mars.onem2m.web.nework.protol.M2mServerStatusDO;
+import org.lab.mars.onem2m.web.nework.protol.M2mServerStatusDOs;
+import org.lab.mars.onem2m.web.nework.protol.M2mWebGetDataResponse;
+import org.lab.mars.onem2m.web.nework.protol.M2mWebPacket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +31,7 @@ public class WebServerChannelHandler extends
     private String self;
     private NetworkPool networkPool;
     private Integer replicationFactor;
+    private List<String> allServers;
 
     public WebServerChannelHandler(ServerCnxnFactory serverCnxnFactory) {
         this.serverCnxnFactory = serverCnxnFactory;
@@ -34,29 +42,55 @@ public class WebServerChannelHandler extends
     }
 
     @SuppressWarnings("deprecation")
-    private static final AttributeKey<NettyServerCnxn> STATE = new AttributeKey<NettyServerCnxn>(
+    private static final AttributeKey<Channel> STATE = new AttributeKey<Channel>(
             "MyHandler.nettyServerCnxn");
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, Object msg) {
-        System.out.println("接收到了数据");
-        M2mPacket m2mPacket = (M2mPacket) msg;
-        if (preProcessPacket(m2mPacket)) {
-            System.out.println("开始处理");
-            NettyServerCnxn nettyServerCnxn = ctx.attr(STATE).get();
-            nettyServerCnxn.receiveMessage(ctx, m2mPacket);
+        M2mWebPacket m2mPacket = (M2mWebPacket) msg;
+        if (m2mPacket.getM2mRequestHeader().getType() == 1) {
+            try {
+                lookAllServerStatus(m2mPacket, ctx.attr(STATE).get());
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         } else {
-            return;
+
         }
+    }
+
+    public void lookAllServerStatus(M2mWebPacket m2mWebPacket, Channel channel)
+            throws IOException {
+        M2mServerStatusDOs m2mServerStatuses = new M2mServerStatusDOs();
+        final ConcurrentHashMap<Long, String> survivalServers = networkPool
+                .getPositionToServer();
+        List<M2mServerStatusDO> m2mServerStatusDOs = new ArrayList<>();
+        for (Entry<Long, String> survivalServer : survivalServers.entrySet()) {
+            M2mServerStatusDO m2mServerStatusDO = new M2mServerStatusDO();
+            m2mServerStatusDO.setId(survivalServer.getKey());
+            m2mServerStatusDO.setIp(survivalServer.getValue());
+            m2mServerStatusDO.setStatus(1);
+            m2mServerStatusDOs.add(m2mServerStatusDO);
+        }
+        m2mServerStatuses.setM2mServerStatusDOs(m2mServerStatusDOs);
+        M2mWebGetDataResponse m2mWebGetDataResponse = new M2mWebGetDataResponse();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        M2mBinaryOutputArchive boa = M2mBinaryOutputArchive.getArchive(baos);
+        m2mServerStatuses.serialize(boa, "m2mServerStatuses");
+        byte[] bytes = baos.toByteArray();
+        m2mWebGetDataResponse.setData(bytes);
+        M2mWebPacket m2mPacket = new M2mWebPacket(
+                m2mWebPacket.getM2mRequestHeader(),
+                m2mWebPacket.getM2mReplyHeader(), m2mWebPacket.getRequest(),
+                m2mWebGetDataResponse);
+        channel.writeAndFlush(m2mPacket);
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("接收到了新的连接");
-        NettyServerCnxn nettyServerCnxn = new NettyServerCnxn(ctx.channel(),
-                serverCnxnFactory.getZkServers(), serverCnxnFactory);
-        nettyServerCnxn.setNetworkPool(serverCnxnFactory.getNetworkPool());
-        ctx.attr(STATE).set(nettyServerCnxn);
+
+        ctx.attr(STATE).set(ctx.channel());
         ctx.fireChannelRegistered();
     };
 
@@ -73,37 +107,6 @@ public class WebServerChannelHandler extends
         ctx.close();
     }
 
-    /**
-     * 对数据包进行处理
-     * 
-     * @param m2mPacket
-     * @return
-     */
-    public boolean preProcessPacket(M2mPacket m2mPacket) {
-        String key = m2mPacket.getM2mRequestHeader().getKey();
-        if (isShouldHandle(key)) {
-            return true;
-        }
-        String server = networkPool.getSock(key);// 把server
-        if (ipAndChannels.containsKey(server)) {
-            ipAndChannels.get(server).writeAndFlush(m2mPacket);
-        } else {
-            try {
-                TcpClient tcpClient = new TcpClient();
-                String[] splitStrings = spilitString(server);
-                tcpClient.connectionOne("localhost",
-                        Integer.valueOf(splitStrings[1]));
-
-                tcpClient.write(m2mPacket);
-                ipAndChannels.put(server, tcpClient.getChannel());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-        }
-        return false;
-    }
-
     /*
      * 将server拆分为ip以及port
      */
@@ -112,28 +115,4 @@ public class WebServerChannelHandler extends
         return splitMessage;
     }
 
-    /**
-     * 是否应该自己处理
-     * 
-     * @return
-     */
-    private boolean isShouldHandle(String key) {
-        String server = networkPool.getSock(key);
-        if (serverCnxnFactory.isTemporyAdd()) {
-            if (server.equals(self)) {
-                return true;
-            }
-        }
-        long myServerId = networkPool.getServerPosition().get(self);
-        long handlerServerId = networkPool.getServerPosition().get(server);
-        long serverSize = networkPool.getServerPosition().size();
-        long distance = myServerId - handlerServerId;
-        if (distance >= 0 && distance < replicationFactor) {
-            return true;
-        }
-        if (distance < 0 && (distance + serverSize) < replicationFactor) {
-            return true;
-        }
-        return false;
-    }
 }
