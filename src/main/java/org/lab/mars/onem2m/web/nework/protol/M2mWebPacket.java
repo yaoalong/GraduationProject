@@ -1,17 +1,22 @@
-package org.lab.mars.onem2m.proto;
+package org.lab.mars.onem2m.web.nework.protol;
 
 import java.io.IOException;
 
 import org.lab.mars.onem2m.jute.M2mInputArchive;
 import org.lab.mars.onem2m.jute.M2mOutputArchive;
 import org.lab.mars.onem2m.jute.M2mRecord;
+import org.lab.mars.onem2m.proto.M2mReplyHeader;
+import org.lab.mars.onem2m.proto.M2mRequestHeader;
 
-public class M2mPacket implements M2mRecord {
+public class M2mWebPacket implements M2mRecord {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 903838703381334874L;
 
     /**
-	 * 
-	 */
-    private static final long serialVersionUID = 8081949053926818924L;
+     * 
+     */
 
     M2mRequestHeader m2mRequestHeader;
 
@@ -21,7 +26,7 @@ public class M2mPacket implements M2mRecord {
 
     M2mRecord response;
 
-    public M2mPacket(M2mRequestHeader m2mRequestHeader,
+    public M2mWebPacket(M2mRequestHeader m2mRequestHeader,
             M2mReplyHeader m2mReplyHeader, M2mRecord request, M2mRecord response) {
         this.m2mRequestHeader = m2mRequestHeader;
         this.m2mReplyHeader = m2mReplyHeader;
@@ -74,5 +79,4 @@ public class M2mPacket implements M2mRecord {
         // TODO Auto-generated method stub
 
     }
-
 }

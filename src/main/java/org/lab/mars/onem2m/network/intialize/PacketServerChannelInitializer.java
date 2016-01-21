@@ -14,17 +14,20 @@ import org.lab.mars.onem2m.server.ServerCnxnFactory;
  * Created by Administrator on 2015/12/21.
  */
 public class PacketServerChannelInitializer extends
-		ChannelInitializer<SocketChannel> {
-	private ServerCnxnFactory serverCnxnFactory;
-	 public PacketServerChannelInitializer(ServerCnxnFactory serverCnxnFactory) {
-		this.serverCnxnFactory=serverCnxnFactory;
-	}
-	@Override
-	protected void initChannel(SocketChannel ch) throws Exception {
-		ChannelPipeline channelPipeline = ch.pipeline();
-		channelPipeline.addLast(new ObjectEncoder());
-		channelPipeline.addLast(new ObjectDecoder(ClassResolvers
-				.cacheDisabled(null)));
-		channelPipeline.addLast(new PacketServerChannelHandler(serverCnxnFactory));
-	}
+        ChannelInitializer<SocketChannel> {
+    private ServerCnxnFactory serverCnxnFactory;
+
+    public PacketServerChannelInitializer(ServerCnxnFactory serverCnxnFactory) {
+        this.serverCnxnFactory = serverCnxnFactory;
+    }
+
+    @Override
+    protected void initChannel(SocketChannel ch) throws Exception {
+        ChannelPipeline channelPipeline = ch.pipeline();
+        channelPipeline.addLast(new ObjectEncoder());
+        channelPipeline.addLast(new ObjectDecoder(ClassResolvers
+                .cacheDisabled(null)));
+        channelPipeline.addLast(new PacketServerChannelHandler(
+                serverCnxnFactory));
+    }
 }

@@ -13,13 +13,13 @@ import org.lab.mars.onem2m.network.handler.PacketClientChannelHandler;
  * Created by Administrator on 2015/12/21.
  */
 public class PacketClientChannelInitializer extends
-		ChannelInitializer<SocketChannel> {
-	@Override
-	protected void initChannel(SocketChannel ch) throws Exception {
-		ChannelPipeline channelPipeline = ch.pipeline();
-		channelPipeline.addLast(new ObjectEncoder());
-		channelPipeline.addLast(new ObjectDecoder(ClassResolvers
-				.cacheDisabled(null)));
-		channelPipeline.addLast(new PacketClientChannelHandler());
-	}
+        ChannelInitializer<SocketChannel> {
+    @Override
+    protected void initChannel(SocketChannel ch) throws Exception {
+        ChannelPipeline channelPipeline = ch.pipeline();
+        channelPipeline.addLast(new ObjectEncoder());
+        channelPipeline.addLast(new ObjectDecoder(ClassResolvers
+                .cacheDisabled(null)));
+        channelPipeline.addLast(new PacketClientChannelHandler());
+    }
 }

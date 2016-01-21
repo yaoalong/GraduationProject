@@ -6,23 +6,26 @@ import org.lab.mars.onem2m.jute.M2mInputArchive;
 import org.lab.mars.onem2m.jute.M2mOutputArchive;
 import org.lab.mars.onem2m.jute.M2mRecord;
 
-/*
- * 面向web端的
- */
-public class M2mWebRequestHeader implements M2mRecord {
-    private int xid;
-    private int type;
+public class M2mWebReplyHeader implements M2mRecord {
+
     /**
      * 
      */
-    private static final long serialVersionUID = -1242444569099197793L;
+    private static final long serialVersionUID = -8072712128092074074L;
 
-    public M2mWebRequestHeader() {
+    private int xid;
+
+    private long zxid;
+
+    private int err;
+
+    public M2mWebReplyHeader() {
     }
 
-    public M2mWebRequestHeader(int xid, int type) {
+    public M2mWebReplyHeader(int xid, long zxid, int err) {
         this.xid = xid;
-        this.type = type;
+        this.zxid = zxid;
+        this.err = err;
     }
 
     public int getXid() {
@@ -33,12 +36,20 @@ public class M2mWebRequestHeader implements M2mRecord {
         xid = m_;
     }
 
-    public int getType() {
-        return type;
+    public long getZxid() {
+        return zxid;
     }
 
-    public void setType(int m_) {
-        type = m_;
+    public void setZxid(long m_) {
+        zxid = m_;
+    }
+
+    public int getErr() {
+        return err;
+    }
+
+    public void setErr(int m_) {
+        err = m_;
     }
 
     @Override
@@ -46,9 +57,9 @@ public class M2mWebRequestHeader implements M2mRecord {
             throws IOException {
         archive.startRecord(this, tag);
         archive.writeInt(xid, "xid");
-        archive.writeInt(type, "type");
+        archive.writeLong(zxid, "zxid");
+        archive.writeInt(err, "err");
         archive.endRecord(this, tag);
-
     }
 
     @Override
@@ -56,9 +67,9 @@ public class M2mWebRequestHeader implements M2mRecord {
             throws IOException {
         archive.startRecord(tag);
         xid = archive.readInt("xid");
-        type = archive.readInt("type");
+        zxid = archive.readLong("zxid");
+        err = archive.readInt("err");
         archive.endRecord(tag);
 
     }
-
 }

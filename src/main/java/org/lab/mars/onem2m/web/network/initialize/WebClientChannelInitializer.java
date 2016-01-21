@@ -7,24 +7,16 @@ import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 
-import org.lab.mars.onem2m.network.handler.PacketServerChannelHandler;
-import org.lab.mars.onem2m.server.ServerCnxnFactory;
+import org.lab.mars.onem2m.network.handler.PacketClientChannelHandler;
 
-public class WebServerChannelInitializer extends
+public class WebClientChannelInitializer extends
         ChannelInitializer<SocketChannel> {
-    private ServerCnxnFactory serverCnxnFactory;
-
-    public WebServerChannelInitializer(ServerCnxnFactory serverCnxnFactory) {
-        this.serverCnxnFactory = serverCnxnFactory;
-    }
-
     @Override
     protected void initChannel(SocketChannel ch) throws Exception {
         ChannelPipeline channelPipeline = ch.pipeline();
         channelPipeline.addLast(new ObjectEncoder());
         channelPipeline.addLast(new ObjectDecoder(ClassResolvers
                 .cacheDisabled(null)));
-        channelPipeline.addLast(new PacketServerChannelHandler(
-                serverCnxnFactory));
+        channelPipeline.addLast(new PacketClientChannelHandler());
     }
 }
