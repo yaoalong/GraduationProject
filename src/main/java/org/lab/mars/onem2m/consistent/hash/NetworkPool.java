@@ -34,6 +34,8 @@ public class NetworkPool {
     private volatile TreeMap<Long, String> consistentBuckets;
     private volatile boolean initialized = false;
     private int hashingAlg = CONSISTENT_HASH;
+
+    public static ConcurrentHashMap<String, Integer> webPort = new ConcurrentHashMap<String, Integer>();
     /**
      * server对应的位置
      */

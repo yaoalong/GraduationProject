@@ -69,6 +69,7 @@ public class WebServerChannelHandler extends
                     servers.add(entry.getKey());
                 }
             }
+            m2mPacket.getM2mRequestHeader().setType(4);
             M2mWebPacket m2mWebPacket = new M2mWebPacket(
                     m2mPacket.getM2mRequestHeader(),
                     m2mPacket.getM2mReplyHeader(), m2mPacket.getRequest(),
@@ -78,12 +79,14 @@ public class WebServerChannelHandler extends
             String server = networkPool.getSock(m2mPacket.getM2mRequestHeader()
                     .getKey());
             result.put(1, new RetriveServerAndCtx(ctx, new ArrayList<String>()));
+            Long position = networkPool.getServerPosition().get(server);
             for (int i = 0; i < serverCnxnFactory.getReplicationFactor(); i++) {
                 TcpClient tcpClient = new TcpClient();
-                Long position = networkPool.getServerPosition().get(server);
-                tcpClient.connectionOne("localhost", 44444);
+                tcpClient
+                        .connectionOne("localhost", NetworkPool.webPort
+                                .get(networkPool.getPositionToServer().get(
+                                        position++)));
                 tcpClient.write(m2mPacket);
-
             }
 
         } else if (m2mPacket.getM2mRequestHeader().getType() == 4) {

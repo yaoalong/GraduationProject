@@ -42,6 +42,7 @@ import org.lab.mars.onem2m.server.quorum.QuorumPeer.QuorumServer;
 import org.lab.mars.onem2m.server.quorum.flexible.QuorumHierarchical;
 import org.lab.mars.onem2m.server.quorum.flexible.QuorumMaj;
 import org.lab.mars.onem2m.server.quorum.flexible.QuorumVerifier;
+import org.omg.CORBA.PUBLIC_MEMBER;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -72,6 +73,7 @@ public class QuorumPeerConfig {
      */
     protected final HashMap<Long, HashMap<Long, QuorumServer>> positionToServers = new HashMap<>();
 
+    protected HashMap<Long, Integer> sidAndWebPort = new HashMap<Long, Integer>();
     protected long serverId;
     protected String myIp;
     protected HashMap<Long, Long> serverWeight = new HashMap<Long, Long>();
@@ -284,8 +286,11 @@ public class QuorumPeerConfig {
                 sidToClientPort.put(sid, Integer.valueOf(value));
             } else if (key.equals("is.tempory.add")) {
                 isTemporyAdd = Boolean.valueOf(value);
-            } else if (key.equals("web.port")) {
+            } else if (key.equals("webPort")) {
+                int dot = key.indexOf('.');
+                long sid = Long.parseLong(key.substring(dot + 1));
                 webPort = Integer.valueOf(value);
+                sidAndWebPort.put(sid, webPort);
             } else {
                 System.setProperty("zookeeper." + key, value);
             }
@@ -432,6 +437,9 @@ public class QuorumPeerConfig {
                     m2mAddressToId.getAddress() + ":"
                             + sidToClientPort.get(m2mAddressToId.getSid()),
                     m2mAddressToId.getSid());
+            NetworkPool.webPort.put(m2mAddressToId.getAddress() + ":"
+                    + sidToClientPort.get(m2mAddressToId.getSid()),
+                    sidAndWebPort.get(m2mAddressToId.getSid()));
         }
         networkPool.setServers(serversStrings.toArray(new String[serversStrings
                 .size()]));
