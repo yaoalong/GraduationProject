@@ -39,6 +39,9 @@ public class WebServerChannelHandler extends
 
     }
 
+    private int zxid = 0;
+    private ConcurrentHashMap<Integer, List<String>> result = new ConcurrentHashMap<Integer, List<String>>();
+    private ConcurrentHashMap<Integer, Integer> serverResult = new ConcurrentHashMap<Integer, Integer>();
     @SuppressWarnings("deprecation")
     private static final AttributeKey<Channel> STATE = new AttributeKey<Channel>(
             "MyHandler.nettyServerCnxn");
@@ -81,7 +84,38 @@ public class WebServerChannelHandler extends
                 tcpClient.write(m2mPacket);
             }
 
-        } else if (m2mPacket.getM2mReplyHeader().getXid() == 2) {
+        } else if (m2mPacket.getM2mRequestHeader().getType() == 4) {
+            M2mWebRetriveKeyResponse m2mWebRetriveKeyResponse = (M2mWebRetriveKeyResponse) m2mPacket
+                    .getResponse();
+            for (String server : m2mWebRetriveKeyResponse.getServers()) {
+                if (result.get(m2mPacket.getM2mRequestHeader().getXid()) != null) {
+                    result.get(m2mPacket.getM2mRequestHeader().getXid()).add(
+                            server);
+                } else {
+                    List<String> serverList = new ArrayList<>();
+                    serverList.add(server);
+                    result.put(m2mPacket.getM2mRequestHeader().getXid(),
+                            serverList);
+                }
+
+            }
+            if (serverResult.get(m2mPacket.getM2mRequestHeader().getXid()) == null) {
+                serverResult.put(m2mPacket.getM2mRequestHeader().getXid(), 1);
+            } else {
+                serverResult.put(m2mPacket.getM2mRequestHeader().getXid(),
+                        serverResult.get(m2mPacket.getM2mRequestHeader()
+                                .getXid()) + 1);
+            }
+
+            if (serverResult.get(m2mPacket.getM2mRequestHeader().getXid()) >= serverCnxnFactory
+                    .getReplicationFactor()) {
+                M2mWebPacket m2mWebPacket = new M2mWebPacket(
+                        m2mPacket.getM2mRequestHeader(),
+                        m2mPacket.getM2mReplyHeader(), m2mPacket.getRequest(),
+                        new M2mWebRetriveKeyResponse(result.get(m2mPacket
+                                .getM2mRequestHeader().getXid())));
+                ctx.writeAndFlush(m2mWebPacket);
+            }
 
         }
     }
@@ -139,4 +173,13 @@ public class WebServerChannelHandler extends
         }
         ctx.close();
     }
+
+    public int getNextZxid() {
+        return zxid++;
+    }
+
+    public void setZxid(int zxid) {
+        this.zxid = zxid;
+    }
+
 }
