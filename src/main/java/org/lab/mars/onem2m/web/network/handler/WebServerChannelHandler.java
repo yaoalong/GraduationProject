@@ -14,11 +14,15 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.lab.mars.onem2m.consistent.hash.NetworkPool;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
+import org.lab.mars.onem2m.network.TcpClient;
 import org.lab.mars.onem2m.server.ServerCnxnFactory;
+import org.lab.mars.onem2m.server.ZKDatabase;
+import org.lab.mars.onem2m.server.ZooKeeperServer;
 import org.lab.mars.onem2m.web.nework.protol.M2mServerStatusDO;
 import org.lab.mars.onem2m.web.nework.protol.M2mServerStatusDOs;
 import org.lab.mars.onem2m.web.nework.protol.M2mWebGetDataResponse;
 import org.lab.mars.onem2m.web.nework.protol.M2mWebPacket;
+import org.lab.mars.onem2m.web.nework.protol.M2mWebRetriveKeyResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,9 +31,11 @@ public class WebServerChannelHandler extends
     private static Logger LOG = LoggerFactory
             .getLogger(WebServerChannelHandler.class);
     private NetworkPool networkPool;
+    private ServerCnxnFactory serverCnxnFactory;
 
     public WebServerChannelHandler(ServerCnxnFactory serverCnxnFactory) {
         this.networkPool = serverCnxnFactory.getNetworkPool();
+        this.serverCnxnFactory = serverCnxnFactory;
 
     }
 
@@ -44,14 +50,49 @@ public class WebServerChannelHandler extends
             try {
                 lookAllServerStatus(m2mPacket, ctx.attr(STATE).get());
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOG.error("channelRead is error:because of:{}", e.getMessage());
             }
-        } else {
+        } else if (m2mPacket.getM2mRequestHeader().getType() == 2) { // 查看本地是否包含一个key
+            String key = m2mPacket.getM2mRequestHeader().getKey();
+            final ConcurrentHashMap<String, ZooKeeperServer> zookeeperServers = serverCnxnFactory
+                    .getZkServers();
+            List<String> servers = new ArrayList<String>();
+            for (Entry<String, ZooKeeperServer> entry : zookeeperServers
+                    .entrySet()) {
+                ZooKeeperServer zooKeeperServer = entry.getValue();
+                ZKDatabase zkDatabase = zooKeeperServer.getZKDatabase();
+                if (zkDatabase.getM2mData().getNodes().containsKey(key)) {
+                    servers.add(entry.getKey());
+                }
+            }
+            M2mWebPacket m2mWebPacket = new M2mWebPacket(
+                    m2mPacket.getM2mRequestHeader(),
+                    m2mPacket.getM2mReplyHeader(), m2mPacket.getRequest(),
+                    new M2mWebRetriveKeyResponse(servers));
+            ctx.writeAndFlush(m2mWebPacket);
+        } else if (m2mPacket.getM2mRequestHeader().getType() == 3) { // 要查看所有的key
+            String server = networkPool.getSock(m2mPacket.getM2mRequestHeader()
+                    .getKey());
+
+            for (int i = 0; i < serverCnxnFactory.getReplicationFactor(); i++) {
+                TcpClient tcpClient = new TcpClient();
+                Long position = networkPool.getServerPosition().get(server);
+                tcpClient.connectionOne("localhost", 44444);
+                tcpClient.write(m2mPacket);
+            }
+
+        } else if (m2mPacket.getM2mReplyHeader().getXid() == 2) {
 
         }
     }
 
+    /**
+     * 去查询所有的server的状态
+     * 
+     * @param m2mWebPacket
+     * @param channel
+     * @throws IOException
+     */
     public void lookAllServerStatus(M2mWebPacket m2mWebPacket, Channel channel)
             throws IOException {
         M2mServerStatusDOs m2mServerStatuses = new M2mServerStatusDOs();
@@ -60,8 +101,6 @@ public class WebServerChannelHandler extends
         List<M2mServerStatusDO> m2mServerStatusDOs = new ArrayList<>();
         for (Entry<Long, String> survivalServer : survivalServers.entrySet()) {
             M2mServerStatusDO m2mServerStatusDO = new M2mServerStatusDO();
-            System.out.println("key:" + survivalServer.getKey());
-            System.out.println("value" + survivalServer.getValue());
             m2mServerStatusDO.setId(survivalServer.getKey());
             m2mServerStatusDO.setIp(survivalServer.getValue());
             m2mServerStatusDO.setStatus(1);
