@@ -1,7 +1,7 @@
 package org.lab.mars.onem2m.web.nework.protol;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.lab.mars.onem2m.jute.M2mBinaryInputArchive;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
@@ -15,17 +15,17 @@ public class M2mWebRetriveKeyResponse implements M2mRecord {
      * 
      */
     private static final long serialVersionUID = 3367783772293345229L;
-    private List<String> servers;
+    private Set<String> servers;
 
-    public M2mWebRetriveKeyResponse(List<String> servers) {
+    public M2mWebRetriveKeyResponse(Set<String> servers) {
         this.servers = servers;
     }
 
-    public List<String> getServers() {
+    public Set<String> getServers() {
         return servers;
     }
 
-    public void setServers(List<String> servers) {
+    public void setServers(Set<String> servers) {
         this.servers = servers;
     }
 
@@ -33,8 +33,8 @@ public class M2mWebRetriveKeyResponse implements M2mRecord {
             throws java.io.IOException {
         a_.startRecord(this, tag);
         a_.writeInt(servers.size(), "size");
-        for (int i = 0; i < servers.size(); i++) {
-            a_.writeString(servers.get(i), "server");
+        for (String server : servers) {
+            a_.writeString(server, "server");
         }
         a_.endRecord(this, tag);
     }
@@ -43,7 +43,7 @@ public class M2mWebRetriveKeyResponse implements M2mRecord {
             throws java.io.IOException {
         a_.startRecord(tag);
         int size = a_.readInt("size");
-        List<String> serverStrings = new ArrayList<String>();
+        Set<String> serverStrings = new HashSet<String>();
         for (int i = 0; i < size; i++) {
             String server = a_.readString("server");
             serverStrings.add(server);

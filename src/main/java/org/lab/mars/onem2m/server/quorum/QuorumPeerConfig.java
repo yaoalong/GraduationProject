@@ -42,7 +42,6 @@ import org.lab.mars.onem2m.server.quorum.QuorumPeer.QuorumServer;
 import org.lab.mars.onem2m.server.quorum.flexible.QuorumHierarchical;
 import org.lab.mars.onem2m.server.quorum.flexible.QuorumMaj;
 import org.lab.mars.onem2m.server.quorum.flexible.QuorumVerifier;
-import org.omg.CORBA.PUBLIC_MEMBER;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -286,7 +285,7 @@ public class QuorumPeerConfig {
                 sidToClientPort.put(sid, Integer.valueOf(value));
             } else if (key.equals("is.tempory.add")) {
                 isTemporyAdd = Boolean.valueOf(value);
-            } else if (key.equals("webPort")) {
+            } else if (key.startsWith("webPort")) {
                 int dot = key.indexOf('.');
                 long sid = Long.parseLong(key.substring(dot + 1));
                 webPort = Integer.valueOf(value);
@@ -437,6 +436,20 @@ public class QuorumPeerConfig {
                     m2mAddressToId.getAddress() + ":"
                             + sidToClientPort.get(m2mAddressToId.getSid()),
                     m2mAddressToId.getSid());
+            if (m2mAddressToId.getAddress() == null) {
+                System.out.println("错误");
+            }
+            if (sidToClientPort.get(m2mAddressToId.getSid()) == null) {
+                System.out.println("错误2");
+            }
+            if (sidAndWebPort.get(m2mAddressToId.getSid()) == null) {
+                System.out.println(m2mAddressToId.getSid() + "sid");
+                for (Entry<Long, Integer> entry : sidAndWebPort.entrySet()) {
+                    System.out.println("sid:" + entry.getKey());
+                    System.out.println("port:" + entry.getValue());
+                }
+                System.out.println("error 3");
+            }
             NetworkPool.webPort.put(m2mAddressToId.getAddress() + ":"
                     + sidToClientPort.get(m2mAddressToId.getSid()),
                     sidAndWebPort.get(m2mAddressToId.getSid()));

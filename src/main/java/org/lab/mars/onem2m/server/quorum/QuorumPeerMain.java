@@ -238,7 +238,8 @@ public class QuorumPeerMain {
                 }
             }
             WebTcpServer webTcpServer = new WebTcpServer(cnxnFactory);
-            webTcpServer.bind("localhost", config.getWebPort());
+            webTcpServer.bind("localhost",
+                    config.sidAndWebPort.get(config.serverId));
             for (QuorumPeer quorumPeer : quorumPeers) {
                 quorumPeer.join();
             }

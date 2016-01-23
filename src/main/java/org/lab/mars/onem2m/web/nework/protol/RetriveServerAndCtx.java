@@ -2,15 +2,15 @@ package org.lab.mars.onem2m.web.nework.protol;
 
 import io.netty.channel.ChannelHandlerContext;
 
-import java.util.List;
+import java.util.Set;
 
 public class RetriveServerAndCtx {
 
     private ChannelHandlerContext ctx;
 
-    private List<String> servers;
+    private Set<String> servers;
 
-    public RetriveServerAndCtx(ChannelHandlerContext ctx, List<String> servers) {
+    public RetriveServerAndCtx(ChannelHandlerContext ctx, Set<String> servers) {
         this.ctx = ctx;
         this.servers = servers;
     }
@@ -23,11 +23,11 @@ public class RetriveServerAndCtx {
         this.ctx = ctx;
     }
 
-    public List<String> getServers() {
+    public Set<String> getServers() {
         return servers;
     }
 
-    public void setServers(List<String> servers) {
+    public void setServers(Set<String> servers) {
         this.servers = servers;
     }
 

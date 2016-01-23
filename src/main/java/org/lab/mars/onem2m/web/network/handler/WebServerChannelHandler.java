@@ -8,16 +8,19 @@ import io.netty.util.AttributeKey;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.lab.mars.onem2m.consistent.hash.NetworkPool;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
-import org.lab.mars.onem2m.network.TcpClient;
+import org.lab.mars.onem2m.server.M2mDataNode;
 import org.lab.mars.onem2m.server.ServerCnxnFactory;
 import org.lab.mars.onem2m.server.ZKDatabase;
 import org.lab.mars.onem2m.server.ZooKeeperServer;
+import org.lab.mars.onem2m.web.network.WebTcpClient;
 import org.lab.mars.onem2m.web.nework.protol.M2mServerStatusDO;
 import org.lab.mars.onem2m.web.nework.protol.M2mServerStatusDOs;
 import org.lab.mars.onem2m.web.nework.protol.M2mWebGetDataResponse;
@@ -41,8 +44,8 @@ public class WebServerChannelHandler extends
     }
 
     private int zxid = 0;
-    private ConcurrentHashMap<Integer, RetriveServerAndCtx> result = new ConcurrentHashMap<Integer, RetriveServerAndCtx>();
-    private ConcurrentHashMap<Integer, Integer> serverResult = new ConcurrentHashMap<Integer, Integer>();
+    static ConcurrentHashMap<Integer, RetriveServerAndCtx> result = new ConcurrentHashMap<Integer, RetriveServerAndCtx>();
+    static ConcurrentHashMap<Integer, Integer> serverResult = new ConcurrentHashMap<Integer, Integer>();
     @SuppressWarnings("deprecation")
     private static final AttributeKey<Channel> STATE = new AttributeKey<Channel>(
             "MyHandler.nettyServerCnxn");
@@ -60,11 +63,16 @@ public class WebServerChannelHandler extends
             String key = m2mPacket.getM2mRequestHeader().getKey();
             final ConcurrentHashMap<String, ZooKeeperServer> zookeeperServers = serverCnxnFactory
                     .getZkServers();
-            List<String> servers = new ArrayList<String>();
+            Set<String> servers = new HashSet<String>();
             for (Entry<String, ZooKeeperServer> entry : zookeeperServers
                     .entrySet()) {
                 ZooKeeperServer zooKeeperServer = entry.getValue();
                 ZKDatabase zkDatabase = zooKeeperServer.getZKDatabase();
+                System.out.println("Key" + key);
+                for (Entry<String, M2mDataNode> entry2 : zkDatabase
+                        .getM2mData().getNodes().entrySet()) {
+                    System.out.println("m2mDataNode:" + entry2.getKey());
+                }
                 if (zkDatabase.getM2mData().getNodes().containsKey(key)) {
                     servers.add(entry.getKey());
                 }
@@ -78,10 +86,13 @@ public class WebServerChannelHandler extends
         } else if (m2mPacket.getM2mRequestHeader().getType() == 3) { // 要查看所有的key
             String server = networkPool.getSock(m2mPacket.getM2mRequestHeader()
                     .getKey());
-            result.put(1, new RetriveServerAndCtx(ctx, new ArrayList<String>()));
+            result.put(1, new RetriveServerAndCtx(ctx, new HashSet<String>()));
+            serverResult.put(1, 0);
+            m2mPacket.getM2mRequestHeader().setXid(1);
+            m2mPacket.getM2mRequestHeader().setType(2);
             Long position = networkPool.getServerPosition().get(server);
             for (int i = 0; i < serverCnxnFactory.getReplicationFactor(); i++) {
-                TcpClient tcpClient = new TcpClient();
+                WebTcpClient tcpClient = new WebTcpClient();
                 tcpClient
                         .connectionOne("localhost", NetworkPool.webPort
                                 .get(networkPool.getPositionToServer().get(
@@ -90,29 +101,6 @@ public class WebServerChannelHandler extends
             }
 
         } else if (m2mPacket.getM2mRequestHeader().getType() == 4) {
-            M2mWebRetriveKeyResponse m2mWebRetriveKeyResponse = (M2mWebRetriveKeyResponse) m2mPacket
-                    .getResponse();
-            for (String server : m2mWebRetriveKeyResponse.getServers()) {
-
-                result.get(m2mPacket.getM2mRequestHeader().getKey())
-                        .getServers().add(server);
-
-            }
-
-            serverResult
-                    .put(m2mPacket.getM2mRequestHeader().getXid(), serverResult
-                            .get(m2mPacket.getM2mRequestHeader().getXid()) + 1);
-
-            if (serverResult.get(m2mPacket.getM2mRequestHeader().getXid()) >= serverCnxnFactory
-                    .getReplicationFactor()) {
-                M2mWebPacket m2mWebPacket = new M2mWebPacket(
-                        m2mPacket.getM2mRequestHeader(),
-                        m2mPacket.getM2mReplyHeader(), m2mPacket.getRequest(),
-                        new M2mWebRetriveKeyResponse(result.get(
-                                m2mPacket.getM2mRequestHeader().getXid())
-                                .getServers()));
-                ctx.writeAndFlush(m2mWebPacket);
-            }
 
         }
     }
