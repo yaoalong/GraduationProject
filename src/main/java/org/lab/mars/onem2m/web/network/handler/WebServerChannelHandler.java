@@ -23,6 +23,7 @@ import org.lab.mars.onem2m.web.nework.protol.M2mServerStatusDOs;
 import org.lab.mars.onem2m.web.nework.protol.M2mWebGetDataResponse;
 import org.lab.mars.onem2m.web.nework.protol.M2mWebPacket;
 import org.lab.mars.onem2m.web.nework.protol.M2mWebRetriveKeyResponse;
+import org.lab.mars.onem2m.web.nework.protol.RetriveServerAndCtx;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +41,7 @@ public class WebServerChannelHandler extends
     }
 
     private int zxid = 0;
-    private ConcurrentHashMap<Integer, List<String>> result = new ConcurrentHashMap<Integer, List<String>>();
+    private ConcurrentHashMap<Integer, RetriveServerAndCtx> result = new ConcurrentHashMap<Integer, RetriveServerAndCtx>();
     private ConcurrentHashMap<Integer, Integer> serverResult = new ConcurrentHashMap<Integer, Integer>();
     @SuppressWarnings("deprecation")
     private static final AttributeKey<Channel> STATE = new AttributeKey<Channel>(
@@ -76,44 +77,37 @@ public class WebServerChannelHandler extends
         } else if (m2mPacket.getM2mRequestHeader().getType() == 3) { // 要查看所有的key
             String server = networkPool.getSock(m2mPacket.getM2mRequestHeader()
                     .getKey());
-
+            result.put(1, new RetriveServerAndCtx(ctx, new ArrayList<String>()));
             for (int i = 0; i < serverCnxnFactory.getReplicationFactor(); i++) {
                 TcpClient tcpClient = new TcpClient();
                 Long position = networkPool.getServerPosition().get(server);
                 tcpClient.connectionOne("localhost", 44444);
                 tcpClient.write(m2mPacket);
+
             }
 
         } else if (m2mPacket.getM2mRequestHeader().getType() == 4) {
             M2mWebRetriveKeyResponse m2mWebRetriveKeyResponse = (M2mWebRetriveKeyResponse) m2mPacket
                     .getResponse();
             for (String server : m2mWebRetriveKeyResponse.getServers()) {
-                if (result.get(m2mPacket.getM2mRequestHeader().getXid()) != null) {
-                    result.get(m2mPacket.getM2mRequestHeader().getXid()).add(
-                            server);
-                } else {
-                    List<String> serverList = new ArrayList<>();
-                    serverList.add(server);
-                    result.put(m2mPacket.getM2mRequestHeader().getXid(),
-                            serverList);
-                }
+
+                result.get(m2mPacket.getM2mRequestHeader().getKey())
+                        .getServers().add(server);
 
             }
-            if (serverResult.get(m2mPacket.getM2mRequestHeader().getXid()) == null) {
-                serverResult.put(m2mPacket.getM2mRequestHeader().getXid(), 1);
-            } else {
-                serverResult.put(m2mPacket.getM2mRequestHeader().getXid(),
-                        serverResult.get(m2mPacket.getM2mRequestHeader()
-                                .getXid()) + 1);
-            }
+
+            serverResult
+                    .put(m2mPacket.getM2mRequestHeader().getXid(), serverResult
+                            .get(m2mPacket.getM2mRequestHeader().getXid()) + 1);
 
             if (serverResult.get(m2mPacket.getM2mRequestHeader().getXid()) >= serverCnxnFactory
                     .getReplicationFactor()) {
                 M2mWebPacket m2mWebPacket = new M2mWebPacket(
                         m2mPacket.getM2mRequestHeader(),
                         m2mPacket.getM2mReplyHeader(), m2mPacket.getRequest(),
-                        new M2mWebRetriveKeyResponse(result.get(m2mPacket
-                                .getM2mRequestHeader().getXid())));
+                        new M2mWebRetriveKeyResponse(result.get(
+                                m2mPacket.getM2mRequestHeader().getXid())
+                                .getServers()));
                 ctx.writeAndFlush(m2mWebPacket);
             }
 
