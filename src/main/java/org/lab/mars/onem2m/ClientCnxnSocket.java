@@ -41,7 +41,8 @@ import org.slf4j.LoggerFactory;
  * 
  */
 abstract class ClientCnxnSocket {
-    private static final Logger LOG = LoggerFactory.getLogger(ClientCnxnSocket.class);
+    private static final Logger LOG = LoggerFactory
+            .getLogger(ClientCnxnSocket.class);
 
     protected boolean initialized;
 
@@ -60,7 +61,6 @@ abstract class ClientCnxnSocket {
     protected long lastHeard;
     protected long lastSend;
     protected long now;
-    protected ClientCnxn.SendThread sendThread;
 
     /**
      * The sessionId is only available here for Log and Exception messages.
@@ -68,8 +68,7 @@ abstract class ClientCnxnSocket {
      */
     protected long sessionId;
 
-    void introduce(ClientCnxn.SendThread sendThread, long sessionId) {
-        this.sendThread = sendThread;
+    void introduce(long sessionId) {
         this.sessionId = sessionId;
     }
 
@@ -108,9 +107,6 @@ abstract class ClientCnxnSocket {
 
     protected void readLength() throws IOException {
         int len = incomingBuffer.getInt();
-        if (len < 0 || len >= ClientCnxn.packetLen) {
-            throw new IOException("Packet len" + len + " is out of range!");
-        }
         incomingBuffer = ByteBuffer.allocate(len);
     }
 
@@ -129,19 +125,7 @@ abstract class ClientCnxnSocket {
         ConnectResponse conRsp = new ConnectResponse();
         conRsp.deserialize(bbia, "connect");
 
-        // read "is read-only" flag
-        boolean isRO = false;
-        try {
-            isRO = bbia.readBool("readOnly");
-        } catch (IOException e) {
-            // this is ok -- just a packet from an old server which
-            // doesn't contain readOnly field
-            LOG.warn("Connected to an old server; r-o mode will be unavailable");
-        }
-
         this.sessionId = conRsp.getSessionId();
-        sendThread.onConnected(conRsp.getTimeOut(), this.sessionId,
-                conRsp.getPasswd(), isRO);
     }
 
     abstract boolean isConnected();

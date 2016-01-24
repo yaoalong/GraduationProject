@@ -9,6 +9,11 @@ import io.netty.handler.codec.serialization.ObjectEncoder;
 
 import org.lab.mars.onem2m.web.network.handler.WebClientChannelHandler;
 
+/**
+ * @author yaoalong
+ * @Date 2016年1月24日
+ * @Email yaoalong@foxmail.com
+ */
 public class WebClientChannelInitializer extends
         ChannelInitializer<SocketChannel> {
     @Override

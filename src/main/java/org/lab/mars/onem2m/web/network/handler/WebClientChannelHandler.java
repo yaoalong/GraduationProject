@@ -3,33 +3,28 @@ package org.lab.mars.onem2m.web.network.handler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
-import java.io.IOException;
-
-import org.lab.mars.onem2m.KeeperException;
-import org.lab.mars.onem2m.test.Test;
 import org.lab.mars.onem2m.web.nework.protol.M2mWebPacket;
 import org.lab.mars.onem2m.web.nework.protol.M2mWebRetriveKeyResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+/**
+ * 
+ * @author yaoalong
+ * @Date 2016年1月24日
+ * @Email yaoalong@foxmail.com
+ */
 public class WebClientChannelHandler extends
         SimpleChannelInboundHandler<Object> {
-    /**
-     * Creates a client-side handler.
-     */
-    public WebClientChannelHandler() throws KeeperException,
-            InterruptedException {
-        try {
-            Test.createM2mCreatePacket();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+    private static final Logger LOG = LoggerFactory
+            .getLogger(WebClientChannelHandler.class);
+
+    public WebClientChannelHandler() {
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
-        // Send the first message if this handler is a client-side handler.
-        // ctx.writeAndFlush(m2mPacket);
-        // System.out.println("发送成功");
+
     }
 
     @Override
@@ -69,7 +64,6 @@ public class WebClientChannelHandler extends
             WebServerChannelHandler.result
                     .get(m2mPacket.getM2mRequestHeader().getXid()).getCtx()
                     .writeAndFlush(m2mWebPacket);
-            System.out.println("发送成功");
         }
     }
 

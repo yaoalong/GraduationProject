@@ -14,7 +14,7 @@ public class ZooKeeper_Constructor_Usage implements Watcher {
     public static void main(String args[]) throws IOException {
         ZooKeeper zooKeeper = new ZooKeeper("192.168.10.139:2182", 5000,
                 new ZooKeeper_Constructor_Usage());
-        System.out.println(zooKeeper.getState());
+
         try {
             countDownLatch.await();
         } catch (Exception e) {

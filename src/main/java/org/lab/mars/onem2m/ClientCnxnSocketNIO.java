@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
 
-import org.lab.mars.onem2m.ClientCnxn.EndOfStreamException;
 import org.lab.mars.onem2m.ClientCnxn.Packet;
 import org.lab.mars.onem2m.ZooDefs.OpCode;
 import org.slf4j.Logger;
@@ -52,14 +51,14 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
     boolean isConnected() {
         return sockKey != null;
     }
-    
+
     /**
      * @return true if a packet was received
      * @throws InterruptedException
      * @throws IOException
      */
-    void doIO(List<Packet> pendingQueue, LinkedList<Packet> outgoingQueue, ClientCnxn cnxn)
-      throws InterruptedException, IOException {
+    void doIO(List<Packet> pendingQueue, LinkedList<Packet> outgoingQueue,
+            ClientCnxn cnxn) throws InterruptedException, IOException {
         SocketChannel sock = (SocketChannel) sockKey.channel();
         if (sock == null) {
             throw new IOException("Socket is null!");
@@ -67,10 +66,7 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
         if (sockKey.isReadable()) {
             int rc = sock.read(incomingBuffer);
             if (rc < 0) {
-                throw new EndOfStreamException(
-                        "Unable to read additional data from server sessionid 0x"
-                                + Long.toHexString(sessionId)
-                                + ", likely server has closed socket");
+
             }
             if (!incomingBuffer.hasRemaining()) {
                 incomingBuffer.flip();
@@ -81,9 +77,12 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
                     readConnectResult();
                     enableRead();
                     if (findSendablePacket(outgoingQueue,
-                            cnxn.sendThread.clientTunneledAuthenticationInProgress()) != null) {
-                        // Since SASL authentication has completed (if client is configured to do so),
-                        // outgoing packets waiting in the outgoingQueue can now be sent.
+                            cnxn.sendThread
+                                    .clientTunneledAuthenticationInProgress()) != null) {
+                        // Since SASL authentication has completed (if client is
+                        // configured to do so),
+                        // outgoing packets waiting in the outgoingQueue can now
+                        // be sent.
                         enableWrite();
                     }
                     lenBuffer.clear();
@@ -91,29 +90,16 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
                     updateLastHeard();
                     initialized = true;
                 } else {
-                    sendThread.readResponse(incomingBuffer);
-                    lenBuffer.clear();
-                    incomingBuffer = lenBuffer;
-                    updateLastHeard();
                 }
             }
         }
         if (sockKey.isWritable()) {
-            synchronized(outgoingQueue) {
+            synchronized (outgoingQueue) {
                 Packet p = findSendablePacket(outgoingQueue,
-                        cnxn.sendThread.clientTunneledAuthenticationInProgress());
+                        cnxn.sendThread
+                                .clientTunneledAuthenticationInProgress());
 
                 if (p != null) {
-                    updateLastSend();
-                    // If we already started writing p, p.bb will already exist
-                    if (p.bb == null) {
-                        if ((p.requestHeader != null) &&
-                                (p.requestHeader.getType() != OpCode.ping) &&
-                                (p.requestHeader.getType() != OpCode.auth)) {
-                            p.requestHeader.setXid(cnxn.getXid());
-                        }
-                        p.createBB();
-                    }
                     sock.write(p.bb);
                     if (!p.bb.hasRemaining()) {
                         sentCount++;
@@ -137,12 +123,12 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
                 } else if (!initialized && p != null && !p.bb.hasRemaining()) {
                     // On initial connection, write the complete connect request
                     // packet, but then disable further writes until after
-                    // receiving a successful connection response.  If the
+                    // receiving a successful connection response. If the
                     // session is expired, then the server sends the expiration
-                    // response and immediately closes its end of the socket.  If
+                    // response and immediately closes its end of the socket. If
                     // the client is simultaneously writing on its end, then the
                     // TCP stack may choose to abort with RST, in which case the
-                    // client would never receive the session expired event.  See
+                    // client would never receive the session expired event. See
                     // http://docs.oracle.com/javase/6/docs/technotes/guides/net/articles/connection_release.html
                     disableWrite();
                 } else {
@@ -154,13 +140,15 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
     }
 
     private Packet findSendablePacket(LinkedList<Packet> outgoingQueue,
-                                      boolean clientTunneledAuthenticationInProgress) {
+            boolean clientTunneledAuthenticationInProgress) {
         synchronized (outgoingQueue) {
             if (outgoingQueue.isEmpty()) {
                 return null;
             }
-            if (outgoingQueue.getFirst().bb != null // If we've already starting sending the first packet, we better finish
-                || !clientTunneledAuthenticationInProgress) {
+            if (outgoingQueue.getFirst().bb != null // If we've already starting
+                                                    // sending the first packet,
+                                                    // we better finish
+                    || !clientTunneledAuthenticationInProgress) {
                 return outgoingQueue.getFirst();
             }
 
@@ -173,16 +161,18 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
             while (iter.hasNext()) {
                 Packet p = iter.next();
                 if (p.requestHeader == null) {
-                    // We've found the priming-packet. Move it to the beginning of the queue.
+                    // We've found the priming-packet. Move it to the beginning
+                    // of the queue.
                     iter.remove();
                     outgoingQueue.add(0, p);
                     return p;
                 } else {
-                    // Non-priming packet: defer it until later, leaving it in the queue
+                    // Non-priming packet: defer it until later, leaving it in
+                    // the queue
                     // until authentication completes.
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("deferring non-priming packet: " + p +
-                                "until SASL authentication completes.");
+                        LOG.debug("deferring non-priming packet: " + p
+                                + "until SASL authentication completes.");
                     }
                 }
             }
@@ -207,8 +197,7 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
                 sock.socket().shutdownOutput();
             } catch (IOException e) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Ignoring exception during shutdown output",
-                            e);
+                    LOG.debug("Ignoring exception during shutdown output", e);
                 }
             }
             try {
@@ -235,7 +224,7 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
         }
         sockKey = null;
     }
- 
+
     @Override
     void close() {
         try {
@@ -250,9 +239,10 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
             LOG.warn("Ignoring exception during selector close", e);
         }
     }
-    
+
     /**
      * create a socket channel.
+     * 
      * @return the created socket channel
      * @throws IOException
      */
@@ -267,24 +257,22 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
 
     /**
      * register with the selection and connect
-     * @param sock the {@link SocketChannel} 
-     * @param addr the address of remote host
+     * 
+     * @param sock
+     *            the {@link SocketChannel}
+     * @param addr
+     *            the address of remote host
      * @throws IOException
      */
-    void registerAndConnect(SocketChannel sock, InetSocketAddress addr) 
-    throws IOException {
-        sockKey = sock.register(selector, SelectionKey.OP_CONNECT);
-        boolean immediateConnect = sock.connect(addr);
-        if (immediateConnect) {
-            sendThread.primeConnection();
-        }
+    void registerAndConnect(SocketChannel sock, InetSocketAddress addr)
+            throws IOException {
     }
-    
+
     @Override
     void connect(InetSocketAddress addr) throws IOException {
         SocketChannel sock = createSock();
         try {
-           registerAndConnect(sock, addr);
+            registerAndConnect(sock, addr);
         } catch (IOException e) {
             LOG.error("Unable to open socket to " + addr);
             sock.close();
@@ -341,10 +329,10 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
     synchronized void wakeupCnxn() {
         selector.wakeup();
     }
-    
+
     @Override
-    void doTransport(int waitTimeOut, List<Packet> pendingQueue, LinkedList<Packet> outgoingQueue,
-                     ClientCnxn cnxn)
+    void doTransport(int waitTimeOut, List<Packet> pendingQueue,
+            LinkedList<Packet> outgoingQueue, ClientCnxn cnxn)
             throws IOException, InterruptedException {
         selector.select(waitTimeOut);
         Set<SelectionKey> selected;
@@ -355,29 +343,11 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
         // non blocking, so time is effectively a constant. That is
         // Why we just have to do this once, here
         updateNow();
-        for (SelectionKey k : selected) {
-            SocketChannel sc = ((SocketChannel) k.channel());
-            if ((k.readyOps() & SelectionKey.OP_CONNECT) != 0) {
-                if (sc.finishConnect()) {
-                    updateLastSendAndHeard();
-                    sendThread.primeConnection();
-                }
-            } else if ((k.readyOps() & (SelectionKey.OP_READ | SelectionKey.OP_WRITE)) != 0) {
-                doIO(pendingQueue, outgoingQueue, cnxn);
-            }
-        }
-        if (sendThread.getZkState().isConnected()) {
-            synchronized(outgoingQueue) {
-                if (findSendablePacket(outgoingQueue,
-                        cnxn.sendThread.clientTunneledAuthenticationInProgress()) != null) {
-                    enableWrite();
-                }
-            }
-        }
+
         selected.clear();
     }
 
-    //TODO should this be synchronized?
+    // TODO should this be synchronized?
     @Override
     void testableCloseSocket() throws IOException {
         LOG.info("testableCloseSocket() called");
@@ -426,6 +396,5 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
         ByteBuffer pbb = p.bb;
         sock.write(pbb);
     }
-
 
 }
