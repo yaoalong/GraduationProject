@@ -46,9 +46,6 @@ public class WebClientChannelHandler extends
         M2mWebRetriveKeyResponse m2mWebRetriveKeyResponse = (M2mWebRetriveKeyResponse) m2mPacket
                 .getResponse();
         for (String server : m2mWebRetriveKeyResponse.getServers()) {
-            System.out.println("server:" + server);
-            System.out.println("key:"
-                    + m2mPacket.getM2mRequestHeader().getKey());
 
             WebServerChannelHandler.result
                     .get(m2mPacket.getM2mRequestHeader().getXid()).getServers()

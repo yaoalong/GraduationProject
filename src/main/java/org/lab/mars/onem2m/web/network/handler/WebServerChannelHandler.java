@@ -1,9 +1,7 @@
 package org.lab.mars.onem2m.web.network.handler;
 
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.util.AttributeKey;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -13,14 +11,15 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.lab.mars.onem2m.consistent.hash.NetworkPool;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
-import org.lab.mars.onem2m.server.M2mDataNode;
 import org.lab.mars.onem2m.server.ServerCnxnFactory;
 import org.lab.mars.onem2m.server.ZKDatabase;
 import org.lab.mars.onem2m.server.ZooKeeperServer;
 import org.lab.mars.onem2m.web.network.WebTcpClient;
+import org.lab.mars.onem2m.web.network.constant.OperateCode;
 import org.lab.mars.onem2m.web.nework.protol.M2mServerStatusDO;
 import org.lab.mars.onem2m.web.nework.protol.M2mServerStatusDOs;
 import org.lab.mars.onem2m.web.nework.protol.M2mWebGetDataResponse;
@@ -43,24 +42,30 @@ public class WebServerChannelHandler extends
 
     }
 
-    private int zxid = 0;
+    private AtomicInteger zxid = new AtomicInteger(0);
     static ConcurrentHashMap<Integer, RetriveServerAndCtx> result = new ConcurrentHashMap<Integer, RetriveServerAndCtx>();
     static ConcurrentHashMap<Integer, Integer> serverResult = new ConcurrentHashMap<Integer, Integer>();
-    @SuppressWarnings("deprecation")
-    private static final AttributeKey<Channel> STATE = new AttributeKey<Channel>(
-            "MyHandler.nettyServerCnxn");
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, Object msg) {
         M2mWebPacket m2mPacket = (M2mWebPacket) msg;
-        if (m2mPacket.getM2mRequestHeader().getType() == 1) {
+        int operateType = m2mPacket.getM2mRequestHeader().getType();
+        if (operateType == OperateCode.getStatus.getCode()) {
             try {
-                lookAllServerStatus(m2mPacket, ctx.attr(STATE).get());
+                lookAllServerStatus(m2mPacket, ctx);
             } catch (IOException e) {
-                LOG.error("channelRead is error:because of:{}", e.getMessage());
+                if (LOG.isInfoEnabled()) {
+                    LOG.error("channelRead is error:because of:{}",
+                            e.getMessage());
+                }
             }
-        } else if (m2mPacket.getM2mRequestHeader().getType() == 2) { // 查看本地是否包含一个key
+        } else if (operateType == OperateCode.retriveLocalKey.getCode()) { // 查看本地是否包含一个key
             String key = m2mPacket.getM2mRequestHeader().getKey();
+            if (key == null) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("key is null");
+                }
+            }
             final ConcurrentHashMap<String, ZooKeeperServer> zookeeperServers = serverCnxnFactory
                     .getZkServers();
             Set<String> servers = new HashSet<String>();
@@ -68,28 +73,27 @@ public class WebServerChannelHandler extends
                     .entrySet()) {
                 ZooKeeperServer zooKeeperServer = entry.getValue();
                 ZKDatabase zkDatabase = zooKeeperServer.getZKDatabase();
-                System.out.println("Key" + key);
-                for (Entry<String, M2mDataNode> entry2 : zkDatabase
-                        .getM2mData().getNodes().entrySet()) {
-                    System.out.println("m2mDataNode:" + entry2.getKey());
-                }
                 if (zkDatabase.getM2mData().getNodes().containsKey(key)) {
                     servers.add(entry.getKey());
                 }
             }
-            m2mPacket.getM2mRequestHeader().setType(4);
+            m2mPacket.getM2mRequestHeader().setType(
+                    OperateCode.ReplyRetriverRemoteKey.getCode());
             M2mWebPacket m2mWebPacket = new M2mWebPacket(
                     m2mPacket.getM2mRequestHeader(),
                     m2mPacket.getM2mReplyHeader(), m2mPacket.getRequest(),
                     new M2mWebRetriveKeyResponse(servers));
             ctx.writeAndFlush(m2mWebPacket);
-        } else if (m2mPacket.getM2mRequestHeader().getType() == 3) { // 要查看所有的key
+        } else if (operateType == OperateCode.retriveRemoteKey.getCode()) {
             String server = networkPool.getSock(m2mPacket.getM2mRequestHeader()
                     .getKey());
-            result.put(1, new RetriveServerAndCtx(ctx, new HashSet<String>()));
-            serverResult.put(1, 0);
-            m2mPacket.getM2mRequestHeader().setXid(1);
-            m2mPacket.getM2mRequestHeader().setType(2);
+            int zxid = getNextZxid();
+            result.put(zxid,
+                    new RetriveServerAndCtx(ctx, new HashSet<String>()));
+            serverResult.put(zxid, 0);
+            m2mPacket.getM2mRequestHeader().setXid(zxid);
+            m2mPacket.getM2mRequestHeader().setType(
+                    OperateCode.retriveLocalKey.getCode());
             Long position = networkPool.getServerPosition().get(server);
             for (int i = 0; i < serverCnxnFactory.getReplicationFactor(); i++) {
                 WebTcpClient tcpClient = new WebTcpClient(
@@ -101,8 +105,11 @@ public class WebServerChannelHandler extends
                 tcpClient.write(m2mPacket);
             }
 
-        } else if (m2mPacket.getM2mRequestHeader().getType() == 4) {
-
+        } else {
+            if (LOG.isDebugEnabled()) {
+                LOG.info("invalid operate type : {}", m2mPacket
+                        .getM2mRequestHeader().getType());
+            }
         }
     }
 
@@ -113,8 +120,8 @@ public class WebServerChannelHandler extends
      * @param channel
      * @throws IOException
      */
-    public void lookAllServerStatus(M2mWebPacket m2mWebPacket, Channel channel)
-            throws IOException {
+    public void lookAllServerStatus(M2mWebPacket m2mWebPacket,
+            ChannelHandlerContext ctx) throws IOException {
         M2mServerStatusDOs m2mServerStatuses = new M2mServerStatusDOs();
         final ConcurrentHashMap<Long, String> survivalServers = networkPool
                 .getPositionToServer();
@@ -137,13 +144,12 @@ public class WebServerChannelHandler extends
                 m2mWebPacket.getM2mRequestHeader(),
                 m2mWebPacket.getM2mReplyHeader(), m2mWebPacket.getRequest(),
                 m2mWebGetDataResponse);
-        channel.writeAndFlush(m2mPacket);
+        ctx.writeAndFlush(m2mPacket);
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
 
-        ctx.attr(STATE).set(ctx.channel());
         ctx.fireChannelRegistered();
     };
 
@@ -161,11 +167,11 @@ public class WebServerChannelHandler extends
     }
 
     public int getNextZxid() {
-        return zxid++;
+        return zxid.getAndIncrement();
     }
 
     public void setZxid(int zxid) {
-        this.zxid = zxid;
+        this.zxid.set(zxid);
     }
 
 }
