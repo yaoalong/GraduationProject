@@ -185,12 +185,6 @@ public class QuorumPeerConfig {
                 clientPortAddress = value.trim();
             } else if (key.equals("tickTime")) {
                 tickTime = Integer.parseInt(value);
-            } else if (key.equals("maxClientCnxns")) {
-                maxClientCnxns = Integer.parseInt(value);
-            } else if (key.equals("minSessionTimeout")) {
-                minSessionTimeout = Integer.parseInt(value);
-            } else if (key.equals("maxSessionTimeout")) {
-                maxSessionTimeout = Integer.parseInt(value);
             } else if (key.equals("initLimit")) {
                 initLimit = Integer.parseInt(value);
             } else if (key.equals("syncLimit")) {
@@ -230,7 +224,7 @@ public class QuorumPeerConfig {
                     InetSocketAddress electionAddr = new InetSocketAddress(
                             parts[0], Integer.parseInt(parts[2]));// 用来选举的信息
                     servers.put(Long.valueOf(sid), new QuorumServer(sid, addr,
-                            electionAddr));// 用来和别的机器进行沟通的配置信息
+                            electionAddr));
                 } else if (parts.length == 4) {
                     InetSocketAddress electionAddr = new InetSocketAddress(
                             parts[0], Integer.parseInt(parts[2]));
@@ -425,21 +419,13 @@ public class QuorumPeerConfig {
         networkPool = new NetworkPool();
 
         List<String> serversStrings = new ArrayList<String>();
-        Map<String, Long> arrayList = new HashMap<String, Long>();
         for (M2mAddressToId m2mAddressToId : addressToSid) {
-            serversStrings.add(m2mAddressToId.getAddress() + ":"
-                    + sidToClientPort.get(m2mAddressToId.getSid()));
-            arrayList.put(
-                    m2mAddressToId.getAddress() + ":"
-                            + sidToClientPort.get(m2mAddressToId.getSid()),
-                    m2mAddressToId.getSid());
-            NetworkPool.webPort.put(m2mAddressToId.getAddress() + ":"
-                    + sidToClientPort.get(m2mAddressToId.getSid()),
-                    sidAndWebPort.get(m2mAddressToId.getSid()));
-            allServers.put(
-                    m2mAddressToId.getAddress() + ":"
-                            + sidToClientPort.get(m2mAddressToId.getSid()),
-                    m2mAddressToId.getSid());
+            Long sid = m2mAddressToId.getSid();
+            String address = m2mAddressToId.getAddress();
+            serversStrings.add(address + ":" + sidToClientPort.get(sid));
+            NetworkPool.webPort.put(address + ":" + sidToClientPort.get(sid),
+                    sidAndWebPort.get(sid));
+            allServers.put(address + ":" + sidToClientPort.get(sid), sid);
         }
         networkPool.setServers(serversStrings.toArray(new String[serversStrings
                 .size()]));
@@ -454,7 +440,7 @@ public class QuorumPeerConfig {
                 String leftServer = networkPool.getPositionToServer().get(
                         ((myIdInRing + j) + serversStrings.size())
                                 % serversStrings.size());// 最左边
-                Long sid = arrayList.get(leftServer);// 找出对应的sid;
+                Long sid = allServers.get(leftServer);// 找出对应的sid;
 
                 QuorumServer quorumServer = servers.get(sid);
                 String address = quorumServer.addr.getAddress()
@@ -486,7 +472,7 @@ public class QuorumPeerConfig {
                             .getPositionToServer()
                             .get(((myIdInRing - (replication_factor - 1 - j - i)) + serversStrings
                                     .size()) % serversStrings.size());// 最左边
-                    Long sid = arrayList.get(leftServer);// 找出对应的sid;
+                    Long sid = allServers.get(leftServer);// 找出对应的sid;
                     QuorumServer quorumServer = servers.get(sid);
                     String address = quorumServer.addr.getAddress()
                             .getHostAddress();

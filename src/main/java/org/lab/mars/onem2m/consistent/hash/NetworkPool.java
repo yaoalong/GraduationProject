@@ -68,7 +68,7 @@ public class NetworkPool {
     /*
      * 初始化
      */
-    public void initialize() {
+    public synchronized void initialize() {
         try {
 
             // if servers is not set, or it empty, then
@@ -87,15 +87,13 @@ public class NetworkPool {
                 populateConsistentBuckets();
 
             this.initialized = true;
-
         } catch (Exception ex) {
             log.error("error occur:{}", ex.getMessage());
         }
     }
 
     public void populateConsistentBuckets() {
-        consistentBuckets = new TreeMap<Long, String>();
-
+        TreeMap<Long, String> newConsistentBuckets = new TreeMap<Long, String>();
         MessageDigest md5 = MD5.get();
         if (this.totalWeight <= 0 && this.weights != null) {
             for (int i = 0; i < this.weights.length; i++)
@@ -105,12 +103,6 @@ public class NetworkPool {
             this.totalWeight = this.servers.length;
         }
         for (int i = 0; i < servers.length; i++) {
-            // int thisWeight = 1;
-            // if (this.weights != null && this.weights[i] != null)
-            // thisWeight = this.weights[i];
-
-            // double factor = Math.floor(((double) (40 * this.servers.length *
-            // thisWeight)) / (double) this.totalWeight);
             long factor = 1;
             for (long j = 0; j < factor; j++) {
                 byte[] d = md5.digest((servers[i] + "-" + j).getBytes());
@@ -120,22 +112,25 @@ public class NetworkPool {
                             | ((long) (d[1 + h * 4] & 0xFF) << 8)
                             | ((long) (d[0 + h * 4] & 0xFF));
 
-                    consistentBuckets.put(k, servers[i]);
+                    newConsistentBuckets.put(k, servers[i]);
                 }
             }
         }
         long position = 0;
-        for (Map.Entry<Long, String> map : consistentBuckets.entrySet()) {
-            System.out.println("hash value:" + map.getKey() + " ip address:"
-                    + map.getValue() + ":::" + position);
+        for (Map.Entry<Long, String> map : newConsistentBuckets.entrySet()) {
             serverToPosition.put(map.getValue(), position);
             positionToServer.put(position, map.getValue());
             position++;
         }
+        this.consistentBuckets = newConsistentBuckets;
         initialized = true;
     }
 
     public final String getSock(String key) {
+        if (initialized == false) {
+            log.error("can't get sock becaus network is not intialzed!");
+            throw new NullPointerException();
+        }
         return consistentBuckets.get(getBucket(key));
     }
 
