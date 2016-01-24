@@ -117,6 +117,29 @@ public class QuorumPeerMain {
         }
     }
 
+    public void setQuorumPeer(QuorumPeer quorumPeer, QuorumPeerConfig config,
+            NetworkPool networkPool) throws IOException {
+        quorumPeer.setClientPortAddress(config.getClientPortAddress());
+        quorumPeer.setTxnFactory(new FileTxnSnapLog(new File(config
+                .getDataLogDir()), new File(config.getDataDir())));
+        quorumPeer.setMyid(config.getServerId());
+        quorumPeer.setTickTime(config.getTickTime());
+        quorumPeer.setMinSessionTimeout(config.getMinSessionTimeout());
+        quorumPeer.setMaxSessionTimeout(config.getMaxSessionTimeout());
+        quorumPeer.setLearnerType(config.getPeerType());
+        quorumPeer.setSyncEnabled(config.getSyncEnabled());
+        quorumPeer.setQuorumListenOnAllIPs(config.getQuorumListenOnAllIPs());
+        RegisterIntoZooKeeper registerIntoZooKeeper = new RegisterIntoZooKeeper();
+        registerIntoZooKeeper.setServer(config.getZooKeeperServer());
+        ZooKeeper_Monitor zooKeeper_Monitor = new ZooKeeper_Monitor();
+        zooKeeper_Monitor.setServer(config.getZooKeeperServer());
+        zooKeeper_Monitor.setNetworkPool(networkPool);
+        quorumPeer.setZooKeeper_Monitor(zooKeeper_Monitor);
+        quorumPeer.setRegisterIntoZooKeeper(registerIntoZooKeeper);
+        quorumPeer.setMyIp(config.getMyIp());
+        quorumPeer.setM2mDataBase(config.m2mDataBase);
+    }
+
     public void runFromConfig(QuorumPeerConfig config) throws IOException {
         try {
             ManagedUtil.registerLog4jMBeans();
@@ -141,37 +164,16 @@ public class QuorumPeerMain {
                 M2mQuorumServer m2mQuorumServer = config.getM2mQuorumServers();
                 quorumPeer.setHandleIp(config.getMyIp() + ":"
                         + config.clientPort);
-                quorumPeer.setClientPortAddress(config.getClientPortAddress());
-                quorumPeer.setTxnFactory(new FileTxnSnapLog(new File(config
-                        .getDataLogDir()), new File(config.getDataDir())));
+
                 quorumPeer.setQuorumPeers(m2mQuorumServer
                         .getPositionToServers().get(0L));// 设置对应的服务器信息
                 quorumPeer.setElectionType(config.getElectionAlg());
-                quorumPeer.setMyid(config.getServerId());
-                quorumPeer.setTickTime(config.getTickTime());
-                quorumPeer.setMinSessionTimeout(config.getMinSessionTimeout());
-                quorumPeer.setMaxSessionTimeout(config.getMaxSessionTimeout());
-                quorumPeer.setInitLimit(config.getInitLimit());
-                quorumPeer.setSyncLimit(config.getSyncLimit());
                 quorumPeer.setQuorumVerifier(new QuorumMaj(m2mQuorumServer
                         .getPositionToServers().get(0L).size()));
                 quorumPeer.setCnxnFactory(cnxnFactory);
-                quorumPeer.setM2mDataBase(config.m2mDataBase);
                 quorumPeer.setZKDatabase(new ZKDatabase(
                         config.getNetworkPool(), config.m2mDataBase, config
                                 .getMyIp() + ":" + config.clientPort));
-                quorumPeer.setLearnerType(config.getPeerType());
-                quorumPeer.setSyncEnabled(config.getSyncEnabled());
-                quorumPeer.setQuorumListenOnAllIPs(config
-                        .getQuorumListenOnAllIPs());
-                RegisterIntoZooKeeper registerIntoZooKeeper = new RegisterIntoZooKeeper();
-                registerIntoZooKeeper.setServer(config.getZooKeeperServer());
-                ZooKeeper_Monitor zooKeeper_Monitor = new ZooKeeper_Monitor();
-                zooKeeper_Monitor.setServer(config.getZooKeeperServer());
-                zooKeeper_Monitor.setNetworkPool(networkPool);
-                quorumPeer.setZooKeeper_Monitor(zooKeeper_Monitor);
-                quorumPeer.setRegisterIntoZooKeeper(registerIntoZooKeeper);
-                quorumPeer.setMyIp(config.getMyIp());
                 quorumPeer.start();
                 quorumPeers.add(quorumPeer);
             } else {
@@ -187,43 +189,14 @@ public class QuorumPeerMain {
                     } else {
                         quorumPeer = new QuorumPeer();
                     }
-                    quorumPeer.setHandleIp(m2mQuorumServer.getServers().get(
-                            Integer.valueOf((i) + "")));
-                    quorumPeer.setClientPortAddress(config
-                            .getClientPortAddress());
-                    quorumPeer.setTxnFactory(new FileTxnSnapLog(new File(config
-                            .getDataLogDir()), new File(config.getDataDir())));
                     quorumPeer.setQuorumPeers(servers);// 设置对应的服务器信息
                     quorumPeer.setElectionType(config.getElectionAlg());
-                    quorumPeer.setMyid(config.getServerId());
-                    quorumPeer.setTickTime(config.getTickTime());
-                    quorumPeer.setMinSessionTimeout(config
-                            .getMinSessionTimeout());
-                    quorumPeer.setMaxSessionTimeout(config
-                            .getMaxSessionTimeout());
-                    quorumPeer.setInitLimit(config.getInitLimit());
-                    quorumPeer.setSyncLimit(config.getSyncLimit());
-                    quorumPeer.setQuorumVerifier(new QuorumMaj(m2mQuorumServer
-                            .getPositionToServers().get(i).size()));
                     quorumPeer.setCnxnFactory(cnxnFactory);
-                    quorumPeer.setM2mDataBase(config.m2mDataBase);
                     quorumPeer.setZKDatabase(new ZKDatabase(config
                             .getNetworkPool(), config.m2mDataBase,
                             m2mQuorumServer.getServers().get(
                                     Integer.valueOf((i) + ""))));
-                    quorumPeer.setLearnerType(config.getPeerType());
-                    quorumPeer.setSyncEnabled(config.getSyncEnabled());
-                    quorumPeer.setQuorumListenOnAllIPs(config
-                            .getQuorumListenOnAllIPs());
-                    RegisterIntoZooKeeper registerIntoZooKeeper = new RegisterIntoZooKeeper();
-                    registerIntoZooKeeper
-                            .setServer(config.getZooKeeperServer());
-                    ZooKeeper_Monitor zooKeeper_Monitor = new ZooKeeper_Monitor();
-                    zooKeeper_Monitor.setServer(config.getZooKeeperServer());
-                    zooKeeper_Monitor.setNetworkPool(networkPool);
-                    quorumPeer.setZooKeeper_Monitor(zooKeeper_Monitor);
-                    quorumPeer.setRegisterIntoZooKeeper(registerIntoZooKeeper);
-                    quorumPeer.setMyIp(config.getMyIp());
+
                     quorumPeer.start();
 
                     quorumPeers.add(quorumPeer);
