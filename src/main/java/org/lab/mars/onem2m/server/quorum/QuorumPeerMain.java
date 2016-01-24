@@ -28,10 +28,8 @@ import javax.management.JMException;
 import org.lab.mars.onem2m.consistent.hash.NetworkPool;
 import org.lab.mars.onem2m.jmx.ManagedUtil;
 import org.lab.mars.onem2m.persistence.FileTxnSnapLog;
-import org.lab.mars.onem2m.server.DatadirCleanupManager;
 import org.lab.mars.onem2m.server.NettyServerCnxnFactory;
 import org.lab.mars.onem2m.server.ZKDatabase;
-import org.lab.mars.onem2m.server.ZooKeeperServerMain;
 import org.lab.mars.onem2m.server.quorum.QuorumPeer.QuorumServer;
 import org.lab.mars.onem2m.server.quorum.QuorumPeerConfig.ConfigException;
 import org.lab.mars.onem2m.server.quorum.flexible.QuorumMaj;
@@ -109,20 +107,13 @@ public class QuorumPeerMain {
         if (args.length == 1) {
             config.parse(args[0]);
         }
-
-        // Start and schedule the the purge task
-        DatadirCleanupManager purgeMgr = new DatadirCleanupManager(
-                config.getDataDir(), config.getDataLogDir(),
-                config.getSnapRetainCount(), config.getPurgeInterval());
-        purgeMgr.start();
-
         if (args.length == 1 && config.servers.size() > 0) {
             runFromConfig(config);
         } else {
-            LOG.warn("Either no config or no quorum defined in config, running "
+            LOG.error("Either no config or no quorum defined in config, running "
                     + " in standalone mode");
-            // there is only server in the quorum -- run as standalone
-            ZooKeeperServerMain.main(args);
+            System.exit(0);
+
         }
     }
 
@@ -140,6 +131,7 @@ public class QuorumPeerMain {
             cnxnFactory.setNetworkPool(networkPool);
             cnxnFactory.configure(config.getClientPortAddress().getPort(), 5);
             cnxnFactory.setMyIp(config.getMyIp());
+            cnxnFactory.setAllServers(config.allServers);
             cnxnFactory.setReplicationFactory(config.getReplication_factor());// 设置复制因子
             cnxnFactory.setNetworkPool(config.getNetworkPool());
             cnxnFactory.setTemporyAdd(config.isTemporyAdd());

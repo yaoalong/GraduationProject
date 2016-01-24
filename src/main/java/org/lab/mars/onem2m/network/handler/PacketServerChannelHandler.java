@@ -38,26 +38,20 @@ public class PacketServerChannelHandler extends
 
     }
 
-    @SuppressWarnings("deprecation")
-    private static final AttributeKey<NettyServerCnxn> STATE = new AttributeKey<NettyServerCnxn>(
-            "MyHandler.nettyServerCnxn");
+    private static final AttributeKey<NettyServerCnxn> STATE = AttributeKey
+            .valueOf("MyHandler.nettyServerCnxn");
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, Object msg) {
-        System.out.println("接收到了数据");
         M2mPacket m2mPacket = (M2mPacket) msg;
         if (preProcessPacket(m2mPacket)) {
-            System.out.println("开始处理");
             NettyServerCnxn nettyServerCnxn = ctx.attr(STATE).get();
             nettyServerCnxn.receiveMessage(ctx, m2mPacket);
-        } else {
-            return;
         }
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("接收到了新的连接");
         NettyServerCnxn nettyServerCnxn = new NettyServerCnxn(ctx.channel(),
                 serverCnxnFactory.getZkServers(), serverCnxnFactory);
         nettyServerCnxn.setNetworkPool(serverCnxnFactory.getNetworkPool());

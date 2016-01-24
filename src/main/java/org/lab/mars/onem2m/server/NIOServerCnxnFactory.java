@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.lab.mars.onem2m.consistent.hash.NetworkPool;
@@ -37,22 +38,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class NIOServerCnxnFactory extends ServerCnxnFactory implements Runnable {
-    private static final Logger LOG = LoggerFactory.getLogger(NIOServerCnxnFactory.class);
+    private static final Logger LOG = LoggerFactory
+            .getLogger(NIOServerCnxnFactory.class);
 
     static {
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-                public void uncaughtException(Thread t, Throwable e) {
-                    LOG.error("Thread " + t + " died", e);
-                }
-            });
+            public void uncaughtException(Thread t, Throwable e) {
+                LOG.error("Thread " + t + " died", e);
+            }
+        });
         /**
-         * this is to avoid the jvm bug:
-         * NullPointerException in Selector.open()
+         * this is to avoid the jvm bug: NullPointerException in Selector.open()
          * http://bugs.sun.com/view_bug.do?bug_id=6427854
          */
         try {
             Selector.open().close();
-        } catch(IOException ie) {
+        } catch (IOException ie) {
             LOG.error("Selector failed to open", ie);
         }
     }
@@ -65,24 +66,26 @@ public class NIOServerCnxnFactory extends ServerCnxnFactory implements Runnable 
      * We use this buffer to do efficient socket I/O. Since there is a single
      * sender thread per NIOServerCnxn instance, we can use a member variable to
      * only allocate it once.
-    */
+     */
     final ByteBuffer directBuffer = ByteBuffer.allocateDirect(64 * 1024);
 
-    final HashMap<InetAddress, Set<NIOServerCnxn>> ipMap =
-        new HashMap<InetAddress, Set<NIOServerCnxn>>( );
+    final HashMap<InetAddress, Set<NIOServerCnxn>> ipMap = new HashMap<InetAddress, Set<NIOServerCnxn>>();
 
     int maxClientCnxns = 60;
 
     /**
-     * Construct a new server connection factory which will accept an unlimited number
-     * of concurrent connections from each client (up to the file descriptor
-     * limits of the operating system). startup(zks) must be called subsequently.
+     * Construct a new server connection factory which will accept an unlimited
+     * number of concurrent connections from each client (up to the file
+     * descriptor limits of the operating system). startup(zks) must be called
+     * subsequently.
+     * 
      * @throws IOException
      */
     public NIOServerCnxnFactory() throws IOException {
     }
 
     Thread thread;
+
     @Override
     public void configure(InetSocketAddress addr, int maxcc) throws IOException {
         configureSaslLogin();
@@ -122,34 +125,34 @@ public class NIOServerCnxnFactory extends ServerCnxnFactory implements Runnable 
         start();
         zks.startdata();
         zks.startup();
-       // setZooKeeperServer(zks);
+        // setZooKeeperServer(zks);
     }
 
     @Override
-    public InetSocketAddress getLocalAddress(){
-        return (InetSocketAddress)ss.socket().getLocalSocketAddress();
+    public InetSocketAddress getLocalAddress() {
+        return (InetSocketAddress) ss.socket().getLocalSocketAddress();
     }
 
     @Override
-    public int getLocalPort(){
+    public int getLocalPort() {
         return ss.socket().getLocalPort();
     }
 
     private void addCnxn(NIOServerCnxn cnxn) {
         synchronized (cnxns) {
             cnxns.add(cnxn);
-            synchronized (ipMap){
+            synchronized (ipMap) {
                 InetAddress addr = cnxn.sock.socket().getInetAddress();
                 Set<NIOServerCnxn> s = ipMap.get(addr);
                 if (s == null) {
                     // in general we will see 1 connection from each
                     // host, setting the initial cap to 2 allows us
                     // to minimize mem usage in the common case
-                    // of 1 entry --  we need to set the initial cap
+                    // of 1 entry -- we need to set the initial cap
                     // to 2 to avoid rehash when the first entry is added
                     s = new HashSet<NIOServerCnxn>(2);
                     s.add(cnxn);
-                    ipMap.put(addr,s);
+                    ipMap.put(addr, s);
                 } else {
                     s.add(cnxn);
                 }
@@ -157,8 +160,8 @@ public class NIOServerCnxnFactory extends ServerCnxnFactory implements Runnable 
         }
     }
 
-    protected NIOServerCnxn createConnection(SocketChannel sock,
-            SelectionKey sk) throws IOException {
+    protected NIOServerCnxn createConnection(SocketChannel sock, SelectionKey sk)
+            throws IOException {
         return new NIOServerCnxn(zkServer, sock, sk, this);
     }
 
@@ -168,7 +171,8 @@ public class NIOServerCnxnFactory extends ServerCnxnFactory implements Runnable 
         // this lock)
         synchronized (ipMap) {
             Set<NIOServerCnxn> s = ipMap.get(cl);
-            if (s == null) return 0;
+            if (s == null)
+                return 0;
             return s.size();
         }
     }
@@ -186,17 +190,17 @@ public class NIOServerCnxnFactory extends ServerCnxnFactory implements Runnable 
                 Collections.shuffle(selectedList);
                 for (SelectionKey k : selectedList) {
                     if ((k.readyOps() & SelectionKey.OP_ACCEPT) != 0) {
-                        SocketChannel sc = ((ServerSocketChannel) k
-                                .channel()).accept();
+                        SocketChannel sc = ((ServerSocketChannel) k.channel())
+                                .accept();
                         InetAddress ia = sc.socket().getInetAddress();
                         int cnxncount = getClientCnxnCount(ia);
-                        if (maxClientCnxns > 0 && cnxncount >= maxClientCnxns){
+                        if (maxClientCnxns > 0 && cnxncount >= maxClientCnxns) {
                             LOG.warn("Too many connections from " + ia
-                                     + " - max is " + maxClientCnxns );
+                                    + " - max is " + maxClientCnxns);
                             sc.close();
                         } else {
                             LOG.info("Accepted socket connection from "
-                                     + sc.socket().getRemoteSocketAddress());
+                                    + sc.socket().getRemoteSocketAddress());
                             sc.configureBlocking(false);
                             SelectionKey sk = sc.register(selector,
                                     SelectionKey.OP_READ);
@@ -210,7 +214,7 @@ public class NIOServerCnxnFactory extends ServerCnxnFactory implements Runnable 
                     } else {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("Unexpected ops in select "
-                                      + k.readyOps());
+                                    + k.readyOps());
                         }
                     }
                 }
@@ -235,16 +239,17 @@ public class NIOServerCnxnFactory extends ServerCnxnFactory implements Runnable 
         selector.wakeup();
         HashSet<NIOServerCnxn> cnxns;
         synchronized (this.cnxns) {
-            cnxns = (HashSet<NIOServerCnxn>)this.cnxns.clone();
+            cnxns = (HashSet<NIOServerCnxn>) this.cnxns.clone();
         }
         // got to clear all the connections that we have in the selector
-        for (NIOServerCnxn cnxn: cnxns) {
+        for (NIOServerCnxn cnxn : cnxns) {
             try {
                 // don't hold this.cnxns lock as deadlock may occur
                 cnxn.close();
             } catch (Exception e) {
-                LOG.warn("Ignoring exception closing cnxn sessionid 0x"
-                         + Long.toHexString(cnxn.sessionId), e);
+                LOG.warn(
+                        "Ignoring exception closing cnxn sessionid 0x"
+                                + Long.toHexString(cnxn.sessionId), e);
             }
         }
     }
@@ -283,7 +288,7 @@ public class NIOServerCnxnFactory extends ServerCnxnFactory implements Runnable 
     private void closeSessionWithoutWakeup(long sessionId) {
         HashSet<NIOServerCnxn> cnxns;
         synchronized (this.cnxns) {
-            cnxns = (HashSet<NIOServerCnxn>)this.cnxns.clone();
+            cnxns = (HashSet<NIOServerCnxn>) this.cnxns.clone();
         }
 
         for (NIOServerCnxn cnxn : cnxns) {
@@ -308,27 +313,33 @@ public class NIOServerCnxnFactory extends ServerCnxnFactory implements Runnable 
         return cnxns;
     }
 
-	@Override
-	public String getMyIp() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public String getMyIp() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public NetworkPool getNetworkPool() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public NetworkPool getNetworkPool() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public Integer getReplicationFactor() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public Integer getReplicationFactor() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public boolean isTemporyAdd() {
-		// TODO Auto-generated method stub
-		return false;
-	}
+    @Override
+    public boolean isTemporyAdd() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public Map<String, Long> getAllServer() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

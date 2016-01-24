@@ -80,7 +80,6 @@ public class QuorumPeerConfig {
     protected int numGroups = 0;
     protected QuorumVerifier quorumVerifier;
     protected int snapRetainCount = 3;
-    protected int purgeInterval = 0;
     protected boolean syncEnabled = true;
 
     protected LearnerType peerType = LearnerType.PARTICIPANT;
@@ -94,7 +93,6 @@ public class QuorumPeerConfig {
 
     protected String zooKeeperServer;
     protected Integer replication_factor;
-    // client port
     protected Integer clientPort;
 
     /**
@@ -106,6 +104,7 @@ public class QuorumPeerConfig {
      * 一个服务器对应的sid
      */
 
+    protected final Map<String, Long> allServers = new HashMap<String, Long>();
     protected List<M2mAddressToId> addressToSid = new ArrayList<>();
 
     M2mQuorumServer m2mQuorumServers = new M2mQuorumServer();
@@ -212,8 +211,6 @@ public class QuorumPeerConfig {
                 syncEnabled = Boolean.parseBoolean(value);
             } else if (key.equals("autopurge.snapRetainCount")) {
                 snapRetainCount = Integer.parseInt(value);
-            } else if (key.equals("autopurge.purgeInterval")) {
-                purgeInterval = Integer.parseInt(value);
             } else if (key.startsWith("server.")) {
                 int dot = key.indexOf('.');
                 long sid = Long.parseLong(key.substring(dot + 1));
@@ -436,23 +433,13 @@ public class QuorumPeerConfig {
                     m2mAddressToId.getAddress() + ":"
                             + sidToClientPort.get(m2mAddressToId.getSid()),
                     m2mAddressToId.getSid());
-            if (m2mAddressToId.getAddress() == null) {
-                System.out.println("错误");
-            }
-            if (sidToClientPort.get(m2mAddressToId.getSid()) == null) {
-                System.out.println("错误2");
-            }
-            if (sidAndWebPort.get(m2mAddressToId.getSid()) == null) {
-                System.out.println(m2mAddressToId.getSid() + "sid");
-                for (Entry<Long, Integer> entry : sidAndWebPort.entrySet()) {
-                    System.out.println("sid:" + entry.getKey());
-                    System.out.println("port:" + entry.getValue());
-                }
-                System.out.println("error 3");
-            }
             NetworkPool.webPort.put(m2mAddressToId.getAddress() + ":"
                     + sidToClientPort.get(m2mAddressToId.getSid()),
                     sidAndWebPort.get(m2mAddressToId.getSid()));
+            allServers.put(
+                    m2mAddressToId.getAddress() + ":"
+                            + sidToClientPort.get(m2mAddressToId.getSid()),
+                    m2mAddressToId.getSid());
         }
         networkPool.setServers(serversStrings.toArray(new String[serversStrings
                 .size()]));
@@ -576,10 +563,6 @@ public class QuorumPeerConfig {
 
     public int getSnapRetainCount() {
         return snapRetainCount;
-    }
-
-    public int getPurgeInterval() {
-        return purgeInterval;
     }
 
     public boolean getSyncEnabled() {

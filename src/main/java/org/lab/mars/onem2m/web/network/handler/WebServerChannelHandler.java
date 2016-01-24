@@ -3,7 +3,6 @@ package org.lab.mars.onem2m.web.network.handler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -12,9 +11,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import org.lab.mars.onem2m.consistent.hash.NetworkPool;
-import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.server.ServerCnxnFactory;
 import org.lab.mars.onem2m.server.ZKDatabase;
 import org.lab.mars.onem2m.server.ZooKeeperServer;
@@ -22,9 +21,9 @@ import org.lab.mars.onem2m.web.network.WebTcpClient;
 import org.lab.mars.onem2m.web.network.constant.OperateCode;
 import org.lab.mars.onem2m.web.nework.protol.M2mServerStatusDO;
 import org.lab.mars.onem2m.web.nework.protol.M2mServerStatusDOs;
-import org.lab.mars.onem2m.web.nework.protol.M2mWebGetDataResponse;
 import org.lab.mars.onem2m.web.nework.protol.M2mWebPacket;
 import org.lab.mars.onem2m.web.nework.protol.M2mWebRetriveKeyResponse;
+import org.lab.mars.onem2m.web.nework.protol.M2mWebServerStatusResponse;
 import org.lab.mars.onem2m.web.nework.protol.RetriveServerAndCtx;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,24 +125,36 @@ public class WebServerChannelHandler extends
         final ConcurrentHashMap<Long, String> survivalServers = networkPool
                 .getPositionToServer();
         List<M2mServerStatusDO> m2mServerStatusDOs = new ArrayList<>();
-        for (Entry<Long, String> survivalServer : survivalServers.entrySet()) {
-            M2mServerStatusDO m2mServerStatusDO = new M2mServerStatusDO();
-            m2mServerStatusDO.setId(survivalServer.getKey());
-            m2mServerStatusDO.setIp(survivalServer.getValue());
-            m2mServerStatusDO.setStatus(1);
-            m2mServerStatusDOs.add(m2mServerStatusDO);
-        }
+        List<String> serverStrings = survivalServers
+                .entrySet()
+                .stream()
+                .map(entry -> {
+                    M2mServerStatusDO m2mServerStatusDO = new M2mServerStatusDO();
+                    m2mServerStatusDO.setId(entry.getKey());
+                    m2mServerStatusDO.setIp(entry.getValue());
+                    m2mServerStatusDO.setStatus(1);
+                    m2mServerStatusDOs.add(m2mServerStatusDO);
+                    return entry.getValue();
+                }).collect(Collectors.toList());
+
+        serverCnxnFactory.getAllServer().entrySet().stream().map(entry -> {
+            if (!serverStrings.contains(entry.getKey())) {
+                M2mServerStatusDO m2mServerStatusDO = new M2mServerStatusDO();
+                m2mServerStatusDO.setId(entry.getValue());
+                m2mServerStatusDO.setIp(entry.getKey());
+                m2mServerStatusDO.setStatus(0);
+                m2mServerStatusDOs.add(m2mServerStatusDO);
+            }
+            return entry.getKey();
+        }).count();
+
         m2mServerStatuses.setM2mServerStatusDOs(m2mServerStatusDOs);
-        M2mWebGetDataResponse m2mWebGetDataResponse = new M2mWebGetDataResponse();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        M2mBinaryOutputArchive boa = M2mBinaryOutputArchive.getArchive(baos);
-        m2mServerStatuses.serialize(boa, "m2mServerStatuses");
-        byte[] bytes = baos.toByteArray();
-        m2mWebGetDataResponse.setData(bytes);
-        M2mWebPacket m2mPacket = new M2mWebPacket(
+        M2mWebServerStatusResponse m2mWebServerStatusResponse = new M2mWebServerStatusResponse();
+        M2mWebPacket m2mPacket = M2mWebPacketHandle.createM2mWebPacket(
                 m2mWebPacket.getM2mRequestHeader(),
                 m2mWebPacket.getM2mReplyHeader(), m2mWebPacket.getRequest(),
-                m2mWebGetDataResponse);
+                m2mWebServerStatusResponse, m2mServerStatuses,
+                "m2mWebServerStatuses");
         ctx.writeAndFlush(m2mPacket);
     }
 
@@ -168,10 +179,6 @@ public class WebServerChannelHandler extends
 
     public int getNextZxid() {
         return zxid.getAndIncrement();
-    }
-
-    public void setZxid(int zxid) {
-        this.zxid.set(zxid);
     }
 
 }
