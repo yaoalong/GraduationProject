@@ -16,12 +16,19 @@ import org.lab.mars.onem2m.web.network.handler.WebClientChannelHandler;
  */
 public class WebClientChannelInitializer extends
         ChannelInitializer<SocketChannel> {
+
+    private Integer replicationFactor;
+
+    public WebClientChannelInitializer(Integer replicationFactor) {
+        this.replicationFactor = replicationFactor;
+    }
+
     @Override
     protected void initChannel(SocketChannel ch) throws Exception {
         ChannelPipeline channelPipeline = ch.pipeline();
         channelPipeline.addLast(new ObjectEncoder());
         channelPipeline.addLast(new ObjectDecoder(ClassResolvers
                 .cacheDisabled(null)));
-        channelPipeline.addLast(new WebClientChannelHandler());
+        channelPipeline.addLast(new WebClientChannelHandler(replicationFactor));
     }
 }

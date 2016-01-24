@@ -11,13 +11,18 @@ import org.lab.mars.onem2m.web.network.initialize.WebClientChannelInitializer;
 
 public class WebTcpClient {
     private Channel channel;
+    private Integer replicationFactor;
+
+    public WebTcpClient(Integer replicationFactor) {
+        this.replicationFactor = replicationFactor;
+    }
 
     public void connectionOne(String host, int port) {
         Bootstrap bootstrap = new Bootstrap();
         bootstrap.group(NetworkEventLoopGroup.workerGroup)
                 .channel(NioSocketChannel.class)
                 .option(ChannelOption.TCP_NODELAY, true)
-                .handler(new WebClientChannelInitializer());
+                .handler(new WebClientChannelInitializer(replicationFactor));
         bootstrap.connect(host, port).addListener((ChannelFuture future) -> {
             channel = future.channel();
         });
@@ -27,9 +32,8 @@ public class WebTcpClient {
     public void write(Object msg) {
         while (channel == null) {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }

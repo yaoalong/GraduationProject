@@ -92,7 +92,8 @@ public class WebServerChannelHandler extends
             m2mPacket.getM2mRequestHeader().setType(2);
             Long position = networkPool.getServerPosition().get(server);
             for (int i = 0; i < serverCnxnFactory.getReplicationFactor(); i++) {
-                WebTcpClient tcpClient = new WebTcpClient();
+                WebTcpClient tcpClient = new WebTcpClient(
+                        serverCnxnFactory.getReplicationFactor());
                 tcpClient
                         .connectionOne("localhost", NetworkPool.webPort
                                 .get(networkPool.getPositionToServer().get(

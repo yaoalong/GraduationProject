@@ -3,6 +3,8 @@ package org.lab.mars.onem2m.web.network.handler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
+import java.net.InetSocketAddress;
+
 import org.lab.mars.onem2m.web.nework.protol.M2mWebPacket;
 import org.lab.mars.onem2m.web.nework.protol.M2mWebRetriveKeyResponse;
 import org.slf4j.Logger;
@@ -18,19 +20,29 @@ public class WebClientChannelHandler extends
         SimpleChannelInboundHandler<Object> {
     private static final Logger LOG = LoggerFactory
             .getLogger(WebClientChannelHandler.class);
+    private Integer replicationFactor;
 
-    public WebClientChannelHandler() {
+    public WebClientChannelHandler(Integer replicationFactor) {
+        this.replicationFactor = replicationFactor;
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
-
+        if (LOG.isInfoEnabled()) {
+            String host = ((InetSocketAddress) ctx.channel().remoteAddress())
+                    .getAddress().getHostAddress();
+            int port = ((InetSocketAddress) ctx.channel().remoteAddress())
+                    .getPort();
+            LOG.info("host:{},port:{}", host, port);
+        }
     }
 
+    /**
+     * 处理接收到的别的Server对Web请求的回复
+     */
     @Override
     public void channelRead0(ChannelHandlerContext ctx, Object msg) {
         M2mWebPacket m2mPacket = (M2mWebPacket) msg;
-        System.out.println("收到了对应的web回复");
         M2mWebRetriveKeyResponse m2mWebRetriveKeyResponse = (M2mWebRetriveKeyResponse) m2mPacket
                 .getResponse();
         for (String server : m2mWebRetriveKeyResponse.getServers()) {
@@ -43,18 +55,12 @@ public class WebClientChannelHandler extends
                     .add(server);
 
         }
-        System.out.println("zxid::"
-                + WebServerChannelHandler.serverResult.get(m2mPacket
-                        .getM2mRequestHeader().getXid()));
         WebServerChannelHandler.serverResult.put(m2mPacket
                 .getM2mRequestHeader().getXid(),
                 WebServerChannelHandler.serverResult.get(m2mPacket
                         .getM2mRequestHeader().getXid()) + 1);
-        System.out.println("接受了:"
-                + WebServerChannelHandler.serverResult.get(m2mPacket
-                        .getM2mRequestHeader().getXid()));
         if (WebServerChannelHandler.serverResult.get(m2mPacket
-                .getM2mRequestHeader().getXid()) >= 2) {
+                .getM2mRequestHeader().getXid()) >= replicationFactor) {
             M2mWebPacket m2mWebPacket = new M2mWebPacket(
                     m2mPacket.getM2mRequestHeader(),
                     m2mPacket.getM2mReplyHeader(), m2mPacket.getRequest(),
