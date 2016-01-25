@@ -47,8 +47,10 @@ public class WebServerChannelHandler extends
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, Object msg) {
+        System.out.println("接收到了数据");
         M2mWebPacket m2mPacket = (M2mWebPacket) msg;
         int operateType = m2mPacket.getM2mRequestHeader().getType();
+        System.out.println(operateType + "操作类型");
         if (operateType == OperateCode.getStatus.getCode()) {
             try {
                 lookAllServerStatus(m2mPacket, ctx);
@@ -84,6 +86,7 @@ public class WebServerChannelHandler extends
                     new M2mWebRetriveKeyResponse(servers));
             ctx.writeAndFlush(m2mWebPacket);
         } else if (operateType == OperateCode.retriveRemoteKey.getCode()) {
+            System.out.println("进入到这里");
             String server = networkPool.getSock(m2mPacket.getM2mRequestHeader()
                     .getKey());
             int zxid = getNextZxid();
