@@ -98,12 +98,13 @@ public class NIOServerCnxn extends ServerCnxn {
         if (this.factory.login != null) {
             this.zooKeeperSaslServer = new ZooKeeperSaslServer(factory.login);
         }
-        if (zk != null) { 
+        if (zk != null) {
             outstandingLimit = zk.getGlobalOutstandingLimit();
         }
         sock.socket().setTcpNoDelay(true);
-        /* set socket linger to false, so that socket close does not
-         * block */
+        /*
+         * set socket linger to false, so that socket close does not block
+         */
         sock.socket().setSoLinger(false, -1);
         InetAddress addr = ((InetSocketAddress) sock.socket()
                 .getRemoteSocketAddress()).getAddress();
@@ -111,36 +112,38 @@ public class NIOServerCnxn extends ServerCnxn {
         sk.interestOps(SelectionKey.OP_READ);
     }
 
-    /* Send close connection packet to the client, doIO will eventually
-     * close the underlying machinery (like socket, selectorkey, etc...)
+    /*
+     * Send close connection packet to the client, doIO will eventually close
+     * the underlying machinery (like socket, selectorkey, etc...)
      */
     public void sendCloseSession() {
         sendBuffer(ServerCnxnFactory.closeConn);
     }
 
     /**
-     * send buffer without using the asynchronous
-     * calls to selector and then close the socket
+     * send buffer without using the asynchronous calls to selector and then
+     * close the socket
+     * 
      * @param bb
      */
     void sendBufferSync(ByteBuffer bb) {
-       try {
-           /* configure socket to be blocking
-            * so that we dont have to do write in 
-            * a tight while loop
-            */
-           sock.configureBlocking(true);
-           if (bb != ServerCnxnFactory.closeConn) {
-               if (sock.isOpen()) {
-                   sock.write(bb);
-               }
-               packetSent();
-           } 
-       } catch (IOException ie) {
-           LOG.error("Error sending data synchronously ", ie);
-       }
+        try {
+            /*
+             * configure socket to be blocking so that we dont have to do write
+             * in a tight while loop
+             */
+            sock.configureBlocking(true);
+            if (bb != ServerCnxnFactory.closeConn) {
+                if (sock.isOpen()) {
+                    sock.write(bb);
+                }
+                packetSent();
+            }
+        } catch (IOException ie) {
+            LOG.error("Error sending data synchronously ", ie);
+        }
     }
-    
+
     public void sendBuffer(ByteBuffer bb) {
         try {
             if (bb != ServerCnxnFactory.closeConn) {
@@ -161,7 +164,7 @@ public class NIOServerCnxn extends ServerCnxn {
                 }
             }
 
-            synchronized(this.factory){
+            synchronized (this.factory) {
                 sk.selector().wakeup();
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Add a buffer to outgoingBuffers, sk " + sk
@@ -172,8 +175,8 @@ public class NIOServerCnxn extends ServerCnxn {
                     sk.interestOps(sk.interestOps() | SelectionKey.OP_WRITE);
                 }
             }
-            
-        } catch(Exception e) {
+
+        } catch (Exception e) {
             LOG.error("Unexpected Exception: ", e);
         }
     }
@@ -185,8 +188,8 @@ public class NIOServerCnxn extends ServerCnxn {
             if (rc < 0) {
                 throw new EndOfStreamException(
                         "Unable to read additional data from client sessionid 0x"
-                        + Long.toHexString(sessionId)
-                        + ", likely client has closed socket");
+                                + Long.toHexString(sessionId)
+                                + ", likely client has closed socket");
             }
         }
 
@@ -217,7 +220,7 @@ public class NIOServerCnxn extends ServerCnxn {
         try {
             if (isSocketOpen() == false) {
                 LOG.warn("trying to do i/o on a null socket for session:0x"
-                         + Long.toHexString(sessionId));
+                        + Long.toHexString(sessionId));
 
                 return;
             }
@@ -226,8 +229,8 @@ public class NIOServerCnxn extends ServerCnxn {
                 if (rc < 0) {
                     throw new EndOfStreamException(
                             "Unable to read additional data from client sessionid 0x"
-                            + Long.toHexString(sessionId)
-                            + ", likely client has closed socket");
+                                    + Long.toHexString(sessionId)
+                                    + ", likely client has closed socket");
                 }
                 if (incomingBuffer.remaining() == 0) {
                     boolean isPayload;
@@ -241,8 +244,7 @@ public class NIOServerCnxn extends ServerCnxn {
                     }
                     if (isPayload) { // not the case for 4letterword
                         readPayload();
-                    }
-                    else {
+                    } else {
                         // four letter words take care
                         // need not do anything else
                         return;
@@ -327,24 +329,23 @@ public class NIOServerCnxn extends ServerCnxn {
                     // outgoingBuffers.size() = " + outgoingBuffers.size());
                 }
 
-                synchronized(this.factory){
+                synchronized (this.factory) {
                     if (outgoingBuffers.size() == 0) {
                         if (!initialized
                                 && (sk.interestOps() & SelectionKey.OP_READ) == 0) {
-                            throw new CloseRequestException("responded to info probe");
+                            throw new CloseRequestException(
+                                    "responded to info probe");
                         }
                         sk.interestOps(sk.interestOps()
                                 & (~SelectionKey.OP_WRITE));
                     } else {
-                        sk.interestOps(sk.interestOps()
-                                | SelectionKey.OP_WRITE);
+                        sk.interestOps(sk.interestOps() | SelectionKey.OP_WRITE);
                     }
                 }
             }
         } catch (CancelledKeyException e) {
             LOG.warn("Exception causing close of session 0x"
-                    + Long.toHexString(sessionId)
-                    + " due to " + e);
+                    + Long.toHexString(sessionId) + " due to " + e);
             if (LOG.isDebugEnabled()) {
                 LOG.debug("CancelledKeyException stack trace", e);
             }
@@ -353,14 +354,13 @@ public class NIOServerCnxn extends ServerCnxn {
             // expecting close to log session closure
             close();
         } catch (EndOfStreamException e) {
-            LOG.warn("caught end of stream exception",e); // tell user why
+            LOG.warn("caught end of stream exception", e); // tell user why
 
             // expecting close to log session closure
             close();
         } catch (IOException e) {
             LOG.warn("Exception causing close of session 0x"
-                    + Long.toHexString(sessionId)
-                    + " due to " + e);
+                    + Long.toHexString(sessionId) + " due to " + e);
             if (LOG.isDebugEnabled()) {
                 LOG.debug("IOException stack trace", e);
             }
@@ -369,15 +369,15 @@ public class NIOServerCnxn extends ServerCnxn {
     }
 
     private void readRequest() throws IOException {
-     //   zkServer.processPacket(this, incomingBuffer);
+        // zkServer.processPacket(this, incomingBuffer);
     }
-    
+
     protected void incrOutstandingRequests(RequestHeader h) {
         if (h.getXid() >= 0) {
             synchronized (this) {
                 outstandingRequests++;
             }
-            synchronized (this.factory) {        
+            synchronized (this.factory) {
                 // check throttling
                 if (zkServer.getInProcess() > outstandingLimit) {
                     if (LOG.isDebugEnabled()) {
@@ -414,7 +414,7 @@ public class NIOServerCnxn extends ServerCnxn {
         if (zkServer == null) {
             throw new IOException("ZooKeeperServer not running");
         }
-     //   zkServer.processConnectRequest(this, incomingBuffer);
+        // zkServer.processConnectRequest(this, incomingBuffer);
         initialized = true;
     }
 
@@ -441,19 +441,21 @@ public class NIOServerCnxn extends ServerCnxn {
             }
         }
     }
-    
+
     /**
      * This class wraps the sendBuffer method of NIOServerCnxn. It is
-     * responsible for chunking up the response to a client. Rather
-     * than cons'ing up a response fully in memory, which may be large
-     * for some commands, this class chunks up the result.
+     * responsible for chunking up the response to a client. Rather than
+     * cons'ing up a response fully in memory, which may be large for some
+     * commands, this class chunks up the result.
      */
     private class SendBufferWriter extends Writer {
         private StringBuffer sb = new StringBuffer();
-        
+
         /**
          * Check if we are ready to send another chunk.
-         * @param force force sending, even if not a full chunk
+         * 
+         * @param force
+         *            force sending, even if not a full chunk
          */
         private void checkFlush(boolean force) {
             if ((force && sb.length() > 0) || sb.length() > 2048) {
@@ -465,7 +467,8 @@ public class NIOServerCnxn extends ServerCnxn {
 
         @Override
         public void close() throws IOException {
-            if (sb == null) return;
+            if (sb == null)
+                return;
             checkFlush(true);
             sb = null; // clear out the ref to ensure no reuse
         }
@@ -482,22 +485,20 @@ public class NIOServerCnxn extends ServerCnxn {
         }
     }
 
-    private static final String ZK_NOT_SERVING =
-        "This ZooKeeper instance is not currently serving requests";
-    
+    private static final String ZK_NOT_SERVING = "This ZooKeeper instance is not currently serving requests";
+
     /**
-     * Set of threads for commmand ports. All the 4
-     * letter commands are run via a thread. Each class
-     * maps to a corresponding 4 letter command. CommandThread
-     * is the abstract class from which all the others inherit.
+     * Set of threads for commmand ports. All the 4 letter commands are run via
+     * a thread. Each class maps to a corresponding 4 letter command.
+     * CommandThread is the abstract class from which all the others inherit.
      */
     private abstract class CommandThread extends Thread {
         PrintWriter pw;
-        
+
         CommandThread(PrintWriter pw) {
             this.pw = pw;
         }
-        
+
         public void run() {
             try {
                 commandRun();
@@ -507,71 +508,72 @@ public class NIOServerCnxn extends ServerCnxn {
                 cleanupWriterSocket(pw);
             }
         }
-        
+
         public abstract void commandRun() throws IOException;
     }
-    
+
     private class RuokCommand extends CommandThread {
         public RuokCommand(PrintWriter pw) {
             super(pw);
         }
-        
+
         @Override
         public void commandRun() {
             pw.print("imok");
-            
+
         }
     }
-    
+
     private class TraceMaskCommand extends CommandThread {
         TraceMaskCommand(PrintWriter pw) {
             super(pw);
         }
-        
+
         @Override
         public void commandRun() {
             long traceMask = ZooTrace.getTextTraceLevel();
             pw.print(traceMask);
         }
     }
-    
+
     private class SetTraceMaskCommand extends CommandThread {
         long trace = 0;
+
         SetTraceMaskCommand(PrintWriter pw, long trace) {
             super(pw);
             this.trace = trace;
         }
-        
+
         @Override
         public void commandRun() {
             pw.print(trace);
         }
     }
-    
+
     private class EnvCommand extends CommandThread {
         EnvCommand(PrintWriter pw) {
             super(pw);
         }
-        
+
         @Override
         public void commandRun() {
             List<Environment.Entry> env = Environment.list();
 
             pw.println("Environment:");
-            for(Environment.Entry e : env) {
+            for (Environment.Entry e : env) {
                 pw.print(e.getKey());
                 pw.print("=");
                 pw.println(e.getValue());
             }
-            
-        } 
+
+        }
     }
-    
+
     private class ConfCommand extends CommandThread {
         ConfCommand(PrintWriter pw) {
             super(pw);
         }
-            
+
         @Override
         public void commandRun() {
             if (zkServer == null) {
@@ -581,36 +583,35 @@ public class NIOServerCnxn extends ServerCnxn {
             }
         }
     }
-    
+
     private class StatResetCommand extends CommandThread {
         public StatResetCommand(PrintWriter pw) {
             super(pw);
         }
-        
-        @Override
-        public void commandRun() {
-            if (zkServer == null) {
-                pw.println(ZK_NOT_SERVING);
-            }
-            else { 
-                zkServer.serverStats().reset();
-                pw.println("Server stats reset.");
-            }
-        }
-    }
-    
-    private class CnxnStatResetCommand extends CommandThread {
-        public CnxnStatResetCommand(PrintWriter pw) {
-            super(pw);
-        }
-        
+
         @Override
         public void commandRun() {
             if (zkServer == null) {
                 pw.println(ZK_NOT_SERVING);
             } else {
-                synchronized(factory.cnxns){
-                    for(ServerCnxn c : factory.cnxns){
+                zkServer.serverStats().reset();
+                pw.println("Server stats reset.");
+            }
+        }
+    }
+
+    private class CnxnStatResetCommand extends CommandThread {
+        public CnxnStatResetCommand(PrintWriter pw) {
+            super(pw);
+        }
+
+        @Override
+        public void commandRun() {
+            if (zkServer == null) {
+                pw.println(ZK_NOT_SERVING);
+            } else {
+                synchronized (factory.cnxns) {
+                    for (ServerCnxn c : factory.cnxns) {
                         c.resetStats();
                     }
                 }
@@ -623,35 +624,34 @@ public class NIOServerCnxn extends ServerCnxn {
         public DumpCommand(PrintWriter pw) {
             super(pw);
         }
-        
+
         @Override
         public void commandRun() {
             if (zkServer == null) {
                 pw.println(ZK_NOT_SERVING);
-            }
-            else {
+            } else {
                 pw.println("SessionTracker dump:");
                 zkServer.sessionTracker.dumpSessions(pw);
                 pw.println("ephemeral nodes dump:");
-              //  zkServer.dumpEphemerals(pw);
+                // zkServer.dumpEphemerals(pw);
             }
         }
     }
-    
+
     private class StatCommand extends CommandThread {
         int len;
+
         public StatCommand(PrintWriter pw, int len) {
             super(pw);
             this.len = len;
         }
-        
+
         @SuppressWarnings("unchecked")
         @Override
         public void commandRun() {
             if (zkServer == null) {
                 pw.println(ZK_NOT_SERVING);
-            }
-            else {   
+            } else {
                 pw.print("Zookeeper version: ");
                 pw.println(Version.getFullVersion());
                 if (len == statCmd) {
@@ -660,11 +660,11 @@ public class NIOServerCnxn extends ServerCnxn {
                     // clone should be faster than iteration
                     // ie give up the cnxns lock faster
                     HashSet<NIOServerCnxn> cnxnset;
-                    synchronized(factory.cnxns){
-                        cnxnset = (HashSet<NIOServerCnxn>)factory
-                        .cnxns.clone();
+                    synchronized (factory.cnxns) {
+                        cnxnset = (HashSet<NIOServerCnxn>) factory.cnxns
+                                .clone();
                     }
-                    for(NIOServerCnxn c : cnxnset){
+                    for (NIOServerCnxn c : cnxnset) {
                         c.dumpConnectionInfo(pw, true);
                         pw.println();
                     }
@@ -674,15 +674,15 @@ public class NIOServerCnxn extends ServerCnxn {
                 pw.print("Node count: ");
                 pw.println(zkServer.getZKDatabase().getNodeCount());
             }
-            
+
         }
     }
-    
+
     private class ConsCommand extends CommandThread {
         public ConsCommand(PrintWriter pw) {
             super(pw);
         }
-        
+
         @SuppressWarnings("unchecked")
         @Override
         public void commandRun() {
@@ -703,12 +703,11 @@ public class NIOServerCnxn extends ServerCnxn {
             }
         }
     }
-    
+
     private class WatchCommand extends CommandThread {
-        int len = 0;
+
         public WatchCommand(PrintWriter pw, int len) {
             super(pw);
-            this.len = len;
         }
 
         @Override
@@ -716,7 +715,6 @@ public class NIOServerCnxn extends ServerCnxn {
             if (zkServer == null) {
                 pw.println(ZK_NOT_SERVING);
             } else {
-                M2mData dt = zkServer.getZKDatabase().getM2mData();
                 pw.println();
             }
         }
@@ -730,7 +728,7 @@ public class NIOServerCnxn extends ServerCnxn {
 
         @Override
         public void commandRun() {
-            if(zkServer == null) {
+            if (zkServer == null) {
                 pw.println(ZK_NOT_SERVING);
                 return;
             }
@@ -754,15 +752,18 @@ public class NIOServerCnxn extends ServerCnxn {
 
             OSMXBean osMbean = new OSMXBean();
             if (osMbean != null && osMbean.getUnix() == true) {
-                print("open_file_descriptor_count", osMbean.getOpenFileDescriptorCount());
-                print("max_file_descriptor_count", osMbean.getMaxFileDescriptorCount());
+                print("open_file_descriptor_count",
+                        osMbean.getOpenFileDescriptorCount());
+                print("max_file_descriptor_count",
+                        osMbean.getMaxFileDescriptorCount());
             }
 
-            if(stats.getServerState().equals("leader")) {
-                Leader leader = ((LeaderZooKeeperServer)zkServer).getLeader();
+            if (stats.getServerState().equals("leader")) {
+                Leader leader = ((LeaderZooKeeperServer) zkServer).getLeader();
 
                 print("followers", leader.getLearners().size());
-                print("synced_followers", leader.getForwardingFollowers().size());
+                print("synced_followers", leader.getForwardingFollowers()
+                        .size());
                 print("pending_syncs", leader.getNumPendingSyncs());
             }
         }
@@ -797,9 +798,9 @@ public class NIOServerCnxn extends ServerCnxn {
     }
 
     /** Return if four letter word found and responded to, otw false **/
+    @SuppressWarnings("resource")
     private boolean checkFourLetterWord(final SelectionKey k, final int len)
-    throws IOException
-    {
+            throws IOException {
         // We take advantage of the limited size of the length to look
         // for cmds. They are all 4-bytes which fits inside of an int
         String cmd = cmd2String.get(len);
@@ -810,25 +811,25 @@ public class NIOServerCnxn extends ServerCnxn {
                 + sock.socket().getRemoteSocketAddress());
         packetReceived();
 
-        /** cancel the selection key to remove the socket handling
-         * from selector. This is to prevent netcat problem wherein
-         * netcat immediately closes the sending side after sending the
-         * commands and still keeps the receiving channel open. 
-         * The idea is to remove the selectionkey from the selector
-         * so that the selector does not notice the closed read on the
-         * socket channel and keep the socket alive to write the data to
-         * and makes sure to close the socket after its done writing the data
+        /**
+         * cancel the selection key to remove the socket handling from selector.
+         * This is to prevent netcat problem wherein netcat immediately closes
+         * the sending side after sending the commands and still keeps the
+         * receiving channel open. The idea is to remove the selectionkey from
+         * the selector so that the selector does not notice the closed read on
+         * the socket channel and keep the socket alive to write the data to and
+         * makes sure to close the socket after its done writing the data
          */
         if (k != null) {
             try {
                 k.cancel();
-            } catch(Exception e) {
+            } catch (Exception e) {
                 LOG.error("Error cancelling command selection key ", e);
             }
         }
 
-        final PrintWriter pwriter = new PrintWriter(
-                new BufferedWriter(new SendBufferWriter()));
+        final PrintWriter pwriter = new PrintWriter(new BufferedWriter(
+                new SendBufferWriter()));
         if (len == ruokCmd) {
             RuokCommand ruok = new RuokCommand(pwriter);
             ruok.start();
@@ -846,7 +847,8 @@ public class NIOServerCnxn extends ServerCnxn {
             incomingBuffer.flip();
             long traceMask = incomingBuffer.getLong();
             ZooTrace.setTextTraceLevel(traceMask);
-            SetTraceMaskCommand setMask = new SetTraceMaskCommand(pwriter, traceMask);
+            SetTraceMaskCommand setMask = new SetTraceMaskCommand(pwriter,
+                    traceMask);
             setMask.start();
             return true;
         } else if (len == enviCmd) {
@@ -893,12 +895,15 @@ public class NIOServerCnxn extends ServerCnxn {
         return false;
     }
 
-    /** Reads the first 4 bytes of lenBuffer, which could be true length or
-     *  four letter word.
+    /**
+     * Reads the first 4 bytes of lenBuffer, which could be true length or four
+     * letter word.
      *
-     * @param k selection key
+     * @param k
+     *            selection key
      * @return true if length read, otw false (wasn't really the length)
-     * @throws IOException if buffer size exceeds maxBuffer size
+     * @throws IOException
+     *             if buffer size exceeds maxBuffer size
      */
     private boolean readLength(SelectionKey k) throws IOException {
         // Read the length, now get the buffer
@@ -926,7 +931,7 @@ public class NIOServerCnxn extends ServerCnxn {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.apache.zookeeper.server.ServerCnxnIface#getSessionTimeout()
      */
     public int getSessionTimeout() {
@@ -945,33 +950,35 @@ public class NIOServerCnxn extends ServerCnxn {
      */
     @Override
     public void close() {
-        synchronized(factory.cnxns){
+        synchronized (factory.cnxns) {
             // if this is not in cnxns then it's already closed
             if (!factory.cnxns.remove(this)) {
                 return;
             }
 
             synchronized (factory.ipMap) {
-                Set<NIOServerCnxn> s =
-                    factory.ipMap.get(sock.socket().getInetAddress());
+                Set<NIOServerCnxn> s = factory.ipMap.get(sock.socket()
+                        .getInetAddress());
                 s.remove(this);
             }
 
             factory.unregisterConnection(this);
 
             if (zkServer != null) {
-               // zkServer.removeCnxn(this);
+                // zkServer.removeCnxn(this);
             }
-    
+
             closeSock();
-    
+
             if (sk != null) {
                 try {
                     // need to cancel this selection key from the selector
                     sk.cancel();
                 } catch (Exception e) {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("ignoring exception during selectionkey cancel", e);
+                        LOG.debug(
+                                "ignoring exception during selectionkey cancel",
+                                e);
                     }
                 }
             }
@@ -979,7 +986,7 @@ public class NIOServerCnxn extends ServerCnxn {
     }
 
     /**
-     * Close resources associated with the sock of this cnxn. 
+     * Close resources associated with the sock of this cnxn.
      */
     private void closeSock() {
         if (sock.isOpen() == false) {
@@ -988,9 +995,9 @@ public class NIOServerCnxn extends ServerCnxn {
 
         LOG.info("Closed socket connection for client "
                 + sock.socket().getRemoteSocketAddress()
-                + (sessionId != 0 ?
-                        " which had sessionid 0x" + Long.toHexString(sessionId) :
-                        " (no session established for client)"));
+                + (sessionId != 0 ? " which had sessionid 0x"
+                        + Long.toHexString(sessionId)
+                        : " (no session established for client)"));
         try {
             /*
              * The following sequence of code is stupid! You would think that
@@ -1032,14 +1039,15 @@ public class NIOServerCnxn extends ServerCnxn {
             }
         }
     }
-    
+
     private final static byte fourBytes[] = new byte[4];
 
     /*
      * (non-Javadoc)
-     *
-     * @see org.apache.zookeeper.server.ServerCnxnIface#sendResponse(org.apache.zookeeper.proto.ReplyHeader,
-     *      org.apache.jute.Record, java.lang.String)
+     * 
+     * @see
+     * org.apache.zookeeper.server.ServerCnxnIface#sendResponse(org.apache.zookeeper
+     * .proto.ReplyHeader, org.apache.jute.Record, java.lang.String)
      */
     @Override
     synchronized public void sendResponse(ReplyHeader h, Record r, String tag) {
@@ -1062,11 +1070,11 @@ public class NIOServerCnxn extends ServerCnxn {
             bb.putInt(b.length - 4).rewind();
             sendBuffer(bb);
             if (h.getXid() > 0) {
-                synchronized(this){
+                synchronized (this) {
                     outstandingRequests--;
                 }
                 // check throttling
-                synchronized (this.factory) {        
+                synchronized (this.factory) {
                     if (zkServer.getInProcess() < outstandingLimit
                             || outstandingRequests < 1) {
                         sk.selector().wakeup();
@@ -1074,24 +1082,28 @@ public class NIOServerCnxn extends ServerCnxn {
                     }
                 }
             }
-         } catch(Exception e) {
+        } catch (Exception e) {
             LOG.warn("Unexpected exception. Destruction averted.", e);
-         }
+        }
     }
 
     /*
      * (non-Javadoc)
-     *
-     * @see org.apache.zookeeper.server.ServerCnxnIface#process(org.apache.zookeeper.proto.WatcherEvent)
+     * 
+     * @see
+     * org.apache.zookeeper.server.ServerCnxnIface#process(org.apache.zookeeper
+     * .proto.WatcherEvent)
      */
     @Override
     synchronized public void process(WatchedEvent event) {
         ReplyHeader h = new ReplyHeader(-1, -1L, 0);
         if (LOG.isTraceEnabled()) {
-            ZooTrace.logTraceMessage(LOG, ZooTrace.EVENT_DELIVERY_TRACE_MASK,
-                                     "Deliver event " + event + " to 0x"
-                                     + Long.toHexString(this.sessionId)
-                                     + " through " + this);
+            ZooTrace.logTraceMessage(
+                    LOG,
+                    ZooTrace.EVENT_DELIVERY_TRACE_MASK,
+                    "Deliver event " + event + " to 0x"
+                            + Long.toHexString(this.sessionId) + " through "
+                            + this);
         }
 
         // Convert WatchedEvent to a type that can be sent over the wire
@@ -1102,7 +1114,7 @@ public class NIOServerCnxn extends ServerCnxn {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.apache.zookeeper.server.ServerCnxnIface#getSessionId()
      */
     @Override

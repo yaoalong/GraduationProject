@@ -10,11 +10,16 @@ import org.apache.zookeeper.Watcher.Event.EventType;
 import org.apache.zookeeper.Watcher.Event.KeeperState;
 import org.apache.zookeeper.ZooKeeper;
 import org.lab.mars.onem2m.consistent.hash.NetworkPool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * 监控zookeeper,从而可以获取在线机器列表
  */
 public class ZooKeeper_Monitor extends Thread implements Watcher {
+
+    private static final Logger LOG = LoggerFactory
+            .getLogger(ZooKeeper_Monitor.class);
     private static final String ROOT_NODE = "/server";
     private static CountDownLatch countDownLatch = new CountDownLatch(1);
     private ZooKeeper zooKeeper;
@@ -26,16 +31,17 @@ public class ZooKeeper_Monitor extends Thread implements Watcher {
 
     public void run() {
         try {
-            ZooKeeper zooKeeper = new ZooKeeper(server, 5000, this);
+            zooKeeper = new ZooKeeper(server, 5000, this);
             countDownLatch.await();
-            getChildrens(zooKeeper);
+            getChildrens();
             while (true) {
                 zooKeeper.getChildren("/server", this);
                 Thread.sleep(1000);
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error("zookeepeer_monitor is error because of:{}",
+                    e.getMessage());
         }
     }
 
@@ -46,9 +52,12 @@ public class ZooKeeper_Monitor extends Thread implements Watcher {
         } else if (EventType.NodeChildrenChanged == event.getType()
                 && event.getPath().startsWith("/server")) {
             try {
-                getChildrens(zooKeeper);
+                if (zooKeeper == null) {
+                    return;
+                }
+                getChildrens();
             } catch (KeeperException | InterruptedException e) {
-                e.printStackTrace();
+                LOG.error("error:{}", e.getMessage());
             }
         }
     }
@@ -56,8 +65,11 @@ public class ZooKeeper_Monitor extends Thread implements Watcher {
     /*
      * 去修改networkPool的服务器列表
      */
-    private void getChildrens(ZooKeeper zooKeeper) throws KeeperException,
-            InterruptedException {
+    private void getChildrens() throws KeeperException, InterruptedException {
+        if (zooKeeper == null) {
+            LOG.error("zookeeper is empty");
+            return;
+        }
         List<String> serverStrings = zooKeeper.getChildren(ROOT_NODE, null);
         networkPool.setServers(serverStrings.toArray(new String[serverStrings
                 .size()]));

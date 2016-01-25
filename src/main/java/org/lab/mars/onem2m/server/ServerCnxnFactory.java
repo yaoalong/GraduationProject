@@ -100,12 +100,6 @@ public abstract class ServerCnxnFactory {
      * 
      * @param zk
      */
-    // final public void setZooKeeperServer(ZooKeeperServer zk) {
-    // this.zkServer = zk;
-    // if (zk != null) {
-    // zk.setServerCnxnFactory(this);
-    // }
-    // }
     /**
      * 每个特定的QuorumPeer都会添加自己的ZooKeeperServer
      * 
@@ -115,9 +109,7 @@ public abstract class ServerCnxnFactory {
     final public void addZooKeeperServer(String ip,
             ZooKeeperServer zooKeeperServer) {
         this.zkServers.put(ip, zooKeeperServer);
-        if (zooKeeperServer != null) {
-            zooKeeperServer.setServerCnxnFactory(this);
-        }
+        zooKeeperServer.setServerCnxnFactory(this);
     }
 
     /**

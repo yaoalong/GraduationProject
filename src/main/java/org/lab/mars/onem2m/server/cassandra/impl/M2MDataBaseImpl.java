@@ -305,8 +305,7 @@ public class M2MDataBaseImpl implements M2MDataBase {
     public boolean isClean() {
         return clean;
     }
-
-    @Override
+@Override
     public String getKeyspace() {
         return keyspace;
     }

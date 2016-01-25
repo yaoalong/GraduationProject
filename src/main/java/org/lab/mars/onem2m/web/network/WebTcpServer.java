@@ -2,9 +2,11 @@ package org.lab.mars.onem2m.web.network;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import org.lab.mars.onem2m.network.NetworkEventLoopGroup;
@@ -17,6 +19,7 @@ public class WebTcpServer {
 
     public WebTcpServer(ServerCnxnFactory serverCnxnFactory) {
         this.serverCnxnFactory = serverCnxnFactory;
+        this.channels = new HashSet<Channel>();
     }
 
     public void bind(String host, int port) throws InterruptedException {
@@ -28,7 +31,9 @@ public class WebTcpServer {
                 .option(ChannelOption.SO_BACKLOG, 1000)
                 .childHandler(
                         new WebServerChannelInitializer(serverCnxnFactory));
-        b.bind(host, port).sync();
+        b.bind(host, port).addListener((ChannelFuture channelFuture) -> {
+            channels.add(channelFuture.channel());
+        });
     }
 
     public void close() {

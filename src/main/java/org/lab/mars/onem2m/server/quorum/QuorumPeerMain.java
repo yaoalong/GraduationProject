@@ -193,6 +193,7 @@ public class QuorumPeerMain {
             for (QuorumPeer quorumPeer : quorumPeers) {
                 quorumPeer.join();
             }
+            webTcpServer.close();
 
         } catch (InterruptedException e) {
             // warn, but generally this is ok

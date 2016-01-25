@@ -26,8 +26,6 @@ import org.lab.mars.onem2m.KeeperException;
 import org.lab.mars.onem2m.ZooDefs.OpCode;
 import org.lab.mars.onem2m.jute.Record;
 import org.lab.mars.onem2m.txn.TxnHeader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This is the structure that represents a request moving through a chain of
@@ -35,8 +33,6 @@ import org.slf4j.LoggerFactory;
  * onto the request as it is processed.
  */
 public class Request {
-    private static final Logger LOG = LoggerFactory.getLogger(Request.class);
-
     public final static Request requestOfDeath = new Request(null, 0, 0, 0,
             null);
 
@@ -47,9 +43,9 @@ public class Request {
      * @param type
      * @param bb
      */
-    public Request(ChannelHandlerContext ctx, long sessionId, int xid, int type,
-            ByteBuffer bb) {
-      this.ctx=ctx;
+    public Request(ChannelHandlerContext ctx, long sessionId, int xid,
+            int type, ByteBuffer bb) {
+        this.ctx = ctx;
         this.sessionId = sessionId;
         this.cxid = xid;
         this.type = type;
@@ -72,17 +68,16 @@ public class Request {
 
     public long zxid = -1;
 
-
     public final long createTime = System.currentTimeMillis();
-    
+
     private Object owner;
-    
+
     private KeeperException e;
 
     public Object getOwner() {
         return owner;
     }
-    
+
     public void setOwner(Object owner) {
         this.owner = owner;
     }
@@ -91,7 +86,7 @@ public class Request {
      * is the packet type a valid packet in zookeeper
      * 
      * @param type
-     *                the type of the packet
+     *            the type of the packet
      * @return true if a valid packet, false if not
      */
     static boolean isValid(int type) {
@@ -143,7 +138,7 @@ public class Request {
             return false;
         }
     }
-    
+
     static String op2String(int op) {
         switch (op) {
         case OpCode.notification:
@@ -165,7 +160,7 @@ public class Request {
         case OpCode.setData:
             return "setData";
         case OpCode.sync:
-              return "sync:";
+            return "sync:";
         case OpCode.getACL:
             return "getACL";
         case OpCode.setACL:
@@ -191,31 +186,25 @@ public class Request {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("sessionid:0x").append(Long.toHexString(sessionId))
-            .append(" type:").append(op2String(type))
-            .append(" cxid:0x").append(Long.toHexString(cxid))
-            .append(" zxid:0x").append(Long.toHexString(hdr == null ?
-                    -2 : hdr.getZxid()))
-            .append(" txntype:").append(hdr == null ?
-                    "unknown" : "" + hdr.getType());
+                .append(" type:").append(op2String(type)).append(" cxid:0x")
+                .append(Long.toHexString(cxid)).append(" zxid:0x")
+                .append(Long.toHexString(hdr == null ? -2 : hdr.getZxid()))
+                .append(" txntype:")
+                .append(hdr == null ? "unknown" : "" + hdr.getType());
 
         // best effort to print the path assoc with this request
         String path = "n/a";
-        if (type != OpCode.createSession
-                && type != OpCode.setWatches
-                && type != OpCode.closeSession
-                && request != null
-                && request.remaining() >= 4)
-        {
+        if (type != OpCode.createSession && type != OpCode.setWatches
+                && type != OpCode.closeSession && request != null
+                && request.remaining() >= 4) {
             try {
                 // make sure we don't mess with request itself
                 ByteBuffer rbuf = request.asReadOnlyBuffer();
                 rbuf.clear();
                 int pathLen = rbuf.getInt();
                 // sanity check
-                if (pathLen >= 0
-                        && pathLen < 4096
-                        && rbuf.remaining() >= pathLen)
-                {
+                if (pathLen >= 0 && pathLen < 4096
+                        && rbuf.remaining() >= pathLen) {
                     byte b[] = new byte[pathLen];
                     rbuf.get(b);
                     path = new String(b);
@@ -232,7 +221,7 @@ public class Request {
     public void setException(KeeperException e) {
         this.e = e;
     }
-	
+
     public KeeperException getException() {
         return e;
     }

@@ -75,6 +75,7 @@ public class TraceFormatter {
             System.err.println("USAGE: TraceFormatter trace_file");
             System.exit(2);
         }
+        @SuppressWarnings("resource")
         FileChannel fc = new FileInputStream(args[0]).getChannel();
         while (true) {
             ByteBuffer bb = ByteBuffer.allocate(41);

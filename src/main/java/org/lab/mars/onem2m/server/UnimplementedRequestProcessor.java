@@ -19,28 +19,20 @@
 package org.lab.mars.onem2m.server;
 
 import org.lab.mars.onem2m.KeeperException;
-import org.lab.mars.onem2m.proto.ReplyHeader;
-import org.lab.mars.onem2m.server.M2mRequest;
 
 /**
- * Manages the unknown requests (i.e. unknown OpCode), by:
- * - sending back the KeeperException.UnimplementedException() error code to the client
- * - closing the connection.
+ * Manages the unknown requests (i.e. unknown OpCode), by: - sending back the
+ * KeeperException.UnimplementedException() error code to the client - closing
+ * the connection.
  */
 public class UnimplementedRequestProcessor implements RequestProcessor {
 
-    public void processRequest(M2mRequest request) throws RequestProcessorException {
+    public void processRequest(M2mRequest request)
+            throws RequestProcessorException {
         KeeperException ke = new KeeperException.UnimplementedException();
         request.setException(ke);
-        ReplyHeader rh = new ReplyHeader(request.cxid, request.zxid, ke.code().intValue());
-      //  try {
-//            request.cnxn.sendResponse(rh, null, "response");
-//        
-//        } catch (IOException e) {
-//            throw new RequestProcessorException("Can't send the response", e);
-//        }
 
-//        request.cnxn.sendCloseSession();
+        // request.cnxn.sendCloseSession();
     }
 
     public void shutdown() {

@@ -268,7 +268,6 @@ public class ClientCnxn {
         public String toString() {
             StringBuilder sb = new StringBuilder();
 
-            sb.append("clientPath:" + clientPath);
             sb.append(" serverPath:" + serverPath);
             sb.append(" finished:" + finished);
 

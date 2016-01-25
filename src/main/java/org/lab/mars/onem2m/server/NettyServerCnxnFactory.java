@@ -101,7 +101,7 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
 
     @Override
     public void closeAll() {
-
+        tcpServer.close();
     }
 
     @Override

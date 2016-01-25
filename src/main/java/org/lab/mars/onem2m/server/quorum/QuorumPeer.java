@@ -576,12 +576,7 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
         case 0:
             le = new LeaderElection(this);
             break;
-        case 1:
-            le = new AuthFastLeaderElection(this);
-            break;
-        case 2:
-            le = new AuthFastLeaderElection(this, true);
-            break;
+
         case 3:
             qcm = new QuorumCnxManager(this);
             QuorumCnxManager.Listener listener = qcm.listener;
@@ -676,7 +671,6 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
                 case FOLLOWING:
                     try {
                         LOG.info("FOLLOWING");
-                        System.out.println("开始启动:" + isStart);
                         setFollower(makeFollower(logFactory));
                         follower.followLeader();
                     } catch (Exception e) {

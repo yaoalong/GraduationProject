@@ -21,7 +21,7 @@
 package org.lab.mars.onem2m.version;
 
 public interface Info {
-    public static final int MAJOR=3;
+    public static final int MAJOR=1;
     public static final int MINOR=4;
     public static final int MICRO=6;
     public static final String QUALIFIER=null;

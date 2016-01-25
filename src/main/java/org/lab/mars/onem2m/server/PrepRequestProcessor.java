@@ -20,10 +20,8 @@ package org.lab.mars.onem2m.server;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.ListIterator;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -32,8 +30,6 @@ import org.lab.mars.onem2m.KeeperException.Code;
 import org.lab.mars.onem2m.MultiTransactionRecord;
 import org.lab.mars.onem2m.Op;
 import org.lab.mars.onem2m.ZooDefs.OpCode;
-import org.lab.mars.onem2m.data.ACL;
-import org.lab.mars.onem2m.data.Id;
 import org.lab.mars.onem2m.jute.M2mRecord;
 import org.lab.mars.onem2m.proto.M2mCreateRequest;
 import org.lab.mars.onem2m.proto.M2mDeleteRequest;
@@ -227,22 +223,6 @@ public class PrepRequestProcessor extends Thread implements RequestProcessor {
         }
     }
 
-    static void checkACL(ZooKeeperServer zks, List<ACL> acl, int perm,
-            List<Id> ids) throws KeeperException.NoAuthException {
-        if (skipACL) {
-            return;
-        }
-        if (acl == null || acl.size() == 0) {
-            return;
-        }
-        for (Id authId : ids) {
-            if (authId.getScheme().equals("super")) {
-                return;
-            }
-        }
-        return;
-    }
-
     /**
      * This method will be called inside the ProcessRequestThread, which is a
      * singleton, so there will be a single thread calling this code.
@@ -352,41 +332,6 @@ public class PrepRequestProcessor extends Thread implements RequestProcessor {
         request.zxid = zks.getZxid();
 
         nextProcessor.processRequest(request);
-    }
-
-    private List<ACL> removeDuplicates(List<ACL> acl) {
-
-        ArrayList<ACL> retval = new ArrayList<ACL>();
-        Iterator<ACL> it = acl.iterator();
-        while (it.hasNext()) {
-            ACL a = it.next();
-            if (retval.contains(a) == false) {
-                retval.add(a);
-            }
-        }
-        return retval;
-    }
-
-    /**
-     * This method checks out the acl making sure it isn't null or empty, it has
-     * valid schemes and ids, and expanding any relative ids that depend on the
-     * requestor's authentication information.
-     *
-     * @param authInfo
-     *            list of ACL IDs associated with the client connection
-     * @param acl
-     *            list of ACLs being assigned to the node (create or setACL
-     *            operation)
-     * @return
-     */
-    private boolean fixupACL(List<Id> authInfo, List<ACL> acl) {
-        if (skipACL) {
-            return true;
-        }
-        if (acl == null || acl.size() == 0) {
-            return false;
-        }
-        return acl.size() > 0;
     }
 
     public void processRequest(M2mRequest m2mRequest) {

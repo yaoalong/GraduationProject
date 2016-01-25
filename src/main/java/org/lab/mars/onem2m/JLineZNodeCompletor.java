@@ -30,55 +30,55 @@ class JLineZNodeCompletor implements Completor {
     }
 
     @SuppressWarnings("unchecked")
-    public int complete(String buffer, int cursor, List candidates) {
+    public int complete(String buffer, int cursor,
+            @SuppressWarnings("rawtypes") List candidates) {
         // Guarantee that the final token is the one we're expanding
-        buffer = buffer.substring(0,cursor);
+        buffer = buffer.substring(0, cursor);
         String token = "";
         if (!buffer.endsWith(" ")) {
             String[] tokens = buffer.split(" ");
             if (tokens.length != 0) {
-                token = tokens[tokens.length-1] ;
+                token = tokens[tokens.length - 1];
             }
         }
 
-        if (token.startsWith("/")){
-            return completeZNode( buffer, token, candidates);
+        if (token.startsWith("/")) {
+            return completeZNode(buffer, token, candidates);
         }
         return completeCommand(buffer, token, candidates);
     }
 
     private int completeCommand(String buffer, String token,
-            List<String> candidates)
-    {
+            List<String> candidates) {
         for (String cmd : ZooKeeperMain.getCommands()) {
-            if (cmd.startsWith( token )) {
+            if (cmd.startsWith(token)) {
                 candidates.add(cmd);
             }
         }
-        return buffer.lastIndexOf(" ")+1;
+        return buffer.lastIndexOf(" ") + 1;
     }
 
-    private int completeZNode( String buffer, String token,
-            List<String> candidates)
-    {
+    private int completeZNode(String buffer, String token,
+            List<String> candidates) {
         String path = token;
         int idx = path.lastIndexOf("/") + 1;
         String prefix = path.substring(idx);
         try {
-            // Only the root path can end in a /, so strip it off every other prefix
-            String dir = idx == 1 ? "/" : path.substring(0,idx-1);
+            // Only the root path can end in a /, so strip it off every other
+            // prefix
+            String dir = idx == 1 ? "/" : path.substring(0, idx - 1);
             List<String> children = zk.getChildren(dir, false);
             for (String child : children) {
                 if (child.startsWith(prefix)) {
-                    candidates.add( child );
+                    candidates.add(child);
                 }
             }
-        } catch( InterruptedException e) {
+        } catch (InterruptedException e) {
+            return 0;
+        } catch (KeeperException e) {
             return 0;
         }
-        catch( KeeperException e) {
-            return 0;
-        }
-        return candidates.size() == 0 ? buffer.length() : buffer.lastIndexOf("/") + 1;
+        return candidates.size() == 0 ? buffer.length() : buffer
+                .lastIndexOf("/") + 1;
     }
 }

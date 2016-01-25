@@ -66,8 +66,8 @@ public class WebClientChannelHandler extends
                     new M2mWebRetriveKeyResponse(WebServerChannelHandler.result
                             .get(m2mPacket.getM2mRequestHeader().getXid())
                             .getServers()));
-            WebServerChannelHandler.result.get(m2mRequestHeader).getCtx()
-                    .writeAndFlush(m2mWebPacket);
+            WebServerChannelHandler.result.get(m2mRequestHeader.getXid())
+                    .getCtx().writeAndFlush(m2mWebPacket);
             WebServerChannelHandler.result.remove(m2mRequestHeader.getXid());
             WebServerChannelHandler.serverResult.remove(m2mRequestHeader
                     .getXid());

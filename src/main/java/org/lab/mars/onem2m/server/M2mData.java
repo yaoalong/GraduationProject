@@ -9,8 +9,6 @@ import org.lab.mars.onem2m.jute.M2mInputArchive;
 import org.lab.mars.onem2m.jute.M2mOutputArchive;
 import org.lab.mars.onem2m.jute.M2mRecord;
 import org.lab.mars.onem2m.server.cassandra.interface4.M2MDataBase;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * M2m内存数据
@@ -23,7 +21,6 @@ public class M2mData implements M2mRecord {
 	 * 
 	 */
     private static final long serialVersionUID = -5084501890442461767L;
-    private static final Logger LOG = LoggerFactory.getLogger(M2mData.class);
     private static final ConcurrentHashMap<String, M2mDataNode> nodes = new ConcurrentHashMap<String, M2mDataNode>();
     public boolean initialized = false;
     private M2MDataBase m2mDataBase;
