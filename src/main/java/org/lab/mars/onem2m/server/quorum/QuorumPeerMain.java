@@ -30,6 +30,7 @@ import org.lab.mars.onem2m.jmx.ManagedUtil;
 import org.lab.mars.onem2m.persistence.FileTxnSnapLog;
 import org.lab.mars.onem2m.server.NettyServerCnxnFactory;
 import org.lab.mars.onem2m.server.ZKDatabase;
+import org.lab.mars.onem2m.server.cassandra.impl.M2MDataBaseImpl;
 import org.lab.mars.onem2m.server.quorum.QuorumPeer.QuorumServer;
 import org.lab.mars.onem2m.server.quorum.QuorumPeerConfig.ConfigException;
 import org.lab.mars.onem2m.server.quorum.flexible.QuorumMaj;
@@ -153,10 +154,14 @@ public class QuorumPeerMain {
                 quorumPeer.setQuorumPeers(servers);// 设置对应的服务器信息
                 quorumPeer.setElectionType(config.getElectionAlg());
                 quorumPeer.setCnxnFactory(cnxnFactory);
+
                 quorumPeer.setZKDatabase(new ZKDatabase(
-                        config.getNetworkPool(), config.m2mDataBase,
-                        m2mQuorumServer.getServers().get(
-                                Integer.valueOf((i) + ""))));
+                        config.getNetworkPool(), new M2MDataBaseImpl(
+                                config.m2mDataBase.isClean(),
+                                config.m2mDataBase.getKeyspace(),
+                                config.m2mDataBase.getTable(),
+                                config.m2mDataBase.getNode()), m2mQuorumServer
+                                .getServers().get(Integer.valueOf((i) + ""))));
                 quorumPeer.setClientPortAddress(config.getClientPortAddress());
                 quorumPeer.setTxnFactory(new FileTxnSnapLog(new File(config
                         .getDataLogDir()), new File(config.getDataDir())));
@@ -176,7 +181,6 @@ public class QuorumPeerMain {
                 quorumPeer.setZooKeeper_Monitor(zooKeeper_Monitor);
                 quorumPeer.setRegisterIntoZooKeeper(registerIntoZooKeeper);
                 quorumPeer.setMyIp(config.getMyIp());
-                quorumPeer.setM2mDataBase(config.m2mDataBase);
 
                 quorumPeer.start();
 

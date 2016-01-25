@@ -290,4 +290,25 @@ public class M2MDataBaseImpl implements M2MDataBase {
         }
         return m2mList;
     }
+
+    @Override
+    public String getTable() {
+        return table;
+    }
+
+    @Override
+    public String getNode() {
+        return node;
+    }
+
+    @Override
+    public boolean isClean() {
+        return clean;
+    }
+
+    @Override
+    public String getKeyspace() {
+        return keyspace;
+    }
+
 }
