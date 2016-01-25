@@ -26,7 +26,6 @@ import org.lab.mars.onem2m.server.FinalRequestProcessor;
 import org.lab.mars.onem2m.server.PrepRequestProcessor;
 import org.lab.mars.onem2m.server.RequestProcessor;
 import org.lab.mars.onem2m.server.ServerCnxn;
-import org.lab.mars.onem2m.server.SessionTrackerImpl;
 import org.lab.mars.onem2m.server.ZKDatabase;
 
 /**
@@ -81,7 +80,7 @@ public class LeaderZooKeeperServer extends QuorumZooKeeperServer {
 
     @Override
     protected void startSessionTracker() {
-        ((SessionTrackerImpl) sessionTracker).start();
+        // ((SessionTrackerImpl) sessionTracker).start();
     }
 
     public boolean touch(long sess, int to) {

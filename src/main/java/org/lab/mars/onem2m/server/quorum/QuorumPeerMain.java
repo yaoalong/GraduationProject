@@ -150,6 +150,8 @@ public class QuorumPeerMain {
                 } else {
                     quorumPeer = new QuorumPeer();
                 }
+                quorumPeer.setHandleIp(m2mQuorumServer.getServers().get(
+                        Integer.valueOf((i) + "")));
                 quorumPeer.setQuorumVerifier(new QuorumMaj(servers.size()));
                 quorumPeer.setQuorumPeers(servers);// 设置对应的服务器信息
                 quorumPeer.setElectionType(config.getElectionAlg());
@@ -169,6 +171,8 @@ public class QuorumPeerMain {
                 quorumPeer.setTickTime(config.getTickTime());
                 quorumPeer.setMinSessionTimeout(config.getMinSessionTimeout());
                 quorumPeer.setMaxSessionTimeout(config.getMaxSessionTimeout());
+                quorumPeer.setInitLimit(config.getInitLimit());
+                quorumPeer.setSyncLimit(config.getSyncLimit());
                 quorumPeer.setLearnerType(config.getPeerType());
                 quorumPeer.setSyncEnabled(config.getSyncEnabled());
                 quorumPeer.setQuorumListenOnAllIPs(config
