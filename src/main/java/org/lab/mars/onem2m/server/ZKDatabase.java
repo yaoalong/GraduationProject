@@ -24,7 +24,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
@@ -62,7 +61,6 @@ public class ZKDatabase {
      */
     // protected DataTree dataTree;
     protected M2mData m2mData;
-    protected ConcurrentHashMap<Long, Integer> sessionsWithTimeouts;
     // protected FileTxnSnapLog snapLog;
     protected long minCommittedLog, maxCommittedLog;
     public static final int commitLogCount = 500; // 临时会存储500个
@@ -80,7 +78,6 @@ public class ZKDatabase {
         this.networkPool = networkPool;
         this.m2mDataBase = m2mDataBase;
         m2mData = new M2mData(m2mDataBase);
-        sessionsWithTimeouts = new ConcurrentHashMap<Long, Integer>();
         List<M2mDataNode> m2mDataNodes = m2mDataBase.retrieve(1L);
         for (M2mDataNode node : m2mDataNodes) {
             if (networkPool.getSock(node.getId()).equals(mySelfString)) {
@@ -111,7 +108,6 @@ public class ZKDatabase {
          * to be safe we just create a new datatree.
          */
         m2mData = new M2mData(m2mDataBase);
-        sessionsWithTimeouts.clear();
         WriteLock lock = logLock.writeLock();
         try {
             lock.lock();
@@ -171,15 +167,6 @@ public class ZKDatabase {
      */
     public void setM2mDataInit(boolean b) {
         m2mData.initialized = b;
-    }
-
-    /**
-     * get sessions with timeouts
-     * 
-     * @return the hashmap of sessions with timeouts
-     */
-    public ConcurrentHashMap<Long, Integer> getSessionWithTimeOuts() {
-        return sessionsWithTimeouts;
     }
 
     /**
@@ -320,8 +307,7 @@ public class ZKDatabase {
      */
     public void deserializeSnapshot(M2mInputArchive ia) throws IOException {
         clear();
-        SerializeUtils.deserializeSnapshot(getM2mData(), ia,
-                getSessionWithTimeOuts());
+        SerializeUtils.deserializeSnapshot(getM2mData(), ia);
         initialized = true;
     }
 
@@ -336,8 +322,7 @@ public class ZKDatabase {
      */
     public void serializeSnapshot(Long peerLast, M2mOutputArchive oa)
             throws IOException, InterruptedException {
-        SerializeUtils.serializeSnapshot(peerLast, getM2mData(), oa,
-                getSessionWithTimeOuts());
+        SerializeUtils.serializeSnapshot(peerLast, getM2mData(), oa);
     }
 
     /*

@@ -374,8 +374,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
     }
 
     protected void createSessionTracker() {
-        sessionTracker = new SessionTrackerImpl(this,
-                zkDb.getSessionWithTimeOuts(), tickTime, 1);
+
     }
 
     protected void startSessionTracker() {

@@ -423,7 +423,6 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
             // load the epochs
             long lastProcessedZxid = zkDb.getM2mData().getLastProcessedZxid();
             long epochOfZxid = ZxidUtils.getEpochFromZxid(lastProcessedZxid);
-            System.out.println("当前的epoch:" + epochOfZxid + getHandleIp());
             try {
                 currentEpoch = readLongFromFile(CURRENT_EPOCH_FILENAME);
                 if (epochOfZxid > currentEpoch && updating.exists()) {

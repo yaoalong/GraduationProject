@@ -50,10 +50,10 @@ public class LeaderZooKeeperServer extends QuorumZooKeeperServer {
                 self.maxSessionTimeout, treeBuilder, zkDb, self);
     }
 
-    public Leader getLeader(){
+    public Leader getLeader() {
         return self.leader;
     }
-    
+
     @Override
     protected void setupRequestProcessors() {
         RequestProcessor finalProcessor = new FinalRequestProcessor(this);
@@ -62,29 +62,27 @@ public class LeaderZooKeeperServer extends QuorumZooKeeperServer {
         commitProcessor = new CommitProcessor(toBeAppliedProcessor,
                 Long.toString(getServerId()), false);
         commitProcessor.start();
-        ProposalRequestProcessor proposalProcessor = new ProposalRequestProcessor(this,
-                commitProcessor);
+        ProposalRequestProcessor proposalProcessor = new ProposalRequestProcessor(
+                this, commitProcessor);
         proposalProcessor.initialize();
         firstProcessor = new PrepRequestProcessor(this, proposalProcessor);
-        ((PrepRequestProcessor)firstProcessor).start();
+        ((PrepRequestProcessor) firstProcessor).start();
     }
 
     @Override
     public int getGlobalOutstandingLimit() {
         return super.getGlobalOutstandingLimit() / (self.getQuorumSize() - 1);
     }
-    
+
     @Override
     public void createSessionTracker() {
-        sessionTracker = new SessionTrackerImpl(this, getZKDatabase().getSessionWithTimeOuts(),
-                tickTime, self.getId());
-    }
-    
-    @Override
-    protected void startSessionTracker() {
-        ((SessionTrackerImpl)sessionTracker).start();
+
     }
 
+    @Override
+    protected void startSessionTracker() {
+        ((SessionTrackerImpl) sessionTracker).start();
+    }
 
     public boolean touch(long sess, int to) {
         return sessionTracker.touchSession(sess, to);
@@ -93,22 +91,21 @@ public class LeaderZooKeeperServer extends QuorumZooKeeperServer {
     @Override
     protected void registerJMX() {
         // register with JMX
-//        try {
-//            jmxDataTreeBean = new DataTreeBean(getZKDatabase().getDataTree());
-//            MBeanRegistry.getInstance().register(jmxDataTreeBean, jmxServerBean);
-//        } catch (Exception e) {
-//            LOG.warn("Failed to register with JMX", e);
-//            jmxDataTreeBean = null;
-//        }
+        // try {
+        // jmxDataTreeBean = new DataTreeBean(getZKDatabase().getDataTree());
+        // MBeanRegistry.getInstance().register(jmxDataTreeBean, jmxServerBean);
+        // } catch (Exception e) {
+        // LOG.warn("Failed to register with JMX", e);
+        // jmxDataTreeBean = null;
+        // }
     }
 
-    public void registerJMX(LeaderBean leaderBean,
-            LocalPeerBean localPeerBean)
-    {
+    public void registerJMX(LeaderBean leaderBean, LocalPeerBean localPeerBean) {
         // register with JMX
         if (self.jmxLeaderElectionBean != null) {
             try {
-                MBeanRegistry.getInstance().unregister(self.jmxLeaderElectionBean);
+                MBeanRegistry.getInstance().unregister(
+                        self.jmxLeaderElectionBean);
             } catch (Exception e) {
                 LOG.warn("Failed to register with JMX", e);
             }
@@ -148,7 +145,7 @@ public class LeaderZooKeeperServer extends QuorumZooKeeperServer {
         }
         jmxServerBean = null;
     }
-    
+
     @Override
     public String getState() {
         return "leader";
@@ -156,23 +153,23 @@ public class LeaderZooKeeperServer extends QuorumZooKeeperServer {
 
     /**
      * Returns the id of the associated QuorumPeer, which will do for a unique
-     * id of this server. 
+     * id of this server.
      */
     @Override
     public long getServerId() {
         return self.getId();
-    }    
-    
+    }
+
     @Override
     protected void revalidateSession(ServerCnxn cnxn, long sessionId,
-        int sessionTimeout) throws IOException {
-//        super.revalidateSession(cnxn, sessionId, sessionTimeout);
-//        try {
-//            setowner as the leader itself, unless updated
-//            via the follower handlers
-//            setOwner(sessionId, ServerCnxn.me);
-//        } catch (SessionExpiredException e) {
-//            this is ok, it just means that the session revalidation failed.
-//        }
+            int sessionTimeout) throws IOException {
+        // super.revalidateSession(cnxn, sessionId, sessionTimeout);
+        // try {
+        // setowner as the leader itself, unless updated
+        // via the follower handlers
+        // setOwner(sessionId, ServerCnxn.me);
+        // } catch (SessionExpiredException e) {
+        // this is ok, it just means that the session revalidation failed.
+        // }
     }
 }

@@ -27,26 +27,25 @@ import org.lab.mars.onem2m.server.ZKDatabase;
 import org.lab.mars.onem2m.server.ZooKeeperServerBean;
 
 /**
- * Parent class for all ZooKeeperServers for Learners 
+ * Parent class for all ZooKeeperServers for Learners
  */
-public abstract class LearnerZooKeeperServer extends QuorumZooKeeperServer {    
+public abstract class LearnerZooKeeperServer extends QuorumZooKeeperServer {
     public LearnerZooKeeperServer(FileTxnSnapLog logFactory, int tickTime,
             int minSessionTimeout, int maxSessionTimeout,
             DataTreeBuilder treeBuilder, ZKDatabase zkDb, QuorumPeer self)
-        throws IOException
-    {
+            throws IOException {
         super(logFactory, tickTime, minSessionTimeout, maxSessionTimeout,
                 treeBuilder, zkDb, self);
     }
 
     /**
-     * Abstract method to return the learner associated with this server.
-     * Since the Learner may change under our feet (when QuorumPeer reassigns
-     * it) we can't simply take a reference here. Instead, we need the 
-     * subclasses to implement this.     
+     * Abstract method to return the learner associated with this server. Since
+     * the Learner may change under our feet (when QuorumPeer reassigns it) we
+     * can't simply take a reference here. Instead, we need the subclasses to
+     * implement this.
      */
-    abstract public Learner getLearner();        
-    
+    abstract public Learner getLearner();
+
     /**
      * Returns the current state of the session tracker. This is only currently
      * used by a Learner to build a ping response packet.
@@ -58,50 +57,49 @@ public abstract class LearnerZooKeeperServer extends QuorumZooKeeperServer {
         }
         return new HashMap<Long, Integer>();
     }
-    
+
     /**
      * Returns the id of the associated QuorumPeer, which will do for a unique
-     * id of this server. 
+     * id of this server.
      */
     @Override
     public long getServerId() {
         return self.getId();
-    }    
-    
+    }
+
     @Override
     public void createSessionTracker() {
-        sessionTracker = new LearnerSessionTracker(this, getZKDatabase().getSessionWithTimeOuts(),
-                self.getId());
     }
-    
+
     @Override
-    protected void startSessionTracker() {}
-    
+    protected void startSessionTracker() {
+    }
+
     @Override
     protected void revalidateSession(ServerCnxn cnxn, long sessionId,
             int sessionTimeout) throws IOException {
         getLearner().validateSession(cnxn, sessionId, sessionTimeout);
     }
-    
+
     @Override
     protected void registerJMX() {
         // register with JMX
-//        try {
-//            jmxDataTreeBean = new DataTreeBean(getZKDatabase().getDataTree());
-//            MBeanRegistry.getInstance().register(jmxDataTreeBean, jmxServerBean);
-//        } catch (Exception e) {
-//            LOG.warn("Failed to register with JMX", e);
-//            jmxDataTreeBean = null;
-//        }
+        // try {
+        // jmxDataTreeBean = new DataTreeBean(getZKDatabase().getDataTree());
+        // MBeanRegistry.getInstance().register(jmxDataTreeBean, jmxServerBean);
+        // } catch (Exception e) {
+        // LOG.warn("Failed to register with JMX", e);
+        // jmxDataTreeBean = null;
+        // }
     }
 
     public void registerJMX(ZooKeeperServerBean serverBean,
-            LocalPeerBean localPeerBean)
-    {
+            LocalPeerBean localPeerBean) {
         // register with JMX
         if (self.jmxLeaderElectionBean != null) {
             try {
-                MBeanRegistry.getInstance().unregister(self.jmxLeaderElectionBean);
+                MBeanRegistry.getInstance().unregister(
+                        self.jmxLeaderElectionBean);
             } catch (Exception e) {
                 LOG.warn("Failed to register with JMX", e);
             }
@@ -110,7 +108,7 @@ public abstract class LearnerZooKeeperServer extends QuorumZooKeeperServer {
 
         try {
             jmxServerBean = serverBean;
-         //   MBeanRegistry.getInstance().register(serverBean, localPeerBean);
+            // MBeanRegistry.getInstance().register(serverBean, localPeerBean);
         } catch (Exception e) {
             LOG.warn("Failed to register with JMX", e);
             jmxServerBean = null;
