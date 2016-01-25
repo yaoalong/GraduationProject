@@ -90,7 +90,7 @@ public class PacketServerChannelHandler extends
             try {
                 TcpClient tcpClient = new TcpClient();
                 String[] splitStrings = spilitString(server);
-                tcpClient.connectionOne("localhost",
+                tcpClient.connectionOne(splitStrings[0],
                         Integer.valueOf(splitStrings[1]));
 
                 tcpClient.write(m2mPacket);

@@ -92,7 +92,7 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
 
         LOG.info("binding to port: " + clientPort);
         try {
-            tcpServer.bind("localhost", clientPort);
+            tcpServer.bind(myIp, clientPort);
         } catch (Exception e) {
             e.printStackTrace();
         }

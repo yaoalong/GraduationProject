@@ -97,10 +97,10 @@ public class WebServerChannelHandler extends
             for (int i = 0; i < serverCnxnFactory.getReplicationFactor(); i++) {
                 WebTcpClient tcpClient = new WebTcpClient(
                         serverCnxnFactory.getReplicationFactor());
-                tcpClient
-                        .connectionOne("localhost", NetworkPool.webPort
-                                .get(networkPool.getPositionToServer().get(
-                                        position++)));
+                tcpClient.connectionOne(spilitString(networkPool
+                        .getPositionToServer().get(position + i))[0],
+                        NetworkPool.webPort.get(networkPool
+                                .getPositionToServer().get(position + i)));
                 tcpClient.write(m2mPacket);
             }
 
@@ -179,6 +179,14 @@ public class WebServerChannelHandler extends
 
     public int getNextZxid() {
         return zxid.getAndIncrement();
+    }
+
+    /*
+     * 将server拆分为ip以及port
+     */
+    private String[] spilitString(String ip) {
+        String[] splitMessage = ip.split(":");
+        return splitMessage;
     }
 
 }
