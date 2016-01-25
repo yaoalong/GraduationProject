@@ -99,7 +99,7 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
     ZooKeeper_Monitor zooKeeper_Monitor;
 
     /**
-     * 它所负责的zab server对应的ip
+     * 它所负责接管数据的 server对应的ip
      */
     private String handleIp;
 
@@ -135,7 +135,7 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
     }
 
     public enum ServerState {
-        LOOKING, FOLLOWING, LEADING, OBSERVING;
+        LOOKING, FOLLOWING, LEADING;
     }
 
     /*
@@ -155,8 +155,6 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
      * at least for QuorumCnxManager. We use the following constant to as the
      * value of such a generic identifier.
      */
-
-    static final long OBSERVER_ID = Long.MAX_VALUE;
 
     /*
      * Record leader election time
@@ -810,8 +808,6 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
             return QuorumStats.Provider.LEADING_STATE;
         case FOLLOWING:
             return QuorumStats.Provider.FOLLOWING_STATE;
-        case OBSERVING:
-            return QuorumStats.Provider.OBSERVING_STATE;
         }
         return QuorumStats.Provider.UNKNOWN_STATE;
     }

@@ -293,9 +293,6 @@ public class FastLeaderElection implements Election {
                                 ackstate = QuorumPeer.ServerState.LEADING;
                                 System.out.println("状态是Leading");
                                 break;
-                            case 3:
-                                ackstate = QuorumPeer.ServerState.OBSERVING;
-                                break;
                             default:
                                 continue;
                             }
@@ -758,13 +755,9 @@ public class FastLeaderElection implements Election {
      * @return ServerState
      */
     private ServerState learningState() {
-        if (self.getLearnerType() == LearnerType.PARTICIPANT) {
-            LOG.debug("I'm a participant: " + self.getId());
-            return ServerState.FOLLOWING;
-        } else {
-            LOG.debug("I'm an observer: " + self.getId());
-            return ServerState.OBSERVING;
-        }
+        LOG.debug("I'm a participant: " + self.getId());
+        return ServerState.FOLLOWING;
+
     }
 
     /**
@@ -956,9 +949,6 @@ public class FastLeaderElection implements Election {
                                 return endVote;
                             }
                         }
-                        break;
-                    case OBSERVING:
-                        LOG.debug("Notification from observer: " + n.sid);
                         break;
                     case FOLLOWING:
                     case LEADING:
