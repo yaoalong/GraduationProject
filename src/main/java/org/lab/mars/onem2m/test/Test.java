@@ -8,6 +8,8 @@ import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.proto.M2mCreateRequest;
 import org.lab.mars.onem2m.proto.M2mCreateResponse;
 import org.lab.mars.onem2m.proto.M2mDeleteRequest;
+import org.lab.mars.onem2m.proto.M2mGetDataRequest;
+import org.lab.mars.onem2m.proto.M2mGetDataResponse;
 import org.lab.mars.onem2m.proto.M2mPacket;
 import org.lab.mars.onem2m.proto.M2mReplyHeader;
 import org.lab.mars.onem2m.proto.M2mRequestHeader;
@@ -68,6 +70,31 @@ public class Test {
         M2mPacket m2mPacket = new M2mPacket(m2mRequestHeader, m2mReplyHeader,
                 m2mSetDataRequest, new M2mCreateResponse());
         return m2mPacket;
+    }
+
+    public static M2mPacket createM2mGetDataPacket() throws IOException {
+        M2mRequestHeader m2mRequestHeader = new M2mRequestHeader();
+        m2mRequestHeader.setType(ZooDefs.OpCode.getData);
+        m2mRequestHeader.setKey("11111");
+        M2mGetDataRequest m2mGetDataRequest = new M2mGetDataRequest();
+        M2mReplyHeader m2mReplyHeader = new M2mReplyHeader();
+        m2mGetDataRequest.setPath("11111");
+        M2mPacket m2mPacket = new M2mPacket(m2mRequestHeader, m2mReplyHeader,
+                m2mGetDataRequest, new M2mCreateResponse());
+        return m2mPacket;
+    }
+
+    public static void deserialGetDataPacket(M2mPacket m2mPacket) {
+
+        M2mGetDataResponse m2mResponse = (M2mGetDataResponse) m2mPacket
+                .getResponse();
+        M2mDataNode m2mDataNode = (M2mDataNode) ResourceReflection
+                .deserializeKryo(m2mResponse.getData());
+        System.out.println(m2mDataNode.getId());
+        System.out.println(m2mDataNode.getData());
+        System.out.println(m2mDataNode.getLabel());
+        System.out.println(m2mDataNode.getZxid());
+
     }
 
     public void testTryAndCatch() throws Exception {

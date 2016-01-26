@@ -34,7 +34,8 @@ import org.slf4j.LoggerFactory;
  * so we need to match them up.
  */
 public class CommitProcessor extends Thread implements RequestProcessor {
-    private static final Logger LOG = LoggerFactory.getLogger(CommitProcessor.class);
+    private static final Logger LOG = LoggerFactory
+            .getLogger(CommitProcessor.class);
 
     /**
      * Requests that we are holding until the commit comes in.
@@ -50,13 +51,15 @@ public class CommitProcessor extends Thread implements RequestProcessor {
     ArrayList<M2mRequest> toProcess = new ArrayList<M2mRequest>();
 
     /**
-     * This flag indicates whether we need to wait for a response to come back from the
-     * leader or we just let the sync operation flow through like a read. The flag will
-     * be true if the CommitProcessor is in a Leader pipeline.
+     * This flag indicates whether we need to wait for a response to come back
+     * from the leader or we just let the sync operation flow through like a
+     * read. The flag will be true if the CommitProcessor is in a Leader
+     * pipeline.
      */
     boolean matchSyncs;
 
-    public CommitProcessor(RequestProcessor nextProcessor, String id, boolean matchSyncs) {
+    public CommitProcessor(RequestProcessor nextProcessor, String id,
+            boolean matchSyncs) {
         super("CommitProcessor:" + id);
         this.nextProcessor = nextProcessor;
         this.matchSyncs = matchSyncs;
@@ -67,7 +70,7 @@ public class CommitProcessor extends Thread implements RequestProcessor {
     @Override
     public void run() {
         try {
-        	M2mRequest nextPending = null;            
+            M2mRequest nextPending = null;
             while (!finished) {
                 int len = toProcess.size();
                 for (int i = 0; i < len; i++) {
@@ -75,9 +78,9 @@ public class CommitProcessor extends Thread implements RequestProcessor {
                 }
                 toProcess.clear();
                 synchronized (this) {
-                	/**
-                	 *只有第一个处理过了，后面才能接着处理
-                	 */
+                    /**
+                     * 只有第一个处理过了，后面才能接着处理
+                     */
                     if ((queuedRequests.size() == 0 || nextPending != null)
                             && committedRequests.size() == 0) {
                         wait();
@@ -95,8 +98,8 @@ public class CommitProcessor extends Thread implements RequestProcessor {
                          * properly.
                          */
                         if (nextPending != null
-                             
-                                && nextPending.cxid == r.cxid) {
+
+                        && nextPending.cxid == r.cxid) {
                             // we want to send our version of the request.
                             // the pointer to the connection in the request
                             nextPending.m2mTxnHeader = r.m2mTxnHeader;
@@ -121,7 +124,7 @@ public class CommitProcessor extends Thread implements RequestProcessor {
                 synchronized (this) {
                     // Process the next requests in the queuedRequests
                     while (nextPending == null && queuedRequests.size() > 0) {
-                    	M2mRequest request = queuedRequests.remove();
+                        M2mRequest request = queuedRequests.remove();
                         switch (request.type) {
                         case OpCode.create:
                         case OpCode.delete:
@@ -130,7 +133,7 @@ public class CommitProcessor extends Thread implements RequestProcessor {
                         case OpCode.setACL:
                         case OpCode.createSession:
                         case OpCode.closeSession:
-                            nextPending = request;
+                            nextPending = request;// 因为是事务类型的，所以需要挂起等待
                             break;
                         case OpCode.sync:
                             if (matchSyncs) {
@@ -140,7 +143,7 @@ public class CommitProcessor extends Thread implements RequestProcessor {
                             }
                             break;
                         default:
-                            toProcess.add(request);
+                            toProcess.add(request); // 如果不是事务的，添加到toProcess队列中，下个循环可以让
                         }
                     }
                 }
@@ -156,8 +159,8 @@ public class CommitProcessor extends Thread implements RequestProcessor {
     synchronized public void commit(M2mRequest request) {
         if (!finished) {
             if (request == null) {
-                LOG.warn("Committed a null!",
-                         new Exception("committing a null! "));
+                LOG.warn("Committed a null!", new Exception(
+                        "committing a null! "));
                 return;
             }
             if (LOG.isDebugEnabled()) {
@@ -173,7 +176,7 @@ public class CommitProcessor extends Thread implements RequestProcessor {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Processing request:: " + request);
         }
-        
+
         if (!finished) {
             queuedRequests.add(request);
             notifyAll();

@@ -27,47 +27,67 @@ import org.lab.mars.onem2m.server.RequestProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 事务ACK发送，并切实可以刷新的
+ * 
+ * @author yaoalong
+ * @Date 2016年1月26日
+ * @Email yaoalong@foxmail.com
+ */
 public class SendAckRequestProcessor implements RequestProcessor, Flushable {
-    private static final Logger LOG = LoggerFactory.getLogger(SendAckRequestProcessor.class);
-    
+    private static final Logger LOG = LoggerFactory
+            .getLogger(SendAckRequestProcessor.class);
+
     Learner learner;
 
     SendAckRequestProcessor(Learner peer) {
         this.learner = peer;
     }
 
+    /**
+     * 事务投票
+     */
     public void processRequest(M2mRequest si) {
-        if(si.type != OpCode.sync){
-            QuorumPacket qp = new QuorumPacket(Leader.ACK, si.m2mTxnHeader.getZxid(), null);
-            System.out.println(si.m2mTxnHeader.getZxid()+"fasong");
+        if (si.type != OpCode.sync) {
+            QuorumPacket qp = new QuorumPacket(Leader.ACK,
+                    si.m2mTxnHeader.getZxid(), null);
             try {
                 learner.writePacket(qp, true);
             } catch (IOException e) {
-                LOG.warn("Closing connection to leader, exception during packet send", e);
+                LOG.warn(
+                        "Closing connection to leader, exception during packet send",
+                        e);
                 try {
                     if (!learner.sock.isClosed()) {
                         learner.sock.close();
                     }
                 } catch (IOException e1) {
-                    // Nothing to do, we are shutting things down, so an exception here is irrelevant
+                    // Nothing to do, we are shutting things down, so an
+                    // exception here is irrelevant
                     LOG.debug("Ignoring error closing the connection", e1);
                 }
             }
         }
     }
-    
+
+    /**
+     * 直接刷新
+     */
     public void flush() throws IOException {
         try {
             learner.writePacket(null, true);
-        } catch(IOException e) {
-            LOG.warn("Closing connection to leader, exception during packet send", e);
+        } catch (IOException e) {
+            LOG.warn(
+                    "Closing connection to leader, exception during packet send",
+                    e);
             try {
                 if (!learner.sock.isClosed()) {
                     learner.sock.close();
                 }
             } catch (IOException e1) {
-                    // Nothing to do, we are shutting things down, so an exception here is irrelevant
-                    LOG.debug("Ignoring error closing the connection", e1);
+                // Nothing to do, we are shutting things down, so an exception
+                // here is irrelevant
+                LOG.debug("Ignoring error closing the connection", e1);
             }
         }
     }

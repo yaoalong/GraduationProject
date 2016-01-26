@@ -41,8 +41,8 @@ import org.slf4j.LoggerFactory;
  * A SyncRequestProcessor is also spawned off to log proposals from the leader.
  */
 public class FollowerZooKeeperServer extends LearnerZooKeeperServer {
-    private static final Logger LOG =
-        LoggerFactory.getLogger(FollowerZooKeeperServer.class);
+    private static final Logger LOG = LoggerFactory
+            .getLogger(FollowerZooKeeperServer.class);
 
     CommitProcessor commitProcessor;
 
@@ -52,22 +52,22 @@ public class FollowerZooKeeperServer extends LearnerZooKeeperServer {
      * Pending sync requests
      */
     ConcurrentLinkedQueue<M2mRequest> pendingSyncs;
-    
+
     /**
      * @param port
      * @param dataDir
      * @throws IOException
      */
-    FollowerZooKeeperServer(FileTxnSnapLog logFactory,QuorumPeer self,
+    FollowerZooKeeperServer(FileTxnSnapLog logFactory, QuorumPeer self,
             DataTreeBuilder treeBuilder, ZKDatabase zkDb) throws IOException {
         super(logFactory, self.tickTime, self.minSessionTimeout,
                 self.maxSessionTimeout, treeBuilder, zkDb, self);
         this.pendingSyncs = new ConcurrentLinkedQueue<M2mRequest>();
     }
 
-    public Follower getFollower(){
+    public Follower getFollower() {
         return self.follower;
-    }      
+    }
 
     @Override
     protected void setupRequestProcessors() {
@@ -78,15 +78,15 @@ public class FollowerZooKeeperServer extends LearnerZooKeeperServer {
         firstProcessor = new FollowerRequestProcessor(this, commitProcessor);
         ((FollowerRequestProcessor) firstProcessor).start();
         syncProcessor = new SyncRequestProcessor(this,
-                new SendAckRequestProcessor((Learner)getFollower()));
+                new SendAckRequestProcessor((Learner) getFollower()));
         syncProcessor.start();
     }
 
-    LinkedBlockingQueue<M2mRequest> pendingTxns = new LinkedBlockingQueue<M2mRequest>();//等待处理的事务
+    LinkedBlockingQueue<M2mRequest> pendingTxns = new LinkedBlockingQueue<M2mRequest>();// 等待处理的事务
 
     public void logRequest(M2mTxnHeader hdr, M2mRecord txn) {
-        M2mRequest request = new M2mRequest(null,  hdr.getCxid(),
-                hdr.getType(), null);
+        M2mRequest request = new M2mRequest(null, hdr.getCxid(), hdr.getType(),
+                null);
         request.m2mTxnHeader = hdr;
         request.txn = txn;
         request.zxid = hdr.getZxid();
@@ -97,10 +97,12 @@ public class FollowerZooKeeperServer extends LearnerZooKeeperServer {
     }
 
     /**
-     * When a COMMIT message is received, eventually this method is called, 
+     * When a COMMIT message is received, eventually this method is called,
      * which matches up the zxid from the COMMIT with (hopefully) the head of
      * the pendingTxns queue and hands it to the commitProcessor to commit.
-     * @param zxid - must correspond to the head of pendingTxns if it exists
+     * 
+     * @param zxid
+     *            - must correspond to the head of pendingTxns if it exists
      */
     public void commit(long zxid) {
         if (pendingTxns.size() == 0) {
@@ -118,22 +120,22 @@ public class FollowerZooKeeperServer extends LearnerZooKeeperServer {
         M2mRequest request = pendingTxns.remove();
         commitProcessor.commit(request);
     }
-    
-    synchronized public void sync(){
-        if(pendingSyncs.size() ==0){
+
+    synchronized public void sync() {
+        if (pendingSyncs.size() == 0) {
             LOG.warn("Not expecting a sync.");
             return;
         }
-                
+
         M2mRequest r = pendingSyncs.remove();
-		commitProcessor.commit(r);
+        commitProcessor.commit(r);
     }
-             
+
     @Override
     public int getGlobalOutstandingLimit() {
         return super.getGlobalOutstandingLimit() / (self.getQuorumSize() - 1);
     }
-    
+
     @Override
     public void shutdown() {
         LOG.info("Shutting down");
@@ -151,7 +153,7 @@ public class FollowerZooKeeperServer extends LearnerZooKeeperServer {
                     e);
         }
     }
-    
+
     @Override
     public String getState() {
         return "follower";

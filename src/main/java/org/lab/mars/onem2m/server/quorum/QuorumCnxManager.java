@@ -126,6 +126,13 @@ public class QuorumCnxManager {
      */
     private AtomicInteger threadCnt = new AtomicInteger(0);
 
+    /**
+     * Messsage包含消息内容，以及发送的sid
+     * 
+     * @author yaoalong
+     * @Date 2016年1月25日
+     * @Email yaoalong@foxmail.com
+     */
     static public class Message {
 
         Message(ByteBuffer buffer, long sid) {

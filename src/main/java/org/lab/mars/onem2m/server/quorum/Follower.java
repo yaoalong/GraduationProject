@@ -29,14 +29,15 @@ import org.lab.mars.onem2m.txn.M2mTxnHeader;
 /**
  * This class has the control logic for the Follower.
  */
-public class Follower extends Learner{
+public class Follower extends Learner {
 
-    private long lastQueued;
+    private long lastQueued;// 上一次进入队列中的zxid
     // This is the same object as this.zk, but we cache the downcast op
     final FollowerZooKeeperServer fzk;
-    Follower(QuorumPeer self,FollowerZooKeeperServer zk) {
+
+    Follower(QuorumPeer self, FollowerZooKeeperServer zk) {
         this.self = self;
-        this.zk=zk;
+        this.zk = zk;
         this.fzk = zk;
     }
 
@@ -45,8 +46,8 @@ public class Follower extends Learner{
         StringBuilder sb = new StringBuilder();
         sb.append("Follower ").append(sock);
         sb.append(" lastQueuedZxid:").append(lastQueued);
-        sb.append(" pendingRevalidationCount:")
-            .append(pendingRevalidations.size());
+        sb.append(" pendingRevalidationCount:").append(
+                pendingRevalidations.size());
         return sb.toString();
     }
 
@@ -57,27 +58,28 @@ public class Follower extends Learner{
      */
     void followLeader() throws InterruptedException {
         self.end_fle = System.currentTimeMillis();
-        LOG.info("FOLLOWING - LEADER ELECTION TOOK - " +
-              (self.end_fle - self.start_fle));
+        LOG.info("FOLLOWING - LEADER ELECTION TOOK - "
+                + (self.end_fle - self.start_fle));
         self.start_fle = 0;
         self.end_fle = 0;
         fzk.registerJMX(new FollowerBean(this, zk), self.jmxLocalPeerBean);
         try {
-            InetSocketAddress addr = findLeader();            
+            InetSocketAddress addr = findLeader();
             try {
                 connectToLeader(addr);
                 long newEpochZxid = registerWithLeader(Leader.FOLLOWERINFO);
 
-                //check to see if the leader zxid is lower than ours
-                //this should never happen but is just a safety check
+                // check to see if the leader zxid is lower than ours
+                // this should never happen but is just a safety check
                 long newEpoch = ZxidUtils.getEpochFromZxid(newEpochZxid);
-                System.out.println("我处理的L:"+newEpoch);
                 if (newEpoch < self.getAcceptedEpoch()) {
-                    LOG.error("Proposed leader epoch " + ZxidUtils.zxidToString(newEpochZxid)
-                            + " is less than our accepted epoch " + ZxidUtils.zxidToString(self.getAcceptedEpoch()));
+                    LOG.error("Proposed leader epoch "
+                            + ZxidUtils.zxidToString(newEpochZxid)
+                            + " is less than our accepted epoch "
+                            + ZxidUtils.zxidToString(self.getAcceptedEpoch()));
                     throw new IOException("Error: Epoch of leader is lower");
                 }
-                syncWithLeader(newEpochZxid);                
+                syncWithLeader(newEpochZxid);
                 QuorumPacket qp = new QuorumPacket();
                 while (self.isRunning()) {
                     readPacket(qp);
@@ -90,33 +92,32 @@ public class Follower extends Learner{
                 } catch (IOException e1) {
                     e1.printStackTrace();
                 }
-    
+
                 // clear pending revalidations
                 pendingRevalidations.clear();
             }
         } finally {
-            zk.unregisterJMX((Learner)this);
+            zk.unregisterJMX((Learner) this);
         }
     }
 
     /**
      * Examine the packet received in qp and dispatch based on its contents.
+     * 
      * @param qp
      * @throws IOException
      */
-    protected void processPacket(QuorumPacket qp) throws IOException{
+    protected void processPacket(QuorumPacket qp) throws IOException {
         switch (qp.getType()) {
-        case Leader.PING:            
-            ping(qp);            
+        case Leader.PING:
+            ping(qp);
             break;
-        case Leader.PROPOSAL:            
+        case Leader.PROPOSAL:
             M2mTxnHeader hdr = new M2mTxnHeader();
             M2mRecord txn = M2mSerializeUtils.deserializeTxn(qp.getData(), hdr);
             if (hdr.getZxid() != lastQueued + 1) {
-                LOG.warn("Got zxid 0x"
-                        + Long.toHexString(hdr.getZxid())
-                        + " expected 0x"
-                        + Long.toHexString(lastQueued + 1));
+                LOG.warn("Got zxid 0x" + Long.toHexString(hdr.getZxid())
+                        + " expected 0x" + Long.toHexString(lastQueued + 1));
             }
             lastQueued = hdr.getZxid();
             fzk.logRequest(hdr, txn);
@@ -138,6 +139,7 @@ public class Follower extends Learner{
 
     /**
      * The zxid of the last operation seen
+     * 
      * @return zxid
      */
     public long getZxid() {
@@ -150,9 +152,10 @@ public class Follower extends Learner{
         }
         return -1;
     }
-    
+
     /**
      * The zxid of the last operation queued
+     * 
      * @return zxid
      */
     protected long getLastQueued() {
@@ -160,7 +163,7 @@ public class Follower extends Learner{
     }
 
     @Override
-    public void shutdown() {    
+    public void shutdown() {
         LOG.info("shutdown called", new Exception("shutdown Follower"));
         super.shutdown();
     }

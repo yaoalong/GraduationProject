@@ -613,16 +613,12 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
             }
         }
         try {
-            boolean validpacket = Request.isValid(si.type);// 判断请求是否是支持的type
+            boolean validpacket = Request.isValid(si.type);// 判断请求是否是支持的type,直接交给firstPorcessor
             if (validpacket) {
                 firstProcessor.processRequest(si);
             } else {
                 LOG.warn("Received packet at server of unknown type " + si.type);
             }
-            // } catch (MissingSessionException e) {
-            // if (LOG.isDebugEnabled()) {
-            // LOG.debug( "Dropping request: " + e.getMessage() );
-            // }
         } catch (RequestProcessorException e) {
             LOG.error("Unable to process request:" + e.getMessage(), e);
         }

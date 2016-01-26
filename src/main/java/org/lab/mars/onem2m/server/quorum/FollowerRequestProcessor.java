@@ -32,7 +32,8 @@ import org.slf4j.LoggerFactory;
  */
 public class FollowerRequestProcessor extends Thread implements
         RequestProcessor {
-    private static final Logger LOG = LoggerFactory.getLogger(FollowerRequestProcessor.class);
+    private static final Logger LOG = LoggerFactory
+            .getLogger(FollowerRequestProcessor.class);
 
     FollowerZooKeeperServer zks;
 
@@ -56,7 +57,7 @@ public class FollowerRequestProcessor extends Thread implements
                 M2mRequest request = queuedRequests.take();
                 nextProcessor.processRequest(request);
                 switch (request.type) {
-                case OpCode.sync:
+                case OpCode.sync: // sync这个操作可以暂时忽略
                     zks.pendingSyncs.add(request);
                     zks.getFollower().request(request);
                     break;

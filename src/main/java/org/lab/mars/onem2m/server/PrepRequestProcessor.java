@@ -85,6 +85,9 @@ public class PrepRequestProcessor extends Thread implements RequestProcessor {
     public static void setFailCreate(boolean b) {
     }
 
+    /**
+     * 不断从submitedRequests中取出
+     */
     @Override
     public void run() {
         try {

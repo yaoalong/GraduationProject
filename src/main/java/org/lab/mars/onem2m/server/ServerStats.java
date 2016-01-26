@@ -18,9 +18,15 @@
 
 package org.lab.mars.onem2m.server;
 
-
 /**
  * Basic Server Statistics
+ */
+/**
+ * 服务器基本的数据统计
+ * 
+ * @author yaoalong
+ * @Date 2016年1月26日
+ * @Email yaoalong@foxmail.com
  */
 public class ServerStats {
     private long packetsSent;
@@ -34,15 +40,18 @@ public class ServerStats {
 
     public interface Provider {
         public long getOutstandingRequests();
+
         public long getLastProcessedZxid();
+
         public String getState();
+
         public int getNumAliveConnections();
     }
-    
+
     public ServerStats(Provider provider) {
         this.provider = provider;
     }
-    
+
     // getters
     synchronized public long getMinLatency() {
         return minLatency == Long.MAX_VALUE ? 0 : minLatency;
@@ -62,11 +71,11 @@ public class ServerStats {
     public long getOutstandingRequests() {
         return provider.getOutstandingRequests();
     }
-    
-    public long getLastProcessedZxid(){
+
+    public long getLastProcessedZxid() {
         return provider.getLastProcessedZxid();
     }
-    
+
     synchronized public long getPacketsReceived() {
         return packetsReceived;
     }
@@ -78,14 +87,14 @@ public class ServerStats {
     public String getServerState() {
         return provider.getState();
     }
-    
+
     /** The number of client connections alive to this server */
     public int getNumAliveClientConnections() {
-    	return provider.getNumAliveConnections();
+        return provider.getNumAliveConnections();
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Latency min/avg/max: " + getMinLatency() + "/"
                 + getAvgLatency() + "/" + getMaxLatency() + "\n");
@@ -95,11 +104,13 @@ public class ServerStats {
 
         if (provider != null) {
             sb.append("Outstanding: " + getOutstandingRequests() + "\n");
-            sb.append("Zxid: 0x"+ Long.toHexString(getLastProcessedZxid())+ "\n");
+            sb.append("Zxid: 0x" + Long.toHexString(getLastProcessedZxid())
+                    + "\n");
         }
         sb.append("Mode: " + getServerState() + "\n");
         return sb.toString();
     }
+
     // mutators
     synchronized void updateLatency(long requestCreateTime) {
         long latency = System.currentTimeMillis() - requestCreateTime;
@@ -112,25 +123,31 @@ public class ServerStats {
             maxLatency = latency;
         }
     }
-    synchronized public void resetLatency(){
+
+    synchronized public void resetLatency() {
         totalLatency = 0;
         count = 0;
         maxLatency = 0;
         minLatency = Long.MAX_VALUE;
     }
-    synchronized public void resetMaxLatency(){
+
+    synchronized public void resetMaxLatency() {
         maxLatency = getMinLatency();
     }
+
     synchronized public void incrementPacketsReceived() {
         packetsReceived++;
     }
+
     synchronized public void incrementPacketsSent() {
         packetsSent++;
     }
-    synchronized public void resetRequestCounters(){
+
+    synchronized public void resetRequestCounters() {
         packetsReceived = 0;
         packetsSent = 0;
     }
+
     synchronized public void reset() {
         resetLatency();
         resetRequestCounters();

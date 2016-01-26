@@ -27,12 +27,15 @@ import org.lab.mars.onem2m.KeeperException.Code;
 import org.lab.mars.onem2m.KeeperException.SessionMovedException;
 import org.lab.mars.onem2m.ZooDefs.OpCode;
 import org.lab.mars.onem2m.jute.M2mRecord;
-import org.lab.mars.onem2m.proto.GetDataRequest;
 import org.lab.mars.onem2m.proto.M2mCreateResponse;
+import org.lab.mars.onem2m.proto.M2mGetDataRequest;
+import org.lab.mars.onem2m.proto.M2mGetDataResponse;
 import org.lab.mars.onem2m.proto.M2mPacket;
 import org.lab.mars.onem2m.proto.M2mReplyHeader;
 import org.lab.mars.onem2m.proto.M2mSetDataResponse;
+import org.lab.mars.onem2m.reflection.ResourceReflection;
 import org.lab.mars.onem2m.server.DataTree.ProcessTxnResult;
+import org.lab.mars.onem2m.server.ZooKeeperServer.ChangeRecord;
 import org.lab.mars.onem2m.txn.ErrorTxn;
 import org.lab.mars.onem2m.txn.M2mTxnHeader;
 import org.slf4j.Logger;
@@ -48,7 +51,8 @@ import org.slf4j.LoggerFactory;
  * outstandingRequests member of ZooKeeperServer.
  */
 public class FinalRequestProcessor implements RequestProcessor {
-    private static final Logger LOG = LoggerFactory.getLogger(FinalRequestProcessor.class);
+    private static final Logger LOG = LoggerFactory
+            .getLogger(FinalRequestProcessor.class);
 
     ZooKeeperServer zks;
 
@@ -57,33 +61,44 @@ public class FinalRequestProcessor implements RequestProcessor {
     }
 
     public void processRequest(M2mRequest request) {
-   
+
         if (LOG.isDebugEnabled()) {
             LOG.debug("Processing request:: " + request);
         }
         ProcessTxnResult rc = null;
+        /**
+         * 这里是一个错误应该进行修改
+         */
         synchronized (zks.outstandingChanges) {
+            while (!zks.outstandingChanges.isEmpty()
+                    && zks.outstandingChanges.get(0).zxid <= request.zxid) {
+                ChangeRecord changeRecord = zks.outstandingChanges.remove(0);
+                if (changeRecord.zxid < request.zxid) {
+                    LOG.warn("Zxid outstanding " + changeRecord.zxid
+                            + " is less than current " + request.zxid);
+                }
+            }
             if (request.m2mTxnHeader != null) {
-               M2mTxnHeader hdr = request.m2mTxnHeader;
-               M2mRecord txn = request.txn;
+                M2mTxnHeader hdr = request.m2mTxnHeader;
+                M2mRecord txn = request.txn;
 
-               rc = zks.processTxn(hdr, txn);
+                rc = zks.processTxn(hdr, txn);
             }
             if (Request.isQuorum(request.type)) {
+                zks.getZKDatabase().addCommittedProposal(request);
             }
         }
 
-        if (request.m2mTxnHeader != null && request.m2mTxnHeader.getType() == OpCode.closeSession) {
+        if (request.m2mTxnHeader != null
+                && request.m2mTxnHeader.getType() == OpCode.closeSession) {
             ServerCnxnFactory scxn = zks.getServerCnxnFactory();
-            // this might be possible since
-            // we might just be playing diffs from the leader
             if (scxn != null && request.ctx == null) {
                 return;
             }
         }
 
-        if(request.ctx==null){
-        	return;
+        if (request.ctx == null) {
+            return;
         }
         ChannelHandlerContext ctx = request.ctx;
 
@@ -91,9 +106,10 @@ public class FinalRequestProcessor implements RequestProcessor {
         Code err = Code.OK;
         M2mRecord rsp = null;
         try {
-            if (request.m2mTxnHeader != null && request.m2mTxnHeader.getType() == OpCode.error) {
-                throw KeeperException.create(KeeperException.Code.get((
-                        (ErrorTxn) request.txn).getErr()));
+            if (request.m2mTxnHeader != null
+                    && request.m2mTxnHeader.getType() == OpCode.error) {
+                throw KeeperException.create(KeeperException.Code
+                        .get(((ErrorTxn) request.txn).getErr()));
             }
 
             KeeperException ke = request.getException();
@@ -102,7 +118,7 @@ public class FinalRequestProcessor implements RequestProcessor {
             }
 
             if (LOG.isDebugEnabled()) {
-                LOG.debug("{}",request);
+                LOG.debug("{}", request);
             }
             switch (request.type) {
             case OpCode.create: {
@@ -119,46 +135,24 @@ public class FinalRequestProcessor implements RequestProcessor {
                 err = Code.get(rc.err);
                 break;
             }
-            case OpCode.sync: {
-//                lastOp = "SYNC";
-//                SyncRequest syncRequest = new SyncRequest();
-//                ByteBufferInputStream.byteBuffer2Record(request.request,
-//                        syncRequest);
-//                rsp = new SyncResponse(syncRequest.getPath());
-//                break;
-            }
             case OpCode.getData: {
-                GetDataRequest getDataRequest = new GetDataRequest();
+                M2mGetDataRequest getDataRequest = new M2mGetDataRequest();
                 ByteBufferInputStream.byteBuffer2Record(request.request,
                         getDataRequest);
-                //DataNode n = zks.getZKDatabase().getNode(getDataRequest.getPath());
-                Object object=zks.getZKDatabase().getData(getDataRequest.getPath());
-               
-//                if (n == null) {
-//                    throw new KeeperException.NoNodeException();
-//                }
-                if (object == null) {
-                    throw new KeeperException.NoNodeException();
+                M2mDataNode m2mDataNode = (M2mDataNode) zks.getZKDatabase()
+                        .getData(getDataRequest.getPath());
+                if (m2mDataNode != null) {
+                    rsp = new M2mGetDataResponse(
+                            ResourceReflection.serializeKryo(m2mDataNode));
                 }
                 break;
             }
             }
         } catch (SessionMovedException e) {
-            // session moved is a connection level error, we need to tear
-            // down the connection otw ZOOKEEPER-710 might happen
-            // ie client on slow follower starts to renew session, fails
-            // before this completes, then tries the fast follower (leader)
-            // and is successful, however the initial renew is then 
-            // successfully fwd/processed by the leader and as a result
-            // the client and leader disagree on where the client is most
-            // recently attached (and therefore invalid SESSION MOVED generated)
-            //cnxn.sendCloseSession();
             return;
         } catch (KeeperException e) {
             err = e.code();
         } catch (Exception e) {
-            // log at error level as we are returning a marshalling
-            // error to the user
             LOG.error("Failed to process " + request, e);
             StringBuilder sb = new StringBuilder();
             ByteBuffer bb = request.request;
@@ -171,13 +165,11 @@ public class FinalRequestProcessor implements RequestProcessor {
         }
 
         long lastZxid = zks.getZKDatabase().getM2mData().getLastProcessedZxid();
-        M2mReplyHeader hdr =
-            new M2mReplyHeader(request.cxid, lastZxid, err.intValue());
+        M2mReplyHeader hdr = new M2mReplyHeader(request.cxid, lastZxid,
+                err.intValue());
 
         zks.serverStats().updateLatency(request.createTime);
-//        cnxn.updateStatsForResponse(request.cxid, lastZxid, lastOp,
-//                    request.createTime, System.currentTimeMillis());
-        M2mPacket m2mPacket=new M2mPacket(null, hdr, null, rsp);
+        M2mPacket m2mPacket = new M2mPacket(null, hdr, null, rsp);
         ctx.writeAndFlush(m2mPacket);
     }
 

@@ -54,16 +54,15 @@ public class TcpClient {
     public static void main(String args[]) {
         TcpClient tcpClient = new TcpClient();
         try {
-            tcpClient.connectionOne("localhost", 2182);
+            tcpClient.connectionOne("192.168.10.131", 2182);
         } catch (Exception e) {
             // TODO: handle exception
             e.printStackTrace();
         }
 
         try {
-            tcpClient.write(Test.createM2mCreatePacket());
+            tcpClient.write(Test.createM2mGetDataPacket());
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }

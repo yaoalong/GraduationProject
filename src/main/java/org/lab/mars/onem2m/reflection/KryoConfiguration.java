@@ -34,9 +34,10 @@ public class KryoConfiguration {
         resolvedClz = new TreeSet<>((o1, o2) -> o1.getName().compareTo(
                 o2.getName()));
         fieldAccessMap = new HashMap<>();
+        @SuppressWarnings("rawtypes")
         Set<Class> seedClz = new HashSet<>();
         seedClz.add(M2mDataNode.class);
-        for (Class clz : seedClz) {
+        for (Class<?> clz : seedClz) {
             fieldAccessMap.put(clz, new ClassAccess(clz));
         }
 
@@ -44,11 +45,11 @@ public class KryoConfiguration {
         seedClz.add(ArrayList.class);
         seedClz.add(LinkedList.class);
 
-        for (Class seedCls : seedClz)
+        for (Class<?> seedCls : seedClz)
             resolveClass(seedCls);
     }
 
-    private static void resolveClass(Class seedCls) {
+    private static void resolveClass(Class<?> seedCls) {
         Field[] fields = seedCls.getFields();
         for (Field field : fields) {
             int modifiers = field.getModifiers();
@@ -58,7 +59,7 @@ public class KryoConfiguration {
                                                                             // final
                                                                             // field
                 continue;
-            Class fieldCls = field.getType();
+            Class<?> fieldCls = field.getType();
             if (!resolvedClz.contains(fieldCls))
                 resolveClass(fieldCls);
             // analyse generics
@@ -78,7 +79,7 @@ public class KryoConfiguration {
     }
 
     public static void configure(Kryo kryo) {
-        for (Class cls : resolvedClz) {
+        for (Class<?> cls : resolvedClz) {
             kryo.register(cls);
         }
     }
@@ -89,10 +90,10 @@ public class KryoConfiguration {
 
     public static class ClassAccess {
         public final FieldAccess fieldAccess;
-        public final ConstructorAccess constructorAccess;
+        public final ConstructorAccess<?> constructorAccess;
         public final Map<String, Integer> fieldIndex;
 
-        public ClassAccess(Class clz) {
+        public ClassAccess(Class<?> clz) {
             fieldAccess = FieldAccess.get(clz);
             constructorAccess = ConstructorAccess.get(clz);
             fieldIndex = new HashMap<>();

@@ -176,7 +176,7 @@ public class LearnerHandler extends Thread {
      * @throws InterruptedException
      */
     /*
-     * 不断去发送消息
+     * 不断去发送消息,对应的是一个follower
      */
     private void sendPackets() throws InterruptedException {
         while (true) {
@@ -265,12 +265,11 @@ public class LearnerHandler extends Thread {
             StateSummary ss = null;
             long zxid = qp.getZxid();
             long newEpoch = leader.getEpochToPropose(this.getSid(),
-                    lastAcceptedEpoch);
+                    lastAcceptedEpoch);// 在这里进行阻塞掉，获取newEpoch
 
             if (this.getVersion() < 0x10000) {
                 // we are going to have to extrapolate the epoch information
                 long epoch = ZxidUtils.getEpochFromZxid(zxid);
-                System.out.println("我的zxid" + zxid);
                 ss = new StateSummary(epoch, zxid);
                 // fake the message
                 leader.waitForEpochAck(this.getSid(), ss);
@@ -280,7 +279,7 @@ public class LearnerHandler extends Thread {
                 QuorumPacket newEpochPacket = new QuorumPacket(
                         Leader.LEADERINFO, ZxidUtils.makeZxid(newEpoch, 0), ver);
                 oa.writeRecord(newEpochPacket, "packet");
-                bufferedOutput.flush();
+                bufferedOutput.flush();// 发送newEpoch给follower
                 QuorumPacket ackEpochPacket = new QuorumPacket();
                 ia.readRecord(ackEpochPacket, "packet");
                 if (ackEpochPacket.getType() != Leader.ACKEPOCH) {
@@ -290,7 +289,7 @@ public class LearnerHandler extends Thread {
                 ByteBuffer bbepoch = ByteBuffer.wrap(ackEpochPacket.getData());
                 ss = new StateSummary(bbepoch.getInt(),
                         ackEpochPacket.getZxid());
-                leader.waitForEpochAck(this.getSid(), ss);
+                leader.waitForEpochAck(this.getSid(), ss);// 阻塞在epoch确认这里,下面开始同步
             }
             peerLastZxid = ss.getLastZxid();
 
@@ -469,7 +468,7 @@ public class LearnerHandler extends Thread {
                 return;
             }
             LOG.info("Received NEWLEADER-ACK message from " + getSid());
-            leader.waitForNewLeaderAck(getSid(), qp.getZxid(), getLearnerType());
+            leader.waitForNewLeaderAck(getSid(), qp.getZxid(), getLearnerType());// 确认新的Leaer
 
             syncLimitCheck.start();
 
@@ -489,7 +488,7 @@ public class LearnerHandler extends Thread {
             // using the data
             //
             queuedPackets.add(new QuorumPacket(Leader.UPTODATE, -1, null));
-
+            // 读取消息然后进行处理
             while (true) {
                 qp = new QuorumPacket();
                 ia.readRecord(qp, "packet");
@@ -515,7 +514,6 @@ public class LearnerHandler extends Thread {
                             LOG.debug("Received ACK from Observer  " + this.sid);
                         }
                     }
-                    System.out.println("开始了" + qp.getZxid());
                     syncLimitCheck.updateAck(qp.getZxid());
                     leader.processAck(this.sid, qp.getZxid(),
                             sock.getLocalSocketAddress());

@@ -228,6 +228,11 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
         return currentVote;
     }
 
+    /**
+     * 当前的投票结果，即可以根据Vote得到现在的Leader
+     * 
+     * @param v
+     */
     public synchronized void setCurrentVote(Vote v) {
         currentVote = v;
     }

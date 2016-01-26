@@ -23,6 +23,8 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 import org.lab.mars.onem2m.jute.BinaryInputArchive;
+import org.lab.mars.onem2m.jute.M2mBinaryInputArchive;
+import org.lab.mars.onem2m.jute.M2mRecord;
 import org.lab.mars.onem2m.jute.Record;
 
 public class ByteBufferInputStream extends InputStream {
@@ -76,6 +78,13 @@ public class ByteBufferInputStream extends InputStream {
             throws IOException {
         BinaryInputArchive ia;
         ia = BinaryInputArchive.getArchive(new ByteBufferInputStream(bb));
+        record.deserialize(ia, "request");
+    }
+
+    static public void byteBuffer2Record(ByteBuffer bb, M2mRecord record)
+            throws IOException {
+        M2mBinaryInputArchive ia;
+        ia = M2mBinaryInputArchive.getArchive(new ByteBufferInputStream(bb));
         record.deserialize(ia, "request");
     }
 

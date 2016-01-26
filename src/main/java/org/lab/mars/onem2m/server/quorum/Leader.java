@@ -302,7 +302,7 @@ public class Leader {
      */
     final static int INFORM = 8;
 
-    ConcurrentMap<Long, Proposal> outstandingProposals = new ConcurrentHashMap<Long, Proposal>();
+    ConcurrentMap<Long, Proposal> outstandingProposals = new ConcurrentHashMap<Long, Proposal>();// 这是以<zxid,投票>
 
     ConcurrentLinkedQueue<Proposal> toBeApplied = new ConcurrentLinkedQueue<Proposal>();// 去应用的列表
     /**
@@ -373,8 +373,6 @@ public class Leader {
         try {
             self.tick = 0;
             zk.loadData();
-            System.out.println("我自己的" + self.getCurrentEpoch());
-            System.out.println("处理L" + zk.getLastProcessedZxid());
             leaderStateSummary = new StateSummary(self.getCurrentEpoch(),
                     zk.getLastProcessedZxid());
 
@@ -386,8 +384,7 @@ public class Leader {
             readyToStart = true;
             long epoch = getEpochToPropose(self.getId(),
                     self.getAcceptedEpoch());
-            System.out.println("接收的:epoch" + epoch);
-            zk.setZxid(ZxidUtils.makeZxid(epoch, 0));
+            zk.setZxid(ZxidUtils.makeZxid(epoch, 0));// 在这里的zxid已经是增长过的了
 
             synchronized (this) {
                 lastProposed = zk.getZxid();
@@ -409,7 +406,7 @@ public class Leader {
             // acknowledged
             try {
                 waitForNewLeaderAck(self.getId(), zk.getZxid(),
-                        LearnerType.PARTICIPANT);
+                        LearnerType.PARTICIPANT);// 等待确认新的Leader
             } catch (InterruptedException e) {
                 shutdown("Waiting for a quorum of followers, only synced with sids: [ "
                         + getSidSetString(newLeaderProposal.ackSet) + " ]");
@@ -555,6 +552,13 @@ public class Leader {
      *            the zxid of the proposal sent out
      * @param followerAddr
      */
+    /**
+     * 处理ack
+     * 
+     * @param sid
+     * @param zxid
+     * @param followerAddr
+     */
     synchronized public void processAck(long sid, long zxid,
             SocketAddress followerAddr) {
         if (LOG.isTraceEnabled()) {
@@ -591,7 +595,7 @@ public class Leader {
             // The proposal has already been committed
             return;
         }
-        Proposal p = outstandingProposals.get(zxid);
+        Proposal p = outstandingProposals.get(zxid);// 获取对应的Proposal
         if (p == null) {
             LOG.warn("Trying to commit future proposal: zxid 0x{} from {}",
                     Long.toHexString(zxid), followerAddr);
@@ -701,6 +705,11 @@ public class Leader {
 
     /**
      * Create a commit packet and send it to all the members of the quorum
+     * 
+     * @param zxid
+     */
+    /**
+     * 创建一个commit packet,发送给Follower
      * 
      * @param zxid
      */
@@ -836,6 +845,13 @@ public class Leader {
      *            handler of the follower
      * @return last proposed zxid
      */
+    /**
+     * 沒有应用的，但是已经完成ACK 确认的，让follower进行同步
+     * 
+     * @param handler
+     * @param lastSeenZxid
+     * @return
+     */
     synchronized public long startForwarding(LearnerHandler handler,
             long lastSeenZxid) {
         // Queue up any outstanding requests enabling the receipt of
@@ -876,6 +892,15 @@ public class Leader {
 
     private HashSet<Long> connectingFollowers = new HashSet<Long>();
 
+    /**
+     * 等待Follower对新的sid以及epoch承认
+     * 
+     * @param sid
+     * @param lastAcceptedEpoch
+     * @return
+     * @throws InterruptedException
+     * @throws IOException
+     */
     public long getEpochToPropose(long sid, long lastAcceptedEpoch)
             throws InterruptedException, IOException {
         synchronized (connectingFollowers) {
@@ -912,6 +937,14 @@ public class Leader {
     private HashSet<Long> electingFollowers = new HashSet<Long>();
     private boolean electionFinished = false;
 
+    /**
+     * 等待ACK的确认
+     * 
+     * @param id
+     * @param ss
+     * @throws IOException
+     * @throws InterruptedException
+     */
     public void waitForEpochAck(long id, StateSummary ss) throws IOException,
             InterruptedException {
         synchronized (electingFollowers) {
