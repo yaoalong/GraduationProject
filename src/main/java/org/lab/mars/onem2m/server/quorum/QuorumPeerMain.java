@@ -190,7 +190,8 @@ public class QuorumPeerMain {
                 quorumPeer.setMyIp(config.getMyIp());
 
                 quorumPeer.start();
-
+                QuorumPeerStatistics.quorums.put(m2mQuorumServer.getServers()
+                        .get(Integer.valueOf((i) + "")), quorumPeer);
                 quorumPeers.add(quorumPeer);
 
             }

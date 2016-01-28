@@ -11,9 +11,11 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.lab.mars.onem2m.server.quorum.QuorumPeer;
 import org.lab.mars.onem2m.server.quorum.QuorumPeer.LearnerType;
 import org.lab.mars.onem2m.server.quorum.QuorumPeer.QuorumServer;
 import org.lab.mars.onem2m.server.quorum.QuorumPeerOperator;
+import org.lab.mars.onem2m.server.quorum.QuorumPeerStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -208,6 +210,11 @@ public class NetworkPool {
                 deadServers.add(server);
             }
         }
+        for (String server : deadServers) {
+            if (!nowDeadServers.contains(server)) {
+                stopQuorumPeer(server);
+            }
+        }
     }
 
     /**
@@ -215,7 +222,7 @@ public class NetworkPool {
      * 
      * @param server
      */
-    public void test(String server) {
+    public void startQuorumPeer(String server) {
         Long position = this.serverToPosition.get(mySelfIpAndPort);
         Long deadPosition = this.serverToPosition.get(server);
         if ((deadPosition + replicationFactor) % serverToPosition.size() == position) {
@@ -246,6 +253,16 @@ public class NetworkPool {
             QuorumPeerOperator.startQuorumPeer(map, server);
         }
 
+    }
+
+    public void stopQuorumPeer(String server) {
+        Long position = this.serverToPosition.get(mySelfIpAndPort);
+        Long deadPosition = this.serverToPosition.get(server);
+        if ((deadPosition + replicationFactor) % serverToPosition.size() == position) {
+            QuorumPeer quorumPeer = QuorumPeerStatistics.quorums.get(server);
+            quorumPeer.shutdown();
+            QuorumPeerStatistics.quorums.remove(server);
+        }
     }
 
     public ConcurrentHashMap<String, Long> getServerPosition() {
