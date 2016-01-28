@@ -45,8 +45,6 @@ public class NetworkPool {
     private int hashingAlg = CONSISTENT_HASH;
 
     private volatile List<String> allServers;
-    private volatile TreeMap<Long, String> allConsistentBuckets;
-
     private volatile String mySelfIpAndPort;
     /**
      * server对应的位置
@@ -326,7 +324,6 @@ public class NetworkPool {
             allPositionToServer.put(position, map.getValue());
             position++;
         }
-        this.allConsistentBuckets = newConsistentBuckets;
     }
 
     public HashMap<Long, QuorumServer> getAllQuorumServers() {
