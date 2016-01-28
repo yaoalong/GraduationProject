@@ -18,10 +18,8 @@
 
 package org.lab.mars.onem2m.jute;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -31,22 +29,20 @@ import java.util.HashMap;
  *
  */
 public class RecordWriter {
-    
+
     private OutputArchive archive;
-    
+
     static HashMap<String, Method> constructFactory() {
         HashMap<String, Method> factory = new HashMap<String, Method>();
+        @SuppressWarnings("rawtypes")
         Class[] params = { OutputStream.class };
         try {
-            factory.put("binary",
-                    BinaryOutputArchive.class.getDeclaredMethod(
-                        "getArchive", params));
-            factory.put("csv",
-                    CsvOutputArchive.class.getDeclaredMethod(
-                        "getArchive", params));
-            factory.put("xml",
-                    XmlOutputArchive.class.getDeclaredMethod(
-                        "getArchive", params));
+            factory.put("binary", BinaryOutputArchive.class.getDeclaredMethod(
+                    "getArchive", params));
+            factory.put("csv", CsvOutputArchive.class.getDeclaredMethod(
+                    "getArchive", params));
+            factory.put("xml", XmlOutputArchive.class.getDeclaredMethod(
+                    "getArchive", params));
         } catch (SecurityException ex) {
             ex.printStackTrace();
         } catch (NoSuchMethodException ex) {
@@ -54,11 +50,10 @@ public class RecordWriter {
         }
         return factory;
     }
-    
+
     static private HashMap<String, Method> archiveFactory = constructFactory();
-    
-    static private OutputArchive createArchive(OutputStream out,
-            String format)
+
+    static private OutputArchive createArchive(OutputStream out, String format)
             throws IOException {
         Method factory = (Method) archiveFactory.get(format);
         if (factory != null) {
@@ -75,19 +70,24 @@ public class RecordWriter {
         }
         return null;
     }
+
     /**
      * Creates a new instance of RecordWriter
-     * @param out Output stream where the records will be serialized
-     * @param format Serialization format ("binary", "xml", or "csv")
+     * 
+     * @param out
+     *            Output stream where the records will be serialized
+     * @param format
+     *            Serialization format ("binary", "xml", or "csv")
      */
-    public RecordWriter(OutputStream out, String format)
-    throws IOException {
+    public RecordWriter(OutputStream out, String format) throws IOException {
         archive = createArchive(out, format);
     }
-    
+
     /**
      * Serialize a record
-     * @param r record to be serialized
+     * 
+     * @param r
+     *            record to be serialized
      */
     public void write(Record r) throws IOException {
         r.serialize(archive, "");

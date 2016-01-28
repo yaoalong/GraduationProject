@@ -398,14 +398,12 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
                 e.printStackTrace();
             }
             registerIntoZooKeeper.start();
-            if (registerIntoZooKeeper != null) {
-                try {
-                    registerIntoZooKeeper.join();
-                } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+            try {
+                registerIntoZooKeeper.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
+
             try {
                 zooKeeper_Monitor.start();
                 cnxnFactory.start();

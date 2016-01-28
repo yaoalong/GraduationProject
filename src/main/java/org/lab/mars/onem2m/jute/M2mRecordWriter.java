@@ -29,22 +29,20 @@ import java.util.HashMap;
  *
  */
 public class M2mRecordWriter {
-    
+
     private M2mOutputArchive archive;
-    
+
     static HashMap<String, Method> constructFactory() {
         HashMap<String, Method> factory = new HashMap<String, Method>();
+        @SuppressWarnings("rawtypes")
         Class[] params = { OutputStream.class };
         try {
-            factory.put("binary",
-            		M2mBinaryOutputArchive.class.getDeclaredMethod(
-                        "getArchive", params));
-            factory.put("csv",
-            		M2mCsvOutputArchive.class.getDeclaredMethod(
-                        "getArchive", params));
-            factory.put("xml",
-            		M2mXmlOutputArchive.class.getDeclaredMethod(
-                        "getArchive", params));
+            factory.put("binary", M2mBinaryOutputArchive.class
+                    .getDeclaredMethod("getArchive", params));
+            factory.put("csv", M2mCsvOutputArchive.class.getDeclaredMethod(
+                    "getArchive", params));
+            factory.put("xml", M2mXmlOutputArchive.class.getDeclaredMethod(
+                    "getArchive", params));
         } catch (SecurityException ex) {
             ex.printStackTrace();
         } catch (NoSuchMethodException ex) {
@@ -52,12 +50,11 @@ public class M2mRecordWriter {
         }
         return factory;
     }
-    
+
     static private HashMap<String, Method> archiveFactory = constructFactory();
-    
+
     static private M2mOutputArchive createArchive(OutputStream out,
-            String format)
-            throws IOException {
+            String format) throws IOException {
         Method factory = (Method) archiveFactory.get(format);
         if (factory != null) {
             Object[] params = { out };
@@ -73,19 +70,24 @@ public class M2mRecordWriter {
         }
         return null;
     }
+
     /**
      * Creates a new instance of RecordWriter
-     * @param out Output stream where the records will be serialized
-     * @param format Serialization format ("binary", "xml", or "csv")
+     * 
+     * @param out
+     *            Output stream where the records will be serialized
+     * @param format
+     *            Serialization format ("binary", "xml", or "csv")
      */
-    public M2mRecordWriter(OutputStream out, String format)
-    throws IOException {
+    public M2mRecordWriter(OutputStream out, String format) throws IOException {
         archive = createArchive(out, format);
     }
-    
+
     /**
      * Serialize a record
-     * @param r record to be serialized
+     * 
+     * @param r
+     *            record to be serialized
      */
     public void write(M2mRecord r) throws IOException {
         r.serialize(archive, "");

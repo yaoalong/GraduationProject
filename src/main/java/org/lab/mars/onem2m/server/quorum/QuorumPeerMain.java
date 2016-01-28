@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.management.JMException;
 
@@ -126,6 +128,7 @@ public class QuorumPeerMain {
         }
 
         LOG.info("Starting quorum peer");
+        QuorumPeerOperator.config = config;
         try {
             NetworkPool networkPool = new NetworkPool();
             NettyServerCnxnFactory cnxnFactory = new NettyServerCnxnFactory();
@@ -194,6 +197,23 @@ public class QuorumPeerMain {
             WebTcpServer webTcpServer = new WebTcpServer(cnxnFactory);
             webTcpServer.bind(config.getMyIp(),
                     config.sidAndWebPort.get(config.serverId));
+            Thread.sleep(10000);
+
+            List<String> allServerList = new ArrayList<String>();
+            final Map<String, Long> allServers = config.allServers;
+            String[] servers = networkPool.getServers();
+
+            List<String> deadServers = new ArrayList<String>();
+            List<String> survivalServers = new ArrayList<String>();
+            for (String server : servers) {
+                survivalServers.add(server);
+            }
+            for (Entry<String, Long> server : allServers.entrySet()) {
+                if (!survivalServers.contains(server.getKey())) {
+                    deadServers.add(server.getKey());
+                }
+                allServerList.add(server.getKey());
+            }
             for (QuorumPeer quorumPeer : quorumPeers) {
                 quorumPeer.join();
             }

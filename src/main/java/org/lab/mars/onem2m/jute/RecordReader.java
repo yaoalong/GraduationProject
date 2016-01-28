@@ -25,38 +25,36 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 
 /**
- * Front-end interface to deserializers. Also acts as a factory
- * for deserializers.
+ * Front-end interface to deserializers. Also acts as a factory for
+ * deserializers.
  *
  */
 public class RecordReader {
-    
+
     private InputArchive archive;
 
     static private HashMap<String, Method> archiveFactory;
-    
+
     static {
         archiveFactory = new HashMap<String, Method>();
+        @SuppressWarnings("rawtypes")
         Class[] params = { InputStream.class };
         try {
-            archiveFactory.put("binary",
-                    BinaryInputArchive.class.getDeclaredMethod(
-                        "getArchive", params));
-            archiveFactory.put("csv",
-                    CsvInputArchive.class.getDeclaredMethod(
-                        "getArchive", params));
-            archiveFactory.put("xml",
-                    XmlInputArchive.class.getDeclaredMethod(
-                        "getArchive", params));
+            archiveFactory.put("binary", BinaryInputArchive.class
+                    .getDeclaredMethod("getArchive", params));
+            archiveFactory.put("csv", CsvInputArchive.class.getDeclaredMethod(
+                    "getArchive", params));
+            archiveFactory.put("xml", XmlInputArchive.class.getDeclaredMethod(
+                    "getArchive", params));
         } catch (SecurityException ex) {
             ex.printStackTrace();
         } catch (NoSuchMethodException ex) {
             ex.printStackTrace();
         }
     }
-    
+
     static private InputArchive createArchive(InputStream in, String format)
-    throws IOException {
+            throws IOException {
         Method factory = (Method) archiveFactory.get(format);
         if (factory != null) {
             Object[] params = { in };
@@ -72,22 +70,27 @@ public class RecordReader {
         }
         return null;
     }
+
     /**
      * Creates a new instance of RecordReader.
-     * @param in Stream from which to deserialize a record
-     * @param format Deserialization format ("binary", "xml", or "csv")
+     * 
+     * @param in
+     *            Stream from which to deserialize a record
+     * @param format
+     *            Deserialization format ("binary", "xml", or "csv")
      */
-    public RecordReader(InputStream in, String format)
-    throws IOException {
+    public RecordReader(InputStream in, String format) throws IOException {
         archive = createArchive(in, format);
     }
-    
+
     /**
      * Deserialize a record
-     * @param r Record to be deserialized
+     * 
+     * @param r
+     *            Record to be deserialized
      */
     public void read(Record r) throws IOException {
         r.deserialize(archive, "");
     }
-    
+
 }

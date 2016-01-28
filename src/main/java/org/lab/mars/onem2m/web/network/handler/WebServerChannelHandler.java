@@ -47,72 +47,77 @@ public class WebServerChannelHandler extends
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, Object msg) {
-        System.out.println("接收到了数据");
-        M2mWebPacket m2mPacket = (M2mWebPacket) msg;
-        int operateType = m2mPacket.getM2mRequestHeader().getType();
-        System.out.println(operateType + "操作类型");
-        if (operateType == OperateCode.getStatus.getCode()) {
-            try {
-                lookAllServerStatus(m2mPacket, ctx);
-            } catch (IOException e) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.error("channelRead is error:because of:{}",
-                            e.getMessage());
+        try {
+            System.out.println("接收到了数据");
+            M2mWebPacket m2mPacket = (M2mWebPacket) msg;
+            int operateType = m2mPacket.getM2mRequestHeader().getType();
+            System.out.println(operateType + "操作类型");
+            if (operateType == OperateCode.getStatus.getCode()) {
+                try {
+                    lookAllServerStatus(m2mPacket, ctx);
+                } catch (IOException e) {
+                    if (LOG.isInfoEnabled()) {
+                        LOG.error("channelRead is error:because of:{}",
+                                e.getMessage());
+                    }
                 }
-            }
-        } else if (operateType == OperateCode.retriveLocalKey.getCode()) { // 查看本地是否包含一个key
-            String key = m2mPacket.getM2mRequestHeader().getKey();
-            if (key == null) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("key is null");
+            } else if (operateType == OperateCode.retriveLocalKey.getCode()) { // 查看本地是否包含一个key
+                String key = m2mPacket.getM2mRequestHeader().getKey();
+                if (key == null) {
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info("key is null");
+                    }
                 }
-            }
-            final ConcurrentHashMap<String, ZooKeeperServer> zookeeperServers = serverCnxnFactory
-                    .getZkServers();
-            Set<String> servers = new HashSet<String>();
-            for (Entry<String, ZooKeeperServer> entry : zookeeperServers
-                    .entrySet()) {
-                ZooKeeperServer zooKeeperServer = entry.getValue();
-                ZKDatabase zkDatabase = zooKeeperServer.getZKDatabase();
-                if (zkDatabase.getM2mData().getNodes().containsKey(key)) {
-                    servers.add(entry.getKey());
+                final ConcurrentHashMap<String, ZooKeeperServer> zookeeperServers = serverCnxnFactory
+                        .getZkServers();
+                Set<String> servers = new HashSet<String>();
+                for (Entry<String, ZooKeeperServer> entry : zookeeperServers
+                        .entrySet()) {
+                    ZooKeeperServer zooKeeperServer = entry.getValue();
+                    ZKDatabase zkDatabase = zooKeeperServer.getZKDatabase();
+                    if (zkDatabase.getM2mData().getNodes().containsKey(key)) {
+                        servers.add(entry.getKey());
+                    }
                 }
-            }
-            m2mPacket.getM2mRequestHeader().setType(
-                    OperateCode.ReplyRetriverRemoteKey.getCode());
-            M2mWebPacket m2mWebPacket = new M2mWebPacket(
-                    m2mPacket.getM2mRequestHeader(),
-                    m2mPacket.getM2mReplyHeader(), m2mPacket.getRequest(),
-                    new M2mWebRetriveKeyResponse(servers));
-            ctx.writeAndFlush(m2mWebPacket);
-        } else if (operateType == OperateCode.retriveRemoteKey.getCode()) {
-            System.out.println("进入到这里");
-            String server = networkPool.getSock(m2mPacket.getM2mRequestHeader()
-                    .getKey());
-            int zxid = getNextZxid();
-            result.put(zxid,
-                    new RetriveServerAndCtx(ctx, new HashSet<String>()));
-            serverResult.put(zxid, 0);
-            m2mPacket.getM2mRequestHeader().setXid(zxid);
-            m2mPacket.getM2mRequestHeader().setType(
-                    OperateCode.retriveLocalKey.getCode());
-            Long position = networkPool.getServerPosition().get(server);
-            for (int i = 0; i < serverCnxnFactory.getReplicationFactor(); i++) {
-                WebTcpClient tcpClient = new WebTcpClient(
-                        serverCnxnFactory.getReplicationFactor());
-                tcpClient.connectionOne(spilitString(networkPool
-                        .getPositionToServer().get(position + i))[0],
-                        NetworkPool.webPort.get(networkPool
-                                .getPositionToServer().get(position + i)));
-                tcpClient.write(m2mPacket);
-            }
+                m2mPacket.getM2mRequestHeader().setType(
+                        OperateCode.ReplyRetriverRemoteKey.getCode());
+                M2mWebPacket m2mWebPacket = new M2mWebPacket(
+                        m2mPacket.getM2mRequestHeader(),
+                        m2mPacket.getM2mReplyHeader(), m2mPacket.getRequest(),
+                        new M2mWebRetriveKeyResponse(servers));
+                ctx.writeAndFlush(m2mWebPacket);
+            } else if (operateType == OperateCode.retriveRemoteKey.getCode()) {
+                System.out.println("进入到这里");
+                String server = networkPool.getSock(m2mPacket
+                        .getM2mRequestHeader().getKey());
+                int zxid = getNextZxid();
+                result.put(zxid, new RetriveServerAndCtx(ctx,
+                        new HashSet<String>()));
+                serverResult.put(zxid, 0);
+                m2mPacket.getM2mRequestHeader().setXid(zxid);
+                m2mPacket.getM2mRequestHeader().setType(
+                        OperateCode.retriveLocalKey.getCode());
+                Long position = networkPool.getServerPosition().get(server);
+                for (int i = 0; i < serverCnxnFactory.getReplicationFactor(); i++) {
+                    WebTcpClient tcpClient = new WebTcpClient(
+                            serverCnxnFactory.getReplicationFactor());
+                    tcpClient.connectionOne(spilitString(networkPool
+                            .getPositionToServer().get(position + i))[0],
+                            NetworkPool.webPort.get(networkPool
+                                    .getPositionToServer().get(position + i)));
+                    tcpClient.write(m2mPacket);
+                }
 
-        } else {
-            if (LOG.isDebugEnabled()) {
-                LOG.info("invalid operate type : {}", m2mPacket
-                        .getM2mRequestHeader().getType());
+            } else {
+                if (LOG.isDebugEnabled()) {
+                    LOG.info("invalid operate type : {}", m2mPacket
+                            .getM2mRequestHeader().getType());
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
     }
 
     /**

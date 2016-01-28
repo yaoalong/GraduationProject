@@ -394,12 +394,7 @@ public class ClientCnxn {
     };
 
     private static class WatcherSetEventPair {
-        private final Set<Watcher> watchers;
-        private final WatchedEvent event;
-
         public WatcherSetEventPair(Set<Watcher> watchers, WatchedEvent event) {
-            this.watchers = watchers;
-            this.event = event;
         }
     }
 
@@ -816,8 +811,6 @@ public class ClientCnxn {
                 LOG.info(msg);
             }
 
-            private static final String RETRY_CONN_MSG = ", closing socket connection and attempting reconnect";
-
             @Override
             public void run() {
                 clientCnxnSocket.updateNow();
@@ -847,7 +840,6 @@ public class ClientCnxn {
                             // determine whether we need to send an AuthFailed
                             // event.
                             if (zooKeeperSaslClient != null) {
-                                boolean sendAuthEvent = false;
                                 if (zooKeeperSaslClient.getSaslState() == ZooKeeperSaslClient.SaslState.INITIAL) {
                                 }
 
