@@ -427,8 +427,9 @@ public class QuorumPeerConfig {
                     sidAndWebPort.get(sid));
             allServers.put(address + ":" + sidToClientPort.get(sid), sid);
         }
-        networkPool.setServers(serversStrings.toArray(new String[serversStrings
-                .size()]));
+        networkPool.setServers(
+                serversStrings.toArray(new String[serversStrings.size()]),
+                false);
         networkPool.initialize();
         Long myIdInRing = networkPool.getServerPosition().get(
                 myIp + ":" + clientPort);

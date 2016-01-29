@@ -190,29 +190,37 @@ public class NetworkPool {
      * 
      * @param servers
      */
-    public void setServers(String[] servers) {
+    public synchronized void setServers(String[] servers, boolean isOk) {
         this.servers = servers;
+        if (isOk) {
+            List<String> nowDeadServers = new ArrayList<String>();
+            List<String> survivalServers = new ArrayList<String>();
+            for (String server : servers) {
+                survivalServers.add(server);
+            }
+            for (String server : allServers) {
+                if (!survivalServers.contains(server)) {
+                    nowDeadServers.add(server);
+                }
+            }
+            for (String server : nowDeadServers) {
+                if (!deadServers.contains(server)) {
+                    deadServers.add(server);
+                    if (QuorumPeerStatistics.quorums.get(server) != null) {
+                        continue;
+                    }
+                    startQuorumPeer(server);
 
-        List<String> nowDeadServers = new ArrayList<String>();
-        List<String> survivalServers = new ArrayList<String>();
-        for (String server : servers) {
-            survivalServers.add(server);
-        }
-        for (String server : allServers) {
-            if (!survivalServers.contains(server)) {
-                nowDeadServers.add(server);
+                }
+            }
+            for (String server : deadServers) {
+                if (!nowDeadServers.contains(server)) {
+                    deadServers.remove(server);
+                    stopQuorumPeer(server);
+                }
             }
         }
-        for (String server : nowDeadServers) {
-            if (!deadServers.contains(server)) {
-                deadServers.add(server);
-            }
-        }
-        for (String server : deadServers) {
-            if (!nowDeadServers.contains(server)) {
-                stopQuorumPeer(server);
-            }
-        }
+
     }
 
     /**
@@ -258,6 +266,9 @@ public class NetworkPool {
         Long deadPosition = this.serverToPosition.get(server);
         if ((deadPosition + replicationFactor) % serverToPosition.size() == position) {
             QuorumPeer quorumPeer = QuorumPeerStatistics.quorums.get(server);
+            if (quorumPeer == null) {
+                return;
+            }
             quorumPeer.shutdown();
             QuorumPeerStatistics.quorums.remove(server);
         }

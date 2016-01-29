@@ -31,6 +31,7 @@ public class ZooKeeper_Monitor extends Thread implements Watcher {
 
     public void run() {
         try {
+            Thread.sleep(3000);
             zooKeeper = new ZooKeeper(server, 5000, this);
             countDownLatch.await();
             getChildrens();
@@ -71,8 +72,8 @@ public class ZooKeeper_Monitor extends Thread implements Watcher {
             return;
         }
         List<String> serverStrings = zooKeeper.getChildren(ROOT_NODE, null);
-        networkPool.setServers(serverStrings.toArray(new String[serverStrings
-                .size()]));
+        networkPool.setServers(
+                serverStrings.toArray(new String[serverStrings.size()]), true);
         networkPool.initialize();
 
     }
