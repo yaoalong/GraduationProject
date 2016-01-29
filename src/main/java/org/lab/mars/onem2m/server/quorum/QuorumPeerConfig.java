@@ -115,6 +115,8 @@ public class QuorumPeerConfig {
 
     private Integer webPort;
 
+    protected List<String> allServersToNetwork = new ArrayList<String>();
+
     @SuppressWarnings("serial")
     public static class ConfigException extends Exception {
         public ConfigException(String msg) {
@@ -426,6 +428,7 @@ public class QuorumPeerConfig {
             NetworkPool.webPort.put(address + ":" + sidToClientPort.get(sid),
                     sidAndWebPort.get(sid));
             allServers.put(address + ":" + sidToClientPort.get(sid), sid);
+            allServersToNetwork.add(address + ":" + sidToClientPort.get(sid));
         }
         networkPool.setServers(
                 serversStrings.toArray(new String[serversStrings.size()]),

@@ -403,7 +403,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
             zkDb.clear();
         }
 
-        unregisterJMX();
+        // unregisterJMX();
     }
 
     protected void unregisterJMX() {

@@ -147,6 +147,8 @@ public class NetworkPool {
         }
         long position = 0;
         for (Map.Entry<Long, String> map : newConsistentBuckets.entrySet()) {
+            System.out.println("position:" + position + " ip: "
+                    + map.getValue());
             serverToPosition.put(map.getValue(), position);
             positionToServer.put(position, map.getValue());
             position++;
@@ -191,6 +193,7 @@ public class NetworkPool {
      * @param servers
      */
     public synchronized void setServers(String[] servers, boolean isOk) {
+        System.out.println("开始设置了");
         this.servers = servers;
         if (isOk) {
             List<String> nowDeadServers = new ArrayList<String>();
@@ -231,6 +234,9 @@ public class NetworkPool {
     public void startQuorumPeer(String server) {
         Long position = this.serverToPosition.get(mySelfIpAndPort);
         Long deadPosition = this.serverToPosition.get(server);
+        if (position == null || deadPosition == null) {
+            return;
+        }
         if ((deadPosition + replicationFactor) % serverToPosition.size() == position) {
             HashMap<Long, QuorumServer> map = new HashMap<Long, QuorumServer>();
             for (long i = 0; i < replicationFactor; i++) {
@@ -308,24 +314,18 @@ public class NetworkPool {
         this.allServers = allServers;
         TreeMap<Long, String> newConsistentBuckets = new TreeMap<Long, String>();
         MessageDigest md5 = MD5.get();
-        if (this.totalWeight <= 0 && this.weights != null) {
-            for (int i = 0; i < this.weights.length; i++)
-                this.totalWeight += (this.weights[i] == null) ? 1
-                        : this.weights[i];
-        } else if (this.weights == null) {
-            this.totalWeight = this.servers.length;
-        }
-        for (int i = 0; i < servers.length; i++) {
+
+        for (int i = 0; i < allServers.size(); i++) {
             long factor = 1;
             for (long j = 0; j < factor; j++) {
-                byte[] d = md5.digest((servers[i] + "-" + j).getBytes());
+                byte[] d = md5.digest((allServers.get(i) + "-" + j).getBytes());
                 for (int h = 0; h < 1; h++) {
                     Long k = ((long) (d[3 + h * 4] & 0xFF) << 24)
                             | ((long) (d[2 + h * 4] & 0xFF) << 16)
                             | ((long) (d[1 + h * 4] & 0xFF) << 8)
                             | ((long) (d[0 + h * 4] & 0xFF));
 
-                    newConsistentBuckets.put(k, servers[i]);
+                    newConsistentBuckets.put(k, allServers.get(i));
                 }
             }
         }

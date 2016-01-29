@@ -497,7 +497,8 @@ public class Leader {
                 tickSkip = !tickSkip;
             }
         } finally {
-            zk.unregisterJMX(this);
+            // zk.unregisterJMX(this);
+            System.out.println("我推出了");
         }
     }
 
@@ -542,6 +543,7 @@ public class Leader {
             }
         }
         isShutdown = true;
+        System.out.println("关闭完全");
     }
 
     /**

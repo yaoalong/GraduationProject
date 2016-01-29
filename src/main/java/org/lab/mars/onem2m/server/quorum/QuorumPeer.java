@@ -658,6 +658,7 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
             while (running) {
                 switch (getPeerState()) {
                 case LOOKING:
+                    System.out.println("哈哈");
                     LOG.info("LOOKING");
                     try {
                         setBCVote(null);
@@ -679,6 +680,7 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
                         follower.shutdown();
                         setFollower(null);
                         setPeerState(ServerState.LOOKING);
+                        System.out.println("开始推出" + "Following");
                     }
                     break;
                 case LEADING:
@@ -694,11 +696,11 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
                             leader.shutdown("Forcing shutdown");
                             setLeader(null);
                         }
+                        System.out.println("开始推出" + "Leading");
                         setPeerState(ServerState.LOOKING);
                     }
                     break;
-                default:
-                    break;
+
                 }
             }
         } finally {
@@ -714,6 +716,7 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
     }
 
     public void shutdown() {
+        System.out.println("关闭了");
         running = false;
         if (leader != null) {
             leader.shutdown("quorum Peer shutdown");

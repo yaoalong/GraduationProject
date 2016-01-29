@@ -129,6 +129,10 @@ public class QuorumPeerMain {
         QuorumPeerOperator.config = config;
         try {
             NetworkPool networkPool = new NetworkPool();
+            networkPool.setAllServers(config.allServersToNetwork);
+            networkPool.setMySelfIpAndPort(config.myIp + ":"
+                    + config.clientPort);
+            networkPool.setReplicationFactor(config.replication_factor);
             NettyServerCnxnFactory cnxnFactory = new NettyServerCnxnFactory();
             cnxnFactory.setNetworkPool(networkPool);
             cnxnFactory.configure(config.getClientPortAddress().getPort(), 5);
@@ -196,6 +200,7 @@ public class QuorumPeerMain {
             WebTcpServer webTcpServer = new WebTcpServer(cnxnFactory);
             webTcpServer.bind(config.getMyIp(),
                     config.sidAndWebPort.get(config.serverId));
+
             for (QuorumPeer quorumPeer : quorumPeers) {
                 quorumPeer.join();
             }
