@@ -6,11 +6,16 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
+
 import org.lab.mars.onem2m.data.synchronization.network.initialize.DataClientChannelInitializer;
 import org.lab.mars.onem2m.network.NetworkEventLoopGroup;
 
 public class DataTcpClient {
     private Channel channel;
+    private ReentrantLock reentrantLock = new ReentrantLock();
+    private Condition condition = reentrantLock.newCondition();
 
     public void connectionOne(String host, int port) {
         Bootstrap bootstrap = new Bootstrap();
@@ -19,17 +24,23 @@ public class DataTcpClient {
                 .option(ChannelOption.TCP_NODELAY, true)
                 .handler(new DataClientChannelInitializer());
         bootstrap.connect(host, port).addListener((ChannelFuture future) -> {
+            reentrantLock.lock();
             channel = future.channel();
+            condition.signalAll();
+            reentrantLock.unlock();
         });
 
     }
 
     public void write(Object msg) {
-        while (channel == null) {
+        if (channel == null) {
             try {
-                Thread.sleep(100);
+                reentrantLock.lock();
+                condition.await();
             } catch (InterruptedException e) {
                 e.printStackTrace();
+            } finally {
+                reentrantLock.unlock();
             }
         }
         channel.writeAndFlush(msg);

@@ -7,6 +7,8 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
 import java.io.IOException;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.lab.mars.onem2m.network.intialize.PacketClientChannelInitializer;
 import org.lab.mars.onem2m.test.Test;
@@ -20,6 +22,8 @@ import org.lab.mars.onem2m.test.Test;
  */
 public class TcpClient {
     private Channel channel;
+    private ReentrantLock reentrantLock = new ReentrantLock();
+    private Condition condition = reentrantLock.newCondition();
 
     public void connectionOne(String host, int port) {
         Bootstrap bootstrap = new Bootstrap();
@@ -28,18 +32,23 @@ public class TcpClient {
                 .option(ChannelOption.TCP_NODELAY, true)
                 .handler(new PacketClientChannelInitializer());
         bootstrap.connect(host, port).addListener((ChannelFuture future) -> {
+            reentrantLock.lock();
             channel = future.channel();
+            condition.notifyAll();
+            reentrantLock.unlock();
         });
 
     }
 
     public void write(Object msg) {
-        while (channel == null) {
+        if (channel == null) {
             try {
-                Thread.sleep(1000);
+                reentrantLock.lock();
+                condition.await();
             } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
+            } finally {
+                reentrantLock.unlock();
             }
         }
         channel.writeAndFlush(msg);
