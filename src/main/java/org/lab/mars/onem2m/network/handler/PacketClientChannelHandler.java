@@ -22,7 +22,6 @@ public class PacketClientChannelHandler extends
         try {
             Test.createM2mCreatePacket();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
@@ -34,7 +33,6 @@ public class PacketClientChannelHandler extends
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, Object msg) {
-        // Echo back the received object to the server.
         Test.deserialGetDataPacket((M2mPacket) msg);
     }
 

@@ -66,9 +66,6 @@ public class FinalRequestProcessor implements RequestProcessor {
             LOG.debug("Processing request:: " + request);
         }
         ProcessTxnResult rc = null;
-        /**
-         * 这里是一个错误应该进行修改
-         */
         synchronized (zks.outstandingChanges) {
             while (!zks.outstandingChanges.isEmpty()
                     && zks.outstandingChanges.get(0).zxid <= request.zxid) {

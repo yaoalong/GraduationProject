@@ -31,14 +31,13 @@ public class ZooKeeper_Monitor extends Thread implements Watcher {
 
     public void run() {
         try {
-            Thread.sleep(10000);
+            Thread.sleep(50000);
             zooKeeper = new ZooKeeper(server, 5000, this);
             countDownLatch.await();
             getChildrens();
             while (true) {
-                // System.out.println("开始监听");
                 zooKeeper.getChildren("/server", this);
-                Thread.sleep(1000);
+                Thread.sleep(100);
             }
 
         } catch (Exception e) {
@@ -51,7 +50,10 @@ public class ZooKeeper_Monitor extends Thread implements Watcher {
     @Override
     public void process(WatchedEvent event) {
         System.out.println("Receive watched event:" + event);
-        if (KeeperState.SyncConnected == event.getState()) {
+        System.out.println("type:" + event.getType().getIntValue());
+        System.out.println("path:" + event.getPath());
+        if (KeeperState.SyncConnected == event.getState()
+                && EventType.NodeChildrenChanged != event.getType()) {
             countDownLatch.countDown();
         } else if (EventType.NodeChildrenChanged == event.getType()
                 && event.getPath().startsWith("/server")) {

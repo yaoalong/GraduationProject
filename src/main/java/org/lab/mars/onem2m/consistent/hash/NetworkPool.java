@@ -56,7 +56,7 @@ public class NetworkPool {
      */
     private ConcurrentHashMap<Long, String> allPositionToServer = new ConcurrentHashMap<Long, String>();
 
-    protected final HashMap<Long, QuorumServer> allQuorumServers = new HashMap<Long, QuorumServer>();
+    protected HashMap<Long, QuorumServer> allQuorumServers = null;
 
     public static ConcurrentHashMap<String, Integer> webPort = new ConcurrentHashMap<String, Integer>();
     /**
@@ -188,12 +188,12 @@ public class NetworkPool {
     }
 
     /**
-     * 在设置最新的server列表
+     * 在设置最新的server列表 servers 所有存活的节点
+     * 
      * 
      * @param servers
      */
     public synchronized void setServers(String[] servers, boolean isOk) {
-        System.out.println("开始设置了");
         this.servers = servers;
         if (isOk) {
             List<String> nowDeadServers = new ArrayList<String>();
@@ -232,37 +232,61 @@ public class NetworkPool {
      * @param server
      */
     public void startQuorumPeer(String server) {
-        Long position = this.serverToPosition.get(mySelfIpAndPort);
-        Long deadPosition = this.serverToPosition.get(server);
-        if (position == null || deadPosition == null) {
-            return;
-        }
-        if ((deadPosition + replicationFactor) % serverToPosition.size() == position) {
-            HashMap<Long, QuorumServer> map = new HashMap<Long, QuorumServer>();
-            for (long i = 0; i < replicationFactor; i++) {
-                String newServer = positionToServer.get(deadPosition + 1);
-                long allDeadPosition = this.allServerToPosition.get(server);
-                long allNewServer = this.allServerToPosition.get(newServer);
-                long sid = allServersToSid.get(allNewServer);
-                QuorumServer quorumServer = allQuorumServers
-                        .get(allServersToSid.get(allNewServer));
-                String address = quorumServer.addr.getAddress()
-                        .getHostAddress();
-                Integer firstPort = quorumServer.addr.getPort();
-                Integer secondPort = quorumServer.electionAddr.getPort();
-                Integer distance = (int) ((allNewServer - allDeadPosition) > 0 ? (allNewServer - allDeadPosition)
-                        : (allNewServer - allDeadPosition + allServers.size()));
-                InetSocketAddress firstInetSocketAddress = new InetSocketAddress(
-                        address, firstPort - distance);
-                InetSocketAddress secondInetSocketAddress = new InetSocketAddress(
-                        address, secondPort - distance);
-                QuorumServer myQuorumServer = new QuorumServer(sid,
-                        firstInetSocketAddress, secondInetSocketAddress,
-                        LearnerType.PARTICIPANT);
-                map.put(sid, myQuorumServer);
-
+        Long position = this.allServerToPosition.get(mySelfIpAndPort);
+        Long deadPosition = this.allServerToPosition.get(server);
+        System.out.println("position:" + position);
+        System.out.println("deadPosition:" + deadPosition);
+        long index = 0;
+        int i = 0;
+        for (i = 1; i < allPositionToServer.size() * replicationFactor
+                && index < replicationFactor; i++) {
+            if (!deadServers
+                    .contains(allPositionToServer.get(deadPosition + i))) {
+                index++;
             }
-            QuorumPeerOperator.startQuorumPeer(map, server);
+        }
+        System.out.println(i + "LL");
+        System.out.println("index:" + index);
+        if (index == replicationFactor) {
+            long myPosition = deadPosition + i - 1 >= allPositionToServer
+                    .size() ? (deadPosition + i - 1)
+                    % allPositionToServer.size() : deadPosition + i - 1;
+            System.out.println("myPosition:" + myPosition);
+            if (allPositionToServer.get(myPosition).equals(mySelfIpAndPort)) {
+                HashMap<Long, QuorumServer> map = new HashMap<Long, QuorumServer>();
+                for (i = 0; i < replicationFactor; i++) {
+                    System.out.println(i + "III");
+                    if (positionToServer.size() == 0) {
+                        System.out.println("为空");
+                    }
+                    Long newPosition = deadPosition + 1 >= positionToServer
+                            .size() ? (deadPosition + 1)
+                            % positionToServer.size() : (deadPosition + 1);
+
+                    String newServer = positionToServer.get(newPosition);
+                    long allDeadPosition = this.allServerToPosition.get(server);// 挂掉节点的位置
+                    long allNewServer = this.allServerToPosition.get(newServer);// 最新节点的位置
+                    long sid = allServersToSid.get(newServer);
+                    QuorumServer quorumServer = allQuorumServers.get(sid);
+                    String address = quorumServer.addr.getAddress()
+                            .getHostAddress();
+                    Integer firstPort = quorumServer.addr.getPort();
+                    Integer secondPort = quorumServer.electionAddr.getPort();
+                    Integer distance = (int) ((allNewServer - allDeadPosition) > 0 ? (allNewServer - allDeadPosition)
+                            : (allNewServer - allDeadPosition + allServers
+                                    .size()));
+                    InetSocketAddress firstInetSocketAddress = new InetSocketAddress(
+                            address, firstPort - distance);
+                    InetSocketAddress secondInetSocketAddress = new InetSocketAddress(
+                            address, secondPort - distance);
+                    QuorumServer myQuorumServer = new QuorumServer(sid,
+                            firstInetSocketAddress, secondInetSocketAddress,
+                            LearnerType.PARTICIPANT);
+                    map.put(sid, myQuorumServer);
+
+                }
+                QuorumPeerOperator.startQuorumPeer(map, server);
+            }
         }
 
     }
@@ -270,6 +294,9 @@ public class NetworkPool {
     public void stopQuorumPeer(String server) {
         Long position = this.serverToPosition.get(mySelfIpAndPort);
         Long deadPosition = this.serverToPosition.get(server);
+        if (position == null || deadPosition == null) {
+            return;
+        }
         if ((deadPosition + replicationFactor) % serverToPosition.size() == position) {
             QuorumPeer quorumPeer = QuorumPeerStatistics.quorums.get(server);
             if (quorumPeer == null) {
@@ -368,6 +395,10 @@ public class NetworkPool {
 
     public void setAllServersToSid(Map<String, Long> allServersToSid) {
         this.allServersToSid = allServersToSid;
+    }
+
+    public void setAllQuorumServers(HashMap<Long, QuorumServer> allQuorumServers) {
+        this.allQuorumServers = allQuorumServers;
     }
 
 }

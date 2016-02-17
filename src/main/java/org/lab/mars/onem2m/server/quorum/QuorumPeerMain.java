@@ -133,6 +133,8 @@ public class QuorumPeerMain {
             networkPool.setMySelfIpAndPort(config.myIp + ":"
                     + config.clientPort);
             networkPool.setReplicationFactor(config.replication_factor);
+            networkPool.setAllServersToSid(config.allServers);
+            networkPool.setAllQuorumServers(config.servers);
             NettyServerCnxnFactory cnxnFactory = new NettyServerCnxnFactory();
             cnxnFactory.setNetworkPool(networkPool);
             cnxnFactory.configure(config.getClientPortAddress().getPort(), 5);
