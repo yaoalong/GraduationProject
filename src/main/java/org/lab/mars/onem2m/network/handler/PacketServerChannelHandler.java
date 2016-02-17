@@ -47,7 +47,7 @@ public class PacketServerChannelHandler extends
     @Override
     public void channelRead0(ChannelHandlerContext ctx, Object msg) {
         M2mPacket m2mPacket = (M2mPacket) msg;
-        if (preProcessPacket(m2mPacket)) {
+        if (preProcessPacket(m2mPacket, ctx)) {
             NettyServerCnxn nettyServerCnxn = ctx.attr(STATE).get();
             nettyServerCnxn.receiveMessage(ctx, m2mPacket);
         }
@@ -81,7 +81,8 @@ public class PacketServerChannelHandler extends
      * @param m2mPacket
      * @return
      */
-    public boolean preProcessPacket(M2mPacket m2mPacket) {
+    public boolean preProcessPacket(M2mPacket m2mPacket,
+            ChannelHandlerContext ctx) {
         String key = m2mPacket.getM2mRequestHeader().getKey();
         if (isShouldHandle(key)) {
             return true;
@@ -97,6 +98,12 @@ public class PacketServerChannelHandler extends
                         Integer.valueOf(splitStrings[1]));
 
                 tcpClient.write(m2mPacket);
+                synchronized (m2mPacket) {
+                    while (!m2mPacket.isFinished()) {
+                        m2mPacket.wait();
+                    }
+                }
+                ctx.writeAndFlush(m2mPacket);
                 ipAndChannels.put(server, tcpClient.getChannel());
             } catch (Exception e) {
                 e.printStackTrace();
