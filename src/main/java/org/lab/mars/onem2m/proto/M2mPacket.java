@@ -20,6 +20,7 @@ public class M2mPacket implements M2mRecord {
     M2mRecord request;
 
     M2mRecord response;
+    boolean finished;
 
     public M2mPacket(M2mRequestHeader m2mRequestHeader,
             M2mReplyHeader m2mReplyHeader, M2mRecord request, M2mRecord response) {
@@ -27,6 +28,7 @@ public class M2mPacket implements M2mRecord {
         this.m2mReplyHeader = m2mReplyHeader;
         this.request = request;
         this.response = response;
+        this.finished = false;
     }
 
     public M2mRequestHeader getM2mRequestHeader() {
@@ -73,6 +75,14 @@ public class M2mPacket implements M2mRecord {
             throws IOException {
         // TODO Auto-generated method stub
 
+    }
+
+    public boolean isFinished() {
+        return finished;
+    }
+
+    public void setFinished(boolean finished) {
+        this.finished = finished;
     }
 
 }

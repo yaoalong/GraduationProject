@@ -6,6 +6,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import java.io.IOException;
 
 import org.lab.mars.onem2m.KeeperException;
+import org.lab.mars.onem2m.network.TcpClient;
 import org.lab.mars.onem2m.proto.M2mPacket;
 import org.lab.mars.onem2m.test.Test;
 
@@ -14,9 +15,12 @@ import org.lab.mars.onem2m.test.Test;
  */
 public class PacketClientChannelHandler extends
         SimpleChannelInboundHandler<Object> {
-    /**
-     * Creates a client-side handler.
-     */
+    private TcpClient tcpClient;
+
+    public PacketClientChannelHandler(TcpClient tcpClient) {
+        this.tcpClient = tcpClient;
+    }
+
     public PacketClientChannelHandler() throws KeeperException,
             InterruptedException {
         try {
@@ -34,6 +38,23 @@ public class PacketClientChannelHandler extends
     @Override
     public void channelRead0(ChannelHandlerContext ctx, Object msg) {
         Test.deserialGetDataPacket((M2mPacket) msg);
+        try {
+            readResponse((M2mPacket) msg);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void readResponse(M2mPacket m2mPacket) throws IOException {
+        M2mPacket packet;
+        synchronized (tcpClient.getPendingQueue()) {
+            if (tcpClient.getPendingQueue().size() == 0) {
+                throw new IOException("Nothing in the queue, but got "
+                        + m2mPacket.getM2mReplyHeader().getXid());
+            }
+            packet = tcpClient.getPendingQueue().remove();
+            packet.setFinished(true);
+        }
     }
 
     @Override

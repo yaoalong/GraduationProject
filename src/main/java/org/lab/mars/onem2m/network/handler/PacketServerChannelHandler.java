@@ -5,6 +5,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.AttributeKey;
 
+import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.lab.mars.onem2m.consistent.hash.NetworkPool;
@@ -29,6 +30,8 @@ public class PacketServerChannelHandler extends
     private String self;
     private NetworkPool networkPool;
     private Integer replicationFactor;
+
+    private final LinkedList<M2mPacket> pendingQueue = new LinkedList<M2mPacket>();
 
     public PacketServerChannelHandler(ServerCnxnFactory serverCnxnFactory) {
         this.serverCnxnFactory = serverCnxnFactory;
@@ -88,7 +91,7 @@ public class PacketServerChannelHandler extends
             ipAndChannels.get(server).writeAndFlush(m2mPacket);
         } else {
             try {
-                TcpClient tcpClient = new TcpClient();
+                TcpClient tcpClient = new TcpClient(pendingQueue);
                 String[] splitStrings = spilitString(server);
                 tcpClient.connectionOne(splitStrings[0],
                         Integer.valueOf(splitStrings[1]));
