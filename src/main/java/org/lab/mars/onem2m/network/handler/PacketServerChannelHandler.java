@@ -6,6 +6,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.AttributeKey;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.lab.mars.onem2m.consistent.hash.NetworkPool;
@@ -29,7 +30,6 @@ public class PacketServerChannelHandler extends
     private ConcurrentHashMap<String, Channel> ipAndChannels = new ConcurrentHashMap<>();
     private String self;
     private NetworkPool networkPool;
-    private Integer replicationFactor;
 
     private final LinkedList<M2mPacket> pendingQueue = new LinkedList<M2mPacket>();
 
@@ -37,7 +37,6 @@ public class PacketServerChannelHandler extends
         this.serverCnxnFactory = serverCnxnFactory;
         this.self = serverCnxnFactory.getMyIp();
         this.networkPool = serverCnxnFactory.getNetworkPool();
-        this.replicationFactor = serverCnxnFactory.getReplicationFactor();
 
     }
 
@@ -84,32 +83,38 @@ public class PacketServerChannelHandler extends
     public boolean preProcessPacket(M2mPacket m2mPacket,
             ChannelHandlerContext ctx) {
         String key = m2mPacket.getM2mRequestHeader().getKey();
-        if (isShouldHandle(key)) {
+        List<String> servers = networkPool.getAllSock(key);
+        if (servers.contains(self)
+                || (serverCnxnFactory.isTemporyAdd() && networkPool
+                        .getSock(key).equals(self))) {
             return true;
         }
-        String server = networkPool.getSock(key);// 把server
-        if (ipAndChannels.containsKey(server)) {
-            ipAndChannels.get(server).writeAndFlush(m2mPacket);
-        } else {
-            try {
-                TcpClient tcpClient = new TcpClient(pendingQueue);
-                String[] splitStrings = spilitString(server);
-                tcpClient.connectionOne(splitStrings[0],
-                        Integer.valueOf(splitStrings[1]));
+        for (int i = 0; i < servers.size(); i++) {
+            String server = servers.get(i);// 把server
+            if (ipAndChannels.containsKey(server)) {
+                ipAndChannels.get(server).writeAndFlush(m2mPacket);
+            } else {
+                try {
+                    TcpClient tcpClient = new TcpClient(pendingQueue);
+                    String[] splitStrings = spilitString(server);
+                    tcpClient.connectionOne(splitStrings[0],
+                            Integer.valueOf(splitStrings[1]));
 
-                tcpClient.write(m2mPacket);
-                synchronized (m2mPacket) {
-                    while (!m2mPacket.isFinished()) {
-                        m2mPacket.wait();
+                    tcpClient.write(m2mPacket);
+                    synchronized (m2mPacket) {
+                        while (!m2mPacket.isFinished()) {
+                            m2mPacket.wait();
+                        }
                     }
+                    ctx.writeAndFlush(m2mPacket);
+                    ipAndChannels.put(server, tcpClient.getChannel());
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-                ctx.writeAndFlush(m2mPacket);
-                ipAndChannels.put(server, tcpClient.getChannel());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
 
+            }
         }
+
         return false;
     }
 
@@ -121,28 +126,4 @@ public class PacketServerChannelHandler extends
         return splitMessage;
     }
 
-    /**
-     * 是否应该自己处理
-     * 
-     * @return
-     */
-    private boolean isShouldHandle(String key) {
-        String server = networkPool.getSock(key);
-        if (serverCnxnFactory.isTemporyAdd()) {
-            if (server.equals(self)) {
-                return true;
-            }
-        }
-        long myServerId = networkPool.getServerPosition().get(self);
-        long handlerServerId = networkPool.getServerPosition().get(server);
-        long serverSize = networkPool.getServerPosition().size();
-        long distance = myServerId - handlerServerId;
-        if (distance >= 0 && distance < replicationFactor) {
-            return true;
-        }
-        if (distance < 0 && (distance + serverSize) < replicationFactor) {
-            return true;
-        }
-        return false;
-    }
 }

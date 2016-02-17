@@ -41,11 +41,14 @@ public class NetworkPool {
     private Integer[] weights;
     private Integer totalWeight = 0;
     private volatile TreeMap<Long, String> consistentBuckets;
+
+    private volatile TreeMap<Long, String> allConsistentBuckets;
     private volatile boolean initialized = false;
     private int hashingAlg = CONSISTENT_HASH;
 
     private volatile List<String> allServers;
     private volatile String mySelfIpAndPort;
+
     /**
      * server对应的位置
      */
@@ -163,6 +166,25 @@ public class NetworkPool {
             throw new NullPointerException();
         }
         return consistentBuckets.get(getBucket(key));
+    }
+
+    /**
+     * 获取处理某个key的所有server
+     * 
+     * @param key
+     * @return
+     */
+    public final List<String> getAllSock(String key) {
+        long hc = getHash(key);
+        long result = findPointFor(hc);
+        List<String> servers = new ArrayList<String>();
+        for (int i = 0; i < replicationFactor; i++) {
+            if (!deadServers.contains(allConsistentBuckets.get(result + i))) {
+                servers.add(allConsistentBuckets.get(result + i));
+            }
+        }
+        return servers;
+
     }
 
     private final long getBucket(String key) {
@@ -333,7 +355,7 @@ public class NetworkPool {
     }
 
     /**
-     * 设置完成以后,进行相应的处理
+     * 让networkPool知道所有的节点
      * 
      * @param allServers
      */
@@ -362,6 +384,7 @@ public class NetworkPool {
             allPositionToServer.put(position, map.getValue());
             position++;
         }
+        this.allConsistentBuckets = newConsistentBuckets;
     }
 
     public HashMap<Long, QuorumServer> getAllQuorumServers() {
@@ -399,6 +422,15 @@ public class NetworkPool {
 
     public void setAllQuorumServers(HashMap<Long, QuorumServer> allQuorumServers) {
         this.allQuorumServers = allQuorumServers;
+    }
+
+    public TreeMap<Long, String> getAllConsistentBuckets() {
+        return allConsistentBuckets;
+    }
+
+    public void setAllConsistentBuckets(
+            TreeMap<Long, String> allConsistentBuckets) {
+        this.allConsistentBuckets = allConsistentBuckets;
     }
 
 }
