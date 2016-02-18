@@ -25,6 +25,7 @@ import java.util.List;
 
 import javax.management.JMException;
 
+import org.apache.zookeeper.server.quorum.QuorumPeerMain;
 import org.lab.mars.onem2m.consistent.hash.NetworkPool;
 import org.lab.mars.onem2m.jmx.ManagedUtil;
 import org.lab.mars.onem2m.persistence.FileTxnSnapLog;
@@ -68,9 +69,9 @@ import org.slf4j.LoggerFactory;
  * "myid" that contains the server id as an ASCII decimal value.
  *
  */
-public class QuorumPeerMain {
+public class M2mQuorumPeerMain {
     private static final Logger LOG = LoggerFactory
-            .getLogger(QuorumPeerMain.class);
+            .getLogger(M2mQuorumPeerMain.class);
 
     private static final String USAGE = "Usage: QuorumPeerMain configfile";
 
@@ -82,7 +83,7 @@ public class QuorumPeerMain {
      *            path to the configfile
      */
     public static void main(String[] args) {
-        QuorumPeerMain main = new QuorumPeerMain();
+        M2mQuorumPeerMain main = new M2mQuorumPeerMain();
         try {
             main.initializeAndRun(args);
         } catch (IllegalArgumentException e) {
@@ -109,7 +110,7 @@ public class QuorumPeerMain {
             config.parse(args[0]);
         }
         if (args.length == 1 && config.servers.size() > 0) {
-            runFromConfig(config);
+            runFromConfig(config, args);
         } else {
             LOG.error("Either no config or no quorum defined in config, running "
                     + " in standalone mode");
@@ -118,7 +119,11 @@ public class QuorumPeerMain {
         }
     }
 
-    public void runFromConfig(QuorumPeerConfig config) throws IOException {
+    @SuppressWarnings("static-access")
+    public void runFromConfig(QuorumPeerConfig config, String[] args)
+            throws IOException {
+        QuorumPeerMain quorumPeerMain = new QuorumPeerMain();
+        quorumPeerMain.main(args);
         try {
             ManagedUtil.registerLog4jMBeans();
         } catch (JMException e) {
