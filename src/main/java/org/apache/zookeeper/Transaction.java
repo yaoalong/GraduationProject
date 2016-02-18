@@ -17,8 +17,7 @@
 
 package org.apache.zookeeper;
 
-import org.lab.mars.onem2m.data.ACL;
-
+import org.apache.zookeeper.data.ACL;
 import java.util.ArrayList;
 import java.util.List;
 

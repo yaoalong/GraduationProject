@@ -116,6 +116,9 @@ public class FinalRequestProcessor implements RequestProcessor {
                rc = zks.processTxn(hdr, txn);
             }
             // do not add non quorum packets to the queue.
+            /**
+             * 添加事务到内存投票队列中
+             */
             if (Request.isQuorum(request.type)) {
                 zks.getZKDatabase().addCommittedProposal(request);
             }

@@ -24,7 +24,7 @@ public class ReplyHeader implements Record {
   private int xid;
   private long zxid;
   private int err;
-  public ReplyHeader() {
+   public ReplyHeader() {
   }
   public ReplyHeader(
         int xid,

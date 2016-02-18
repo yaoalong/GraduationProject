@@ -102,12 +102,12 @@ public class NettyServerCnxn extends ServerCnxn {
                         + Long.toHexString(sessionId));
             }
 
-//            synchronized (factory.ipMap) {
-//                Set<NettyServerCnxn> s =
-//                    factory.ipMap.get(((InetSocketAddress)channel
-//                            .getRemoteAddress()).getAddress());
-//                s.remove(this);
-//            }
+            synchronized (factory.ipMap) {
+                Set<NettyServerCnxn> s =
+                    factory.ipMap.get(((InetSocketAddress)channel
+                            .getRemoteAddress()).getAddress());
+                s.remove(this);
+            }
         }
 
         if (channel.isOpen()) {

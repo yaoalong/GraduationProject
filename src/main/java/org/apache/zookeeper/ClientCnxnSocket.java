@@ -25,10 +25,10 @@ import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.jute.BinaryInputArchive;
 import org.apache.zookeeper.ClientCnxn.Packet;
-import org.lab.mars.onem2m.jute.BinaryInputArchive;
-import org.lab.mars.onem2m.proto.ConnectResponse;
-import org.lab.mars.onem2m.server.ByteBufferInputStream;
+import org.apache.zookeeper.proto.ConnectResponse;
+import org.apache.zookeeper.server.ByteBufferInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -33,11 +33,9 @@ import javax.security.auth.login.LoginException;
 import javax.security.auth.callback.CallbackHandler;
 
 import org.apache.log4j.Logger;
-import org.lab.mars.onem2m.client.ZooKeeperSaslClient;
-
+import org.apache.zookeeper.client.ZooKeeperSaslClient;
 import javax.security.auth.kerberos.KerberosTicket;
 import javax.security.auth.Subject;
-
 import java.util.Date;
 import java.util.Random;
 import java.util.Set;
@@ -65,6 +63,8 @@ public class Login {
     private Thread t = null;
     private boolean isKrbTicket = false;
     private boolean isUsingTicketCache = false;
+    private boolean isUsingKeytab = false;
+
     /** Random number generator */
     private static Random rng = new Random();
 
@@ -105,6 +105,7 @@ public class Login {
             }
             if (entry.getOptions().get("keyTab") != null) {
                 keytabFile = (String)entry.getOptions().get("keyTab");
+                isUsingKeytab = true;
             }
             if (entry.getOptions().get("principal") != null) {
                 principal = (String)entry.getOptions().get("principal");

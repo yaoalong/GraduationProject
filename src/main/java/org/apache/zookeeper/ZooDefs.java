@@ -21,8 +21,8 @@ package org.apache.zookeeper;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import org.lab.mars.onem2m.data.ACL;
-import org.lab.mars.onem2m.data.Id;
+import org.apache.zookeeper.data.ACL;
+import org.apache.zookeeper.data.Id;
 
 public class ZooDefs {
     public interface OpCode {
@@ -97,20 +97,20 @@ public class ZooDefs {
          * This is a completely open ACL .
          */
         public final ArrayList<ACL> OPEN_ACL_UNSAFE = new ArrayList<ACL>(
-                Collections.singletonList(new ACL(Perms.ALL)));
+                Collections.singletonList(new ACL(Perms.ALL, ANYONE_ID_UNSAFE)));
 
         /**
          * This ACL gives the creators authentication id's all permissions.
          */
         public final ArrayList<ACL> CREATOR_ALL_ACL = new ArrayList<ACL>(
-                Collections.singletonList(new ACL(Perms.ALL)));
+                Collections.singletonList(new ACL(Perms.ALL, AUTH_IDS)));
 
         /**
          * This ACL gives the world the ability to read.
          */
         public final ArrayList<ACL> READ_ACL_UNSAFE = new ArrayList<ACL>(
                 Collections
-                        .singletonList(new ACL(Perms.READ)));
+                        .singletonList(new ACL(Perms.READ, ANYONE_ID_UNSAFE)));
     }
 
     final public static String[] opNames = { "notification", "create",

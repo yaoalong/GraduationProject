@@ -28,12 +28,8 @@ import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Map.Entry;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
+import java.util.Properties;
 
 import org.apache.zookeeper.server.ZooKeeperServer;
 import org.apache.zookeeper.server.quorum.QuorumPeer.LearnerType;
@@ -41,9 +37,13 @@ import org.apache.zookeeper.server.quorum.QuorumPeer.QuorumServer;
 import org.apache.zookeeper.server.quorum.flexible.QuorumHierarchical;
 import org.apache.zookeeper.server.quorum.flexible.QuorumMaj;
 import org.apache.zookeeper.server.quorum.flexible.QuorumVerifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 public class QuorumPeerConfig {
-    private static final Logger LOG = LoggerFactory.getLogger(QuorumPeerConfig.class);
+    private static final Logger LOG = LoggerFactory
+            .getLogger(QuorumPeerConfig.class);
 
     protected InetSocketAddress clientPortAddress;
     protected String dataDir;
@@ -60,10 +60,8 @@ public class QuorumPeerConfig {
     protected int electionAlg = 3;
     protected int electionPort = 2182;
     protected boolean quorumListenOnAllIPs = false;
-    protected final HashMap<Long,QuorumServer> servers =
-        new HashMap<Long, QuorumServer>();
-    protected final HashMap<Long,QuorumServer> observers =
-        new HashMap<Long, QuorumServer>();
+    protected final HashMap<Long, QuorumServer> servers = new HashMap<Long, QuorumServer>();
+    protected final HashMap<Long, QuorumServer> observers = new HashMap<Long, QuorumServer>();
 
     protected long serverId;
     protected HashMap<Long, Long> serverWeight = new HashMap<Long, Long>();
@@ -75,18 +73,22 @@ public class QuorumPeerConfig {
     protected boolean syncEnabled = true;
 
     protected LearnerType peerType = LearnerType.PARTICIPANT;
-    
+
     /**
      * Minimum snapshot retain count.
+     * 
      * @see org.apache.zookeeper.server.PurgeTxnLog#purge(File, File, int)
      */
     private final int MIN_SNAP_RETAIN_COUNT = 3;
+
+    private Integer zooKeeperServiceFactor;
 
     @SuppressWarnings("serial")
     public static class ConfigException extends Exception {
         public ConfigException(String msg) {
             super(msg);
         }
+
         public ConfigException(String msg, Exception e) {
             super(msg, e);
         }
@@ -94,8 +96,11 @@ public class QuorumPeerConfig {
 
     /**
      * Parse a ZooKeeper configuration file
-     * @param path the patch of the configuration file
-     * @throws ConfigException error processing configuration
+     * 
+     * @param path
+     *            the patch of the configuration file
+     * @throws ConfigException
+     *             error processing configuration
      */
     public void parse(String path) throws ConfigException {
         File configFile = new File(path);
@@ -126,12 +131,14 @@ public class QuorumPeerConfig {
 
     /**
      * Parse config from a Properties.
-     * @param zkProp Properties to parse from.
+     * 
+     * @param zkProp
+     *            Properties to parse from.
      * @throws IOException
      * @throws ConfigException
      */
-    public void parseProperties(Properties zkProp)
-    throws IOException, ConfigException {
+    public void parseProperties(Properties zkProp) throws IOException,
+            ConfigException {
         int clientPort = 0;
         String clientPortAddress = null;
         for (Entry<Object, Object> entry : zkProp.entrySet()) {
@@ -166,11 +173,10 @@ public class QuorumPeerConfig {
                     peerType = LearnerType.OBSERVER;
                 } else if (value.toLowerCase().equals("participant")) {
                     peerType = LearnerType.PARTICIPANT;
-                } else
-                {
+                } else {
                     throw new ConfigException("Unrecognised peertype: " + value);
                 }
-            } else if (key.equals( "syncEnabled" )) {
+            } else if (key.equals("syncEnabled")) {
                 syncEnabled = Boolean.parseBoolean(value);
             } else if (key.equals("autopurge.snapRetainCount")) {
                 snapRetainCount = Integer.parseInt(value);
@@ -180,10 +186,11 @@ public class QuorumPeerConfig {
                 int dot = key.indexOf('.');
                 long sid = Long.parseLong(key.substring(dot + 1));
                 String parts[] = value.split(":");
-                if ((parts.length != 2) && (parts.length != 3) && (parts.length !=4)) {
+                if ((parts.length != 2) && (parts.length != 3)
+                        && (parts.length != 4)) {
                     LOG.error(value
-                       + " does not have the form host:port or host:port:port " +
-                       " or host:port:port:type");
+                            + " does not have the form host:port or host:port:port "
+                            + " or host:port:port:type");
                 }
                 InetSocketAddress addr = new InetSocketAddress(parts[0],
                         Integer.parseInt(parts[1]));
@@ -192,6 +199,9 @@ public class QuorumPeerConfig {
                 } else if (parts.length == 3) {
                     InetSocketAddress electionAddr = new InetSocketAddress(
                             parts[0], Integer.parseInt(parts[2]));
+                    /**
+                     * sid、addr、以及选举的addr
+                     */
                     servers.put(Long.valueOf(sid), new QuorumServer(sid, addr,
                             electionAddr));
                 } else if (parts.length == 4) {
@@ -200,14 +210,15 @@ public class QuorumPeerConfig {
                     LearnerType type = LearnerType.PARTICIPANT;
                     if (parts[3].toLowerCase().equals("observer")) {
                         type = LearnerType.OBSERVER;
-                        observers.put(Long.valueOf(sid), new QuorumServer(sid, addr,
-                                electionAddr,type));
+                        observers.put(Long.valueOf(sid), new QuorumServer(sid,
+                                addr, electionAddr, type));
                     } else if (parts[3].toLowerCase().equals("participant")) {
                         type = LearnerType.PARTICIPANT;
-                        servers.put(Long.valueOf(sid), new QuorumServer(sid, addr,
-                                electionAddr,type));
+                        servers.put(Long.valueOf(sid), new QuorumServer(sid,
+                                addr, electionAddr, type));
                     } else {
-                        throw new ConfigException("Unrecognised peertype: " + value);
+                        throw new ConfigException("Unrecognised peertype: "
+                                + value);
                     }
                 }
             } else if (key.startsWith("group")) {
@@ -217,23 +228,28 @@ public class QuorumPeerConfig {
                 numGroups++;
 
                 String parts[] = value.split(":");
-                for(String s : parts){
+                for (String s : parts) {
                     long sid = Long.parseLong(s);
-                    if(serverGroup.containsKey(sid))
-                        throw new ConfigException("Server " + sid + "is in multiple groups");
+                    if (serverGroup.containsKey(sid))
+                        throw new ConfigException("Server " + sid
+                                + "is in multiple groups");
                     else
                         serverGroup.put(sid, gid);
                 }
 
-            } else if(key.startsWith("weight")) {
+            } else if (key.startsWith("weight")) {
                 int dot = key.indexOf('.');
                 long sid = Long.parseLong(key.substring(dot + 1));
                 serverWeight.put(sid, Long.parseLong(value));
-            } else {
+            } else if (key.equals("zooKeeper.service.factor")) {
+                zooKeeperServiceFactor = Integer.valueOf(value);
+            }
+
+            else {
                 System.setProperty("zookeeper." + key, value);
             }
         }
-        
+
         // Reset to MIN_SNAP_RETAIN_COUNT if invalid (less than 3)
         // PurgeTxnLog.purge(File, File, int) will not allow to purge less
         // than 3.
@@ -273,7 +289,8 @@ public class QuorumPeerConfig {
         }
         if (servers.size() == 0) {
             if (observers.size() > 0) {
-                throw new IllegalArgumentException("Observers w/o participants is an invalid configuration");
+                throw new IllegalArgumentException(
+                        "Observers w/o participants is an invalid configuration");
             }
             // Not a quorum configuration so return immediately - not an error
             // case (for b/w compatibility), server will default to standalone
@@ -281,7 +298,8 @@ public class QuorumPeerConfig {
             return;
         } else if (servers.size() == 1) {
             if (observers.size() > 0) {
-                throw new IllegalArgumentException("Observers w/o quorum is an invalid configuration");
+                throw new IllegalArgumentException(
+                        "Observers w/o quorum is an invalid configuration");
             }
 
             // HBase currently adds a single server line to the config, for
@@ -290,8 +308,8 @@ public class QuorumPeerConfig {
             servers.clear();
         } else if (servers.size() > 1) {
             if (servers.size() == 2) {
-                LOG.warn("No server failure will be tolerated. " +
-                    "You need at least 3 servers.");
+                LOG.warn("No server failure will be tolerated. "
+                        + "You need at least 3 servers.");
             } else if (servers.size() % 2 == 0) {
                 LOG.warn("Non-optimial configuration, consider an odd number of servers.");
             }
@@ -316,14 +334,15 @@ public class QuorumPeerConfig {
             /*
              * Default of quorum config is majority
              */
-            if(serverGroup.size() > 0){
-                if(servers.size() != serverGroup.size())
-                    throw new ConfigException("Every server must be in exactly one group");
+            if (serverGroup.size() > 0) {
+                if (servers.size() != serverGroup.size())
+                    throw new ConfigException(
+                            "Every server must be in exactly one group");
                 /*
                  * The deafult weight of a server is 1
                  */
-                for(QuorumServer s : servers.values()){
-                    if(!serverWeight.containsKey(s.id))
+                for (QuorumServer s : servers.values()) {
+                    if (!serverWeight.containsKey(s.id))
                         serverWeight.put(s.id, (long) 1);
                 }
 
@@ -338,13 +357,13 @@ public class QuorumPeerConfig {
                  */
 
                 LOG.info("Defaulting to majority quorums");
-                quorumVerifier = new QuorumMaj(servers.size());
+                quorumVerifier = new QuorumMaj(zooKeeperServiceFactor);
             }
 
             // Now add observers to servers, once the quorums have been
             // figured out
             servers.putAll(observers);
-    
+
             File myIdFile = new File(dataDir, "myid");
             if (!myIdFile.exists()) {
                 throw new IllegalArgumentException(myIdFile.toString()
@@ -364,7 +383,7 @@ public class QuorumPeerConfig {
                 throw new IllegalArgumentException("serverid " + myIdString
                         + " is not a number");
             }
-            
+
             // Warn about inconsistent peer type
             LearnerType roleByServersList = observers.containsKey(serverId) ? LearnerType.OBSERVER
                     : LearnerType.PARTICIPANT;
@@ -372,25 +391,56 @@ public class QuorumPeerConfig {
                 LOG.warn("Peer type from servers list (" + roleByServersList
                         + ") doesn't match peerType (" + peerType
                         + "). Defaulting to servers list.");
-    
+
                 peerType = roleByServersList;
             }
         }
     }
 
-    public InetSocketAddress getClientPortAddress() { return clientPortAddress; }
-    public String getDataDir() { return dataDir; }
-    public String getDataLogDir() { return dataLogDir; }
-    public int getTickTime() { return tickTime; }
-    public int getMaxClientCnxns() { return maxClientCnxns; }
-    public int getMinSessionTimeout() { return minSessionTimeout; }
-    public int getMaxSessionTimeout() { return maxSessionTimeout; }
+    public InetSocketAddress getClientPortAddress() {
+        return clientPortAddress;
+    }
 
-    public int getInitLimit() { return initLimit; }
-    public int getSyncLimit() { return syncLimit; }
-    public int getElectionAlg() { return electionAlg; }
-    public int getElectionPort() { return electionPort; }    
-    
+    public String getDataDir() {
+        return dataDir;
+    }
+
+    public String getDataLogDir() {
+        return dataLogDir;
+    }
+
+    public int getTickTime() {
+        return tickTime;
+    }
+
+    public int getMaxClientCnxns() {
+        return maxClientCnxns;
+    }
+
+    public int getMinSessionTimeout() {
+        return minSessionTimeout;
+    }
+
+    public int getMaxSessionTimeout() {
+        return maxSessionTimeout;
+    }
+
+    public int getInitLimit() {
+        return initLimit;
+    }
+
+    public int getSyncLimit() {
+        return syncLimit;
+    }
+
+    public int getElectionAlg() {
+        return electionAlg;
+    }
+
+    public int getElectionPort() {
+        return electionPort;
+    }
+
     public int getSnapRetainCount() {
         return snapRetainCount;
     }
@@ -398,22 +448,29 @@ public class QuorumPeerConfig {
     public int getPurgeInterval() {
         return purgeInterval;
     }
-    
+
     public boolean getSyncEnabled() {
         return syncEnabled;
     }
 
-    public QuorumVerifier getQuorumVerifier() {   
+    public QuorumVerifier getQuorumVerifier() {
         return quorumVerifier;
     }
 
-    public Map<Long,QuorumServer> getServers() {
+    public Map<Long, QuorumServer> getServers() {
         return Collections.unmodifiableMap(servers);
     }
 
-    public long getServerId() { return serverId; }
+    public long getServerId() {
+        return serverId;
+    }
 
-    public boolean isDistributed() { return servers.size() > 1; }
+    /*
+     * 根据servers的大小去判断是否是分布式
+     */
+    public boolean isDistributed() {
+        return servers.size() > 1;
+    }
 
     public LearnerType getPeerType() {
         return peerType;

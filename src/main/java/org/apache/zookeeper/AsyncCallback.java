@@ -19,8 +19,8 @@ package org.apache.zookeeper;
 
 import java.util.List;
 
-import org.lab.mars.onem2m.data.ACL;
-import org.lab.mars.onem2m.data.Stat;
+import org.apache.zookeeper.data.ACL;
+import org.apache.zookeeper.data.Stat;
 
 public interface AsyncCallback {
     interface StatCallback extends AsyncCallback {

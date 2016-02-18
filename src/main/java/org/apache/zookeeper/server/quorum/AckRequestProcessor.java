@@ -18,37 +18,38 @@
 
 package org.apache.zookeeper.server.quorum;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.apache.zookeeper.server.Request;
 import org.apache.zookeeper.server.RequestProcessor;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is a very simple RequestProcessor that simply forwards a request from a
  * previous stage to the leader as an ACK.
  */
+/*
+ * 在这里ACKRequestProcessor只是用来发起投票统计
+ */
 class AckRequestProcessor implements RequestProcessor {
-    private static final Logger LOG = LoggerFactory.getLogger(AckRequestProcessor.class);
-    Leader leader;
+	private static final Logger	LOG	= LoggerFactory.getLogger( AckRequestProcessor.class );
+	Leader						leader;
 
-    AckRequestProcessor(Leader leader) {
-        this.leader = leader;
-    }
+	AckRequestProcessor(Leader leader) {
+		this.leader = leader;
+	}
 
-    /**
-     * Forward the request as an ACK to the leader
-     */
-    public void processRequest(Request request) {
-        QuorumPeer self = leader.self;
-        if(self != null)
-            leader.processAck(self.getId(), request.zxid, null);
-        else
-            LOG.error("Null QuorumPeer");
-    }
+	/**
+	 * Forward the request as an ACK to the leader
+	 */
+	public void processRequest(Request request) {
+		QuorumPeer self = leader.self;
+		if (self != null)
+			leader.processAck( self.getId(), request.zxid, null );
+		else
+			LOG.error( "Null QuorumPeer" );
+	}
 
-    public void shutdown() {
-        // XXX No need to do anything
-    }
+	public void shutdown() {
+		// XXX No need to do anything
+	}
 }

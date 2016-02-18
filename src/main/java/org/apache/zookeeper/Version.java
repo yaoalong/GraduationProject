@@ -18,9 +18,7 @@
 
 package org.apache.zookeeper;
 
-import org.lab.mars.onem2m.version.Info;
-
-public class Version implements Info {
+public class Version implements org.apache.zookeeper.version.Info {
 
     public static int getRevision() {
         return REVISION;
