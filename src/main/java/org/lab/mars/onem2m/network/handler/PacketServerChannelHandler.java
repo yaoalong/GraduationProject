@@ -11,13 +11,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.lab.mars.onem2m.consistent.hash.NetworkPool;
 import org.lab.mars.onem2m.network.TcpClient;
+import org.lab.mars.onem2m.network.TcpServerConnectionStats;
 import org.lab.mars.onem2m.proto.M2mPacket;
 import org.lab.mars.onem2m.server.NettyServerCnxn;
 import org.lab.mars.onem2m.server.ServerCnxnFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-;
 
 /**
  * Created by Administrator on 2015/12/21.
@@ -45,10 +44,15 @@ public class PacketServerChannelHandler extends
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, Object msg) {
+        synchronized (TcpServerConnectionStats.connectionStats) {
+            TcpServerConnectionStats.connectionStats.get(ctx);
+        }
         M2mPacket m2mPacket = (M2mPacket) msg;
         if (preProcessPacket(m2mPacket, ctx)) {
             NettyServerCnxn nettyServerCnxn = ctx.attr(STATE).get();
             nettyServerCnxn.receiveMessage(ctx, m2mPacket);
+        } else {// 需要增加对错误的处理
+
         }
     }
 
@@ -58,7 +62,12 @@ public class PacketServerChannelHandler extends
                 serverCnxnFactory.getZkServers(), serverCnxnFactory);
         nettyServerCnxn.setNetworkPool(serverCnxnFactory.getNetworkPool());
         ctx.attr(STATE).set(nettyServerCnxn);
+        synchronized (TcpServerConnectionStats.connectionStats) {
+            TcpServerConnectionStats.connectionStats.put(ctx, 0L);
+        }
+
         ctx.fireChannelRegistered();
+
     };
 
     @Override
@@ -70,6 +79,9 @@ public class PacketServerChannelHandler extends
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Channel disconnect caused close:{}", cause);
+        }
+        synchronized (TcpServerConnectionStats.connectionStats) {
+            TcpServerConnectionStats.connectionStats.remove(ctx);
         }
         ctx.close();
     }
@@ -108,6 +120,7 @@ public class PacketServerChannelHandler extends
                     }
                     ctx.writeAndFlush(m2mPacket);
                     ipAndChannels.put(server, tcpClient.getChannel());
+                    return true;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
