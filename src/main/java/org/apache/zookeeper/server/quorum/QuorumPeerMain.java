@@ -122,7 +122,8 @@ public class QuorumPeerMain {
     private boolean isStart = false;
 
     public void runFromConfig(QuorumPeerConfig config) throws IOException {
-        if (config.getServerId() > 4 && isStart == false) {
+        if (config.getServerId() > config.zooKeeperServiceFactor
+                && isStart == false) {
             isStart = true;
             return;
         }

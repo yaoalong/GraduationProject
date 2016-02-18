@@ -81,7 +81,7 @@ public class QuorumPeerConfig {
      */
     private final int MIN_SNAP_RETAIN_COUNT = 3;
 
-    private Integer zooKeeperServiceFactor;
+    protected Integer zooKeeperServiceFactor;
 
     @SuppressWarnings("serial")
     public static class ConfigException extends Exception {
