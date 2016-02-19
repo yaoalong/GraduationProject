@@ -38,8 +38,6 @@ public class NetworkPool {
         }
     };
     private volatile String[] servers;
-    private Integer[] weights;
-    private Integer totalWeight = 0;
     private volatile TreeMap<Long, String> consistentBuckets;
 
     private volatile TreeMap<Long, String> allConsistentBuckets;
@@ -127,13 +125,7 @@ public class NetworkPool {
     public void populateConsistentBuckets() {
         TreeMap<Long, String> newConsistentBuckets = new TreeMap<Long, String>();
         MessageDigest md5 = MD5.get();
-        if (this.totalWeight <= 0 && this.weights != null) {
-            for (int i = 0; i < this.weights.length; i++)
-                this.totalWeight += (this.weights[i] == null) ? 1
-                        : this.weights[i];
-        } else if (this.weights == null) {
-            this.totalWeight = this.servers.length;
-        }
+
         for (int i = 0; i < servers.length; i++) {
             long factor = 1;
             for (long j = 0; j < factor; j++) {
@@ -150,8 +142,6 @@ public class NetworkPool {
         }
         long position = 0;
         for (Map.Entry<Long, String> map : newConsistentBuckets.entrySet()) {
-            System.out.println("position:" + position + " ip: "
-                    + map.getValue());
             serverToPosition.put(map.getValue(), position);
             positionToServer.put(position, map.getValue());
             position++;
@@ -179,9 +169,12 @@ public class NetworkPool {
         long result = findPointFor(hc);
         List<String> servers = new ArrayList<String>();
         for (int i = 0; i < replicationFactor; i++) {
-            if (!deadServers.contains(allConsistentBuckets.get(result + i))) {
-                servers.add(allConsistentBuckets.get(result + i));
+            synchronized (deadServers) {
+                if (!deadServers.contains(allConsistentBuckets.get(result + i))) {
+                    servers.add(allConsistentBuckets.get(result + i));
+                }
             }
+
         }
         return servers;
 
@@ -203,10 +196,6 @@ public class NetworkPool {
 
     private final long getHash(String key) {
         return md5HashingAlg(key);
-    }
-
-    public void setWeights(Integer[] weights) {
-        this.weights = weights;
     }
 
     /**
@@ -384,8 +373,6 @@ public class NetworkPool {
             allPositionToServer.put(position, map.getValue());
             position++;
         }
-        System.out.println("设置完全了");
-        System.out.println("大小:" + newConsistentBuckets.size());
         this.allConsistentBuckets = newConsistentBuckets;
     }
 
