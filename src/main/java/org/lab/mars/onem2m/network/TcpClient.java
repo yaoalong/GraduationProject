@@ -12,7 +12,10 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.lab.mars.onem2m.network.intialize.PacketClientChannelInitializer;
+import org.lab.mars.onem2m.proto.M2mGetDataResponse;
 import org.lab.mars.onem2m.proto.M2mPacket;
+import org.lab.mars.onem2m.reflection.ResourceReflection;
+import org.lab.mars.onem2m.server.M2mDataNode;
 import org.lab.mars.onem2m.test.Test;
 
 /**
@@ -63,9 +66,7 @@ public class TcpClient {
                 reentrantLock.unlock();
             }
         }
-        System.out.println("开始发送g");
         if (pendingQueue != null) {
-            System.out.println("不为空");
             pendingQueue.add((M2mPacket) msg);
         }
         channel.writeAndFlush(msg);
@@ -99,6 +100,14 @@ public class TcpClient {
                 }
                 System.out.println("正式完成");
             }
+            M2mGetDataResponse m2mGetDataResponse = (M2mGetDataResponse) m2mPacket
+                    .getResponse();
+            M2mDataNode m2mDataNode = (M2mDataNode) ResourceReflection
+                    .deserializeKryo(m2mGetDataResponse.getData());
+            System.out.println(m2mDataNode.getId());
+            System.out.println(m2mDataNode.getData());
+            System.out.println(m2mDataNode.getLabel());
+            System.out.println(m2mDataNode.getZxid());
         } catch (IOException e) {
             e.printStackTrace();
         }

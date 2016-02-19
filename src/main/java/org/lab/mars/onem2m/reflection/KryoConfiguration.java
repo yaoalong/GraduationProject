@@ -30,7 +30,6 @@ public class KryoConfiguration {
     private static Map<Class, ClassAccess> fieldAccessMap;
 
     static {
-        System.out.println("kryoConfiguration");
         resolvedClz = new TreeSet<>((o1, o2) -> o1.getName().compareTo(
                 o2.getName()));
         fieldAccessMap = new HashMap<>();

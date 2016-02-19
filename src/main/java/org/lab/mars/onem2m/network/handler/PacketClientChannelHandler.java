@@ -56,6 +56,8 @@ public class PacketClientChannelHandler extends
             packet = tcpClient.getPendingQueue().remove();
             packet.setFinished(true);
             synchronized (packet) {
+                System.out.println("是否为空:" + m2mPacket.getResponse() == null);
+                packet.setResponse(m2mPacket.getResponse());
                 packet.notifyAll();
             }
 

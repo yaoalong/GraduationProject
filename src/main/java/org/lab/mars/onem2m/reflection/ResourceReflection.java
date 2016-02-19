@@ -1,12 +1,5 @@
 package org.lab.mars.onem2m.reflection;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
-import com.google.common.collect.Sets;
-
-import org.lab.mars.onem2m.reflection.KryoConfiguration.ClassAccess;
-
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.util.Date;
@@ -14,25 +7,28 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.lab.mars.onem2m.reflection.KryoConfiguration.ClassAccess;
+
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
+import com.google.common.collect.Sets;
 
 /**
- * Author:yaoalong.
- * Date:2015/12/29.
- * Email:yaoalong@foxmail.com
+ * Author:yaoalong. Date:2015/12/29. Email:yaoalong@foxmail.com
  */
 public class ResourceReflection {
 
     private static Set<Class> defaultClz;
 
     static {
-        System.out.println("ha");
         defaultClz = Sets.newHashSet(Integer.class, Float.class, Double.class,
-                Boolean.class, Long.class, BigDecimal.class, String.class, Date.class);
+                Boolean.class, Long.class, BigDecimal.class, String.class,
+                Date.class);
     }
 
     protected static final ThreadLocal<Kryo> kryo = new ThreadLocal<Kryo>() {
         protected com.esotericsoftware.kryo.Kryo initialValue() {
-            System.out.println("LL");
             Kryo k = new Kryo();
             KryoConfiguration.configure(k);
             return k;
@@ -69,13 +65,11 @@ public class ResourceReflection {
         }
     }
 
-
-
-
     @SuppressWarnings("unchecked")
     public static <R> R deserialize(Class<R> cls, Map<String, Object> result) {
         ClassAccess clzAccess = KryoConfiguration.get(cls);
-        if (clzAccess == null) return null;
+        if (clzAccess == null)
+            return null;
         R instance = (R) clzAccess.constructorAccess.newInstance();
         if (result != null)
             result.forEach((k, v) -> {
@@ -83,9 +77,11 @@ public class ResourceReflection {
                     Object fieldObj = v;
                     if (v instanceof ByteBuffer) {
                         ByteBuffer _v = (ByteBuffer) v;
-                        fieldObj = deserializeKryo(_v.array(), _v.position(), _v.remaining());
+                        fieldObj = deserializeKryo(_v.array(), _v.position(),
+                                _v.remaining());
                     }
-                    clzAccess.fieldAccess.set(instance, clzAccess.fieldIndex.get(k), fieldObj);
+                    clzAccess.fieldAccess.set(instance,
+                            clzAccess.fieldIndex.get(k), fieldObj);
                 }
             });
         return instance;
@@ -95,13 +91,15 @@ public class ResourceReflection {
         Map<String, Object> result = new HashMap<>();
         Class<? extends Object> clz = instance.getClass();
         ClassAccess clzAccess = KryoConfiguration.get(clz);
-        if (clzAccess == null){
+        if (clzAccess == null) {
             return null;
         }
         clzAccess.fieldIndex.forEach((field, index) -> {
             Object fieldObj = clzAccess.fieldAccess.get(instance, index);
             if (fieldObj != null)
-                result.put(field, defaultClz.contains(fieldObj.getClass()) ? fieldObj : ByteBuffer.wrap(serializeKryo(fieldObj)));
+                result.put(field,
+                        defaultClz.contains(fieldObj.getClass()) ? fieldObj
+                                : ByteBuffer.wrap(serializeKryo(fieldObj)));
         });
         return result;
     }

@@ -80,7 +80,7 @@ public class Test {
         M2mReplyHeader m2mReplyHeader = new M2mReplyHeader();
         m2mGetDataRequest.setPath("11111");
         M2mPacket m2mPacket = new M2mPacket(m2mRequestHeader, m2mReplyHeader,
-                m2mGetDataRequest, new M2mCreateResponse());
+                m2mGetDataRequest, new M2mGetDataResponse());
         return m2mPacket;
     }
 
