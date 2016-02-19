@@ -35,7 +35,6 @@ import java.util.Map;
 import org.apache.zookeeper.KeeperException;
 import org.lab.mars.onem2m.common.AtomicFileOutputStream;
 import org.lab.mars.onem2m.jmx.MBeanRegistry;
-import org.lab.mars.onem2m.jmx.ZKMBeanInfo;
 import org.lab.mars.onem2m.persistence.FileTxnSnapLog;
 import org.lab.mars.onem2m.server.ServerCnxnFactory;
 import org.lab.mars.onem2m.server.ZKDatabase;
@@ -79,10 +78,6 @@ import org.slf4j.LoggerFactory;
  */
 public class QuorumPeer extends Thread implements QuorumStats.Provider {
     private static final Logger LOG = LoggerFactory.getLogger(QuorumPeer.class);
-
-    QuorumBean jmxQuorumBean;
-    LocalPeerBean jmxLocalPeerBean;
-    LeaderElectionBean jmxLeaderElectionBean;
     QuorumCnxManager qcm;
     M2MDataBase m2mDataBase;
     RegisterIntoZooKeeper registerIntoZooKeeper;
@@ -147,7 +142,7 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
      * conditions change (e.g. which state to become after LOOKING).
      */
     public enum LearnerType {
-        PARTICIPANT, OBSERVER;
+        PARTICIPANT
     }
 
     /*
@@ -624,32 +619,6 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
                 + cnxnFactory.getLocalAddress());
 
         LOG.debug("Starting quorum peer");
-        try {
-            jmxQuorumBean = new QuorumBean(this);
-            MBeanRegistry.getInstance().register(jmxQuorumBean, null);
-            for (QuorumServer s : getView().values()) {
-                ZKMBeanInfo p;
-                if (getId() == s.id && isStart == true) {
-                    p = jmxLocalPeerBean = new LocalPeerBean(this);
-                    try {
-                        MBeanRegistry.getInstance().register(p, jmxQuorumBean);
-                    } catch (Exception e) {
-                        LOG.warn("Failed to register with JMX", e);
-                        jmxLocalPeerBean = null;
-                    }
-                } else {
-                    p = new RemotePeerBean(s);
-                    try {
-                        MBeanRegistry.getInstance().register(p, jmxQuorumBean);
-                    } catch (Exception e) {
-                        LOG.warn("Failed to register with JMX", e);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            LOG.warn("Failed to register with JMX", e);
-            jmxQuorumBean = null;
-        }
 
         try {
             /*
@@ -710,13 +679,10 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
             } catch (Exception e) {
                 LOG.warn("Failed to unregister with JMX", e);
             }
-            jmxQuorumBean = null;
-            jmxLocalPeerBean = null;
         }
     }
 
     public void shutdown() {
-        System.out.println("关闭了");
         running = false;
         if (leader != null) {
             leader.shutdown("quorum Peer shutdown");
@@ -764,12 +730,6 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
      */
     public Map<Long, QuorumPeer.QuorumServer> getObservingView() {
         Map<Long, QuorumPeer.QuorumServer> ret = new HashMap<Long, QuorumPeer.QuorumServer>();
-        Map<Long, QuorumPeer.QuorumServer> view = getView();
-        for (QuorumServer server : view.values()) {
-            if (server.type == LearnerType.OBSERVER) {
-                ret.put(server.id, server);
-            }
-        }
         return ret;
     }
 

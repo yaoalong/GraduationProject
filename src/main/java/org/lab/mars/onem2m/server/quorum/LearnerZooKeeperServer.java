@@ -96,15 +96,6 @@ public abstract class LearnerZooKeeperServer extends QuorumZooKeeperServer {
     public void registerJMX(ZooKeeperServerBean serverBean,
             LocalPeerBean localPeerBean) {
         // register with JMX
-        if (self.jmxLeaderElectionBean != null) {
-            try {
-                MBeanRegistry.getInstance().unregister(
-                        self.jmxLeaderElectionBean);
-            } catch (Exception e) {
-                LOG.warn("Failed to register with JMX", e);
-            }
-            self.jmxLeaderElectionBean = null;
-        }
 
         try {
             jmxServerBean = serverBean;

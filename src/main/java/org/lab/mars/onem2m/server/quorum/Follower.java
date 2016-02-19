@@ -62,7 +62,6 @@ public class Follower extends Learner {
                 + (self.end_fle - self.start_fle));
         self.start_fle = 0;
         self.end_fle = 0;
-        fzk.registerJMX(new FollowerBean(this, zk), self.jmxLocalPeerBean);
         try {
             InetSocketAddress addr = findLeader();
             try {

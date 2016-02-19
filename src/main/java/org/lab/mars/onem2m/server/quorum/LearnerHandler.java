@@ -255,10 +255,6 @@ public class LearnerHandler extends Thread {
             LOG.info("Follower sid: " + sid + " : info : "
                     + leader.self.quorumPeers.get(sid));
 
-            if (qp.getType() == Leader.OBSERVERINFO) {
-                learnerType = LearnerType.OBSERVER;
-            }
-
             long lastAcceptedEpoch = ZxidUtils.getEpochFromZxid(qp.getZxid());
 
             long peerLastZxid;
@@ -509,11 +505,6 @@ public class LearnerHandler extends Thread {
 
                 switch (qp.getType()) {
                 case Leader.ACK:
-                    if (this.learnerType == LearnerType.OBSERVER) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Received ACK from Observer  " + this.sid);
-                        }
-                    }
                     syncLimitCheck.updateAck(qp.getZxid());
                     leader.processAck(this.sid, qp.getZxid(),
                             sock.getLocalSocketAddress());

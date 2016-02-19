@@ -30,8 +30,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
-import org.lab.mars.onem2m.jmx.MBeanRegistry;
-import org.lab.mars.onem2m.server.quorum.QuorumPeer.LearnerType;
 import org.lab.mars.onem2m.server.quorum.QuorumPeer.QuorumServer;
 import org.lab.mars.onem2m.server.quorum.QuorumPeer.ServerState;
 import org.slf4j.Logger;
@@ -145,14 +143,6 @@ public class LeaderElection implements Election {
      * @throws InterruptedException
      */
     public Vote lookForLeader() throws InterruptedException {
-        try {
-            self.jmxLeaderElectionBean = new LeaderElectionBean();
-            MBeanRegistry.getInstance().register(self.jmxLeaderElectionBean,
-                    self.jmxLocalPeerBean);
-        } catch (Exception e) {
-            LOG.warn("Failed to register with JMX", e);
-            self.jmxLeaderElectionBean = null;
-        }
 
         try {
             self.setCurrentVote(new Vote(self.getId(), self.getLastLoggedZxid()));
@@ -257,21 +247,14 @@ public class LeaderElection implements Election {
                              * or FOLLOWING. However if we are an OBSERVER, it
                              * is an error to be elected as a Leader.
                              */
-                            if (self.getLearnerType() == LearnerType.OBSERVER) {
-                                if (current.getId() == self.getId()) {
-                                    // This should never happen!
-                                    LOG.error("OBSERVER elected as leader!");
-                                    Thread.sleep(100);
-                                }
-                            } else {
-                                self.setPeerState((current.getId() == self
-                                        .getId()) ? ServerState.LEADING
-                                        : ServerState.FOLLOWING);
-                                if (self.getPeerState() == ServerState.FOLLOWING) {
-                                    Thread.sleep(100);
-                                }
-                                return current;
+
+                            self.setPeerState((current.getId() == self.getId()) ? ServerState.LEADING
+                                    : ServerState.FOLLOWING);
+                            if (self.getPeerState() == ServerState.FOLLOWING) {
+                                Thread.sleep(100);
                             }
+                            return current;
+
                         }
                     }
                 }
@@ -279,15 +262,7 @@ public class LeaderElection implements Election {
             }
             return null;
         } finally {
-            try {
-                if (self.jmxLeaderElectionBean != null) {
-                    MBeanRegistry.getInstance().unregister(
-                            self.jmxLeaderElectionBean);
-                }
-            } catch (Exception e) {
-                LOG.warn("Failed to unregister with JMX", e);
-            }
-            self.jmxLeaderElectionBean = null;
+
         }
     }
 }

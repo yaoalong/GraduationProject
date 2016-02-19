@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.lab.mars.onem2m.jmx.MBeanRegistry;
 import org.lab.mars.onem2m.server.quorum.QuorumCnxManager.Message;
 import org.lab.mars.onem2m.server.quorum.QuorumPeer.LearnerType;
 import org.lab.mars.onem2m.server.quorum.QuorumPeer.QuorumServer;
@@ -834,14 +833,7 @@ public class FastLeaderElection implements Election {
      * 寻找特定的Leader
      */
     public Vote lookForLeader() throws InterruptedException {
-        try {
-            self.jmxLeaderElectionBean = new LeaderElectionBean();
-            MBeanRegistry.getInstance().register(self.jmxLeaderElectionBean,
-                    self.jmxLocalPeerBean);
-        } catch (Exception e) {
-            LOG.warn("Failed to register with JMX", e);
-            self.jmxLeaderElectionBean = null;
-        }
+
         if (self.start_fle == 0) {
             self.start_fle = System.currentTimeMillis();
         }
@@ -1031,15 +1023,7 @@ public class FastLeaderElection implements Election {
             }
             return null;
         } finally {
-            try {
-                if (self.jmxLeaderElectionBean != null) {
-                    MBeanRegistry.getInstance().unregister(
-                            self.jmxLeaderElectionBean);
-                }
-            } catch (Exception e) {
-                LOG.warn("Failed to unregister with JMX", e);
-            }
-            self.jmxLeaderElectionBean = null;
+
         }
     }
 }

@@ -196,9 +196,7 @@ public class QuorumPeerConfig {
             } else if (key.equals("quorumListenOnAllIPs")) {
                 quorumListenOnAllIPs = Boolean.parseBoolean(value);
             } else if (key.equals("peerType")) {
-                if (value.toLowerCase().equals("observer")) {
-                    peerType = LearnerType.OBSERVER;
-                } else if (value.toLowerCase().equals("participant")) {
+                if (value.toLowerCase().equals("participant")) {
                     peerType = LearnerType.PARTICIPANT;
                 } else {
                     throw new ConfigException("Unrecognised peertype: " + value);

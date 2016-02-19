@@ -368,8 +368,6 @@ public class Leader {
         self.start_fle = 0;
         self.end_fle = 0;
 
-        zk.registerJMX(new LeaderBean(this, zk), self.jmxLocalPeerBean);
-
         try {
             self.tick = 0;
             zk.loadData();
