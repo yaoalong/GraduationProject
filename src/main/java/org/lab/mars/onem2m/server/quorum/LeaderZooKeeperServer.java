@@ -89,14 +89,7 @@ public class LeaderZooKeeperServer extends QuorumZooKeeperServer {
 
     @Override
     protected void registerJMX() {
-        // register with JMX
-        // try {
-        // jmxDataTreeBean = new DataTreeBean(getZKDatabase().getDataTree());
-        // MBeanRegistry.getInstance().register(jmxDataTreeBean, jmxServerBean);
-        // } catch (Exception e) {
-        // LOG.warn("Failed to register with JMX", e);
-        // jmxDataTreeBean = null;
-        // }
+
     }
 
     public void registerJMX(LeaderBean leaderBean, LocalPeerBean localPeerBean) {

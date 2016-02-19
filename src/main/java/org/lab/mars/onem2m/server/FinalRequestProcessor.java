@@ -164,14 +164,11 @@ public class FinalRequestProcessor implements RequestProcessor {
         long lastZxid = zks.getZKDatabase().getM2mData().getLastProcessedZxid();
         M2mReplyHeader hdr = new M2mReplyHeader(request.cxid, lastZxid,
                 err.intValue());
-
-        zks.serverStats().updateLatency(request.createTime);
         M2mPacket m2mPacket = new M2mPacket(null, hdr, null, rsp);
         ctx.writeAndFlush(m2mPacket);
     }
 
     public void shutdown() {
-        // we are the final link in the chain
         LOG.info("shutdown of request processor complete");
     }
 

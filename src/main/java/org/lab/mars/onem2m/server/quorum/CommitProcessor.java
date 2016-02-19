@@ -129,10 +129,6 @@ public class CommitProcessor extends Thread implements RequestProcessor {
                         case OpCode.create:
                         case OpCode.delete:
                         case OpCode.setData:
-                        case OpCode.multi:
-                        case OpCode.setACL:
-                        case OpCode.createSession:
-                        case OpCode.closeSession:
                             nextPending = request;// 因为是事务类型的，所以需要挂起等待
                             break;
                         case OpCode.sync:

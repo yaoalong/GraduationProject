@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
  * null. This change the semantic of txnlog on the observer since it only
  * contains committed txns.
  */
+// TODO 现在没有利用到SyncRequestProcessor,需要添加
 public class SyncRequestProcessor extends Thread implements RequestProcessor {
     private static final Logger LOG = LoggerFactory
             .getLogger(SyncRequestProcessor.class);
