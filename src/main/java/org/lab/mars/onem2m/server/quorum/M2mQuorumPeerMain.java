@@ -173,8 +173,8 @@ public class M2mQuorumPeerMain {
                                 config.m2mDataBase.isClean(),
                                 config.m2mDataBase.getKeyspace(),
                                 config.m2mDataBase.getTable(),
-                                config.m2mDataBase.getNode()), m2mQuorumServer
-                                .getServers().get(Integer.valueOf((i) + ""))));
+                                config.m2mDataBase.getNode()), quorumPeer
+                                .getHandleIp()));
                 quorumPeer.setClientPortAddress(config.getClientPortAddress());
                 quorumPeer.setTxnFactory(new FileTxnSnapLog(new File(config
                         .getDataLogDir()), new File(config.getDataDir())));
@@ -186,8 +186,6 @@ public class M2mQuorumPeerMain {
                 quorumPeer.setSyncLimit(config.getSyncLimit());
                 quorumPeer.setLearnerType(config.getPeerType());
                 quorumPeer.setSyncEnabled(config.getSyncEnabled());
-                quorumPeer.setQuorumListenOnAllIPs(config
-                        .getQuorumListenOnAllIPs());
                 RegisterIntoZooKeeper registerIntoZooKeeper = new RegisterIntoZooKeeper();
                 registerIntoZooKeeper.setServer(config.getZooKeeperServer());
                 ZooKeeper_Monitor zooKeeper_Monitor = new ZooKeeper_Monitor();

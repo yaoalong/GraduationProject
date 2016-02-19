@@ -70,8 +70,9 @@ public class ZKDatabase {
 
     private NetworkPool networkPool;
 
-    /*
-     * 并且进行加载
+    /**
+     * 
+     * 初始化的同时进行数据加载
      */
     public ZKDatabase(NetworkPool networkPool, M2MDataBase m2mDataBase,
             String mySelfString) {

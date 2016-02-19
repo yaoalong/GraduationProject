@@ -10,9 +10,13 @@ import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.Watcher.Event.KeeperState;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RegisterIntoZooKeeper extends Thread implements Watcher {
 
+    private static final Logger LOG = LoggerFactory
+            .getLogger(RegisterIntoZooKeeper.class);
     private static CountDownLatch countDownLatch = new CountDownLatch(1);
     private String server;
     private ZooKeeper zooKeeper;
@@ -27,7 +31,6 @@ public class RegisterIntoZooKeeper extends Thread implements Watcher {
 
     @Override
     public void run() {
-        System.out.println(zooKeeper.getState());
         try {
             countDownLatch.await();
         } catch (Exception e) {
@@ -37,8 +40,7 @@ public class RegisterIntoZooKeeper extends Thread implements Watcher {
             zooKeeper.create("/server/" + ip, "1".getBytes(),
                     Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
         } catch (KeeperException | InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.trace("error because of:{}", e);
         }
     }
 

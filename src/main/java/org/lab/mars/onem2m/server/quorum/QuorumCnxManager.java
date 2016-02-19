@@ -501,13 +501,9 @@ public class QuorumCnxManager {
                 try {
                     ss = new ServerSocket();
                     ss.setReuseAddress(true);
-                    if (self.getQuorumListenOnAllIPs()) {
-                        int port = self.quorumPeers.get(self.getId()).electionAddr
-                                .getPort();
-                        addr = new InetSocketAddress(port);
-                    } else {
-                        addr = self.quorumPeers.get(self.getId()).electionAddr;
-                    }
+
+                    addr = self.quorumPeers.get(self.getId()).electionAddr;
+
                     LOG.info("My election bind port: " + addr.toString());
                     setName(self.quorumPeers.get(self.getId()).electionAddr
                             .toString());

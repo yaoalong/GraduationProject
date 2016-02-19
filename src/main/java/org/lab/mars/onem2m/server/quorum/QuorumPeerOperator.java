@@ -39,8 +39,6 @@ public class QuorumPeerOperator {
             quorumPeer.setSyncLimit(config.getSyncLimit());
             quorumPeer.setLearnerType(config.getPeerType());
             quorumPeer.setSyncEnabled(config.getSyncEnabled());
-            quorumPeer
-                    .setQuorumListenOnAllIPs(config.getQuorumListenOnAllIPs());
             quorumPeer.setMyIp(config.getMyIp());
 
             quorumPeer.start();

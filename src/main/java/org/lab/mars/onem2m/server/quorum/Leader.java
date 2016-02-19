@@ -188,22 +188,17 @@ public class Leader {
     Leader(QuorumPeer self, LeaderZooKeeperServer zk) throws IOException {
         this.self = self;
         try {
-            if (self.getQuorumListenOnAllIPs()) {
-                ss = new ServerSocket(self.getQuorumAddress().getPort());
-            } else {
-                ss = new ServerSocket();
-            }
+
+            ss = new ServerSocket();
+
             ss.setReuseAddress(true);
-            if (!self.getQuorumListenOnAllIPs()) {
-                ss.bind(self.getQuorumAddress());
-            }
+
+            ss.bind(self.getQuorumAddress());
+
         } catch (BindException e) {
-            if (self.getQuorumListenOnAllIPs()) {
-                LOG.error("Couldn't bind to port "
-                        + self.getQuorumAddress().getPort(), e);
-            } else {
-                LOG.error("Couldn't bind to " + self.getQuorumAddress(), e);
-            }
+
+            LOG.error("Couldn't bind to " + self.getQuorumAddress(), e);
+
             throw e;
         }
         this.zk = zk;
@@ -495,8 +490,6 @@ public class Leader {
                 tickSkip = !tickSkip;
             }
         } finally {
-            // zk.unregisterJMX(this);
-            System.out.println("我推出了");
         }
     }
 

@@ -209,9 +209,6 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
     /**
      * This is who I think the leader currently is.
      */
-    /**
-     * 这个Vote我们可以知道哪台机器是Leader
-     */
     volatile private Vote currentVote;
 
     /**
@@ -224,8 +221,7 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
     }
 
     /**
-     * 当前的投票结果，即可以根据Vote得到现在的Leader
-     * 
+     *
      * @param v
      */
     public synchronized void setCurrentVote(Vote v) {
@@ -289,7 +285,6 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
      * Whether or not to listen on all IPs for the two quorum ports (broadcast
      * and fast leader election).
      */
-    protected boolean quorumListenOnAllIPs = false;
 
     private ServerState state = ServerState.LOOKING;
 
@@ -357,7 +352,6 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
         this.tickTime = tickTime;
         this.initLimit = initLimit;
         this.syncLimit = syncLimit;
-        this.quorumListenOnAllIPs = quorumListenOnAllIPs;
         this.logFactory = new FileTxnSnapLog(dataLogDir, dataDir);
         this.zkDb = new ZKDatabase(null, m2mDataBase, myIp + ":"
                 + (cnxnFactory.getLocalPort()));
@@ -934,14 +928,6 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
      */
     public void setElectionType(int electionType) {
         this.electionType = electionType;
-    }
-
-    public boolean getQuorumListenOnAllIPs() {
-        return quorumListenOnAllIPs;
-    }
-
-    public void setQuorumListenOnAllIPs(boolean quorumListenOnAllIPs) {
-        this.quorumListenOnAllIPs = quorumListenOnAllIPs;
     }
 
     public ServerCnxnFactory getCnxnFactory() {
