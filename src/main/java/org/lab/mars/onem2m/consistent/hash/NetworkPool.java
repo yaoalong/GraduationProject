@@ -384,6 +384,8 @@ public class NetworkPool {
             allPositionToServer.put(position, map.getValue());
             position++;
         }
+        System.out.println("设置完全了");
+        System.out.println("大小:" + newConsistentBuckets.size());
         this.allConsistentBuckets = newConsistentBuckets;
     }
 
@@ -426,11 +428,6 @@ public class NetworkPool {
 
     public TreeMap<Long, String> getAllConsistentBuckets() {
         return allConsistentBuckets;
-    }
-
-    public void setAllConsistentBuckets(
-            TreeMap<Long, String> allConsistentBuckets) {
-        this.allConsistentBuckets = allConsistentBuckets;
     }
 
 }

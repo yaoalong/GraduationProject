@@ -54,6 +54,10 @@ public class PacketClientChannelHandler extends
             }
             packet = tcpClient.getPendingQueue().remove();
             packet.setFinished(true);
+            synchronized (packet) {
+                packet.notifyAll();
+            }
+
         }
     }
 

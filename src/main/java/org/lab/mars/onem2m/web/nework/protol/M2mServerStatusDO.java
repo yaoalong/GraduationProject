@@ -4,7 +4,7 @@ package org.lab.mars.onem2m.web.nework.protol;
  * 
  * @author yaoalong
  * @Date 2016年1月24日
- * @Email yaoalong@foxmail.com 服务器状态封装类
+ * @Email yaoalong@foxmail.com
  */
 public class M2mServerStatusDO {
 

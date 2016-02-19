@@ -46,14 +46,14 @@ public class TcpClient {
         bootstrap.connect(host, port).addListener((ChannelFuture future) -> {
             reentrantLock.lock();
             channel = future.channel();
-            condition.notifyAll();
+            condition.signalAll();
             reentrantLock.unlock();
         });
 
     }
 
     public void write(Object msg) {
-        if (channel == null) {
+        while (channel == null) {
             try {
                 reentrantLock.lock();
                 condition.await();
@@ -63,6 +63,7 @@ public class TcpClient {
                 reentrantLock.unlock();
             }
         }
+        System.out.println("开始发送g");
         channel.writeAndFlush(msg);
         if (pendingQueue != null) {
             pendingQueue.add((M2mPacket) msg);

@@ -123,7 +123,7 @@ public class M2mQuorumPeerMain {
     public void runFromConfig(QuorumPeerConfig config, String[] args)
             throws IOException {
         QuorumPeerMain quorumPeerMain = new QuorumPeerMain();
-        quorumPeerMain.main(args);
+        // quorumPeerMain.main(args);
         try {
             ManagedUtil.registerLog4jMBeans();
         } catch (JMException e) {
@@ -146,7 +146,6 @@ public class M2mQuorumPeerMain {
             cnxnFactory.setMyIp(config.getMyIp());
             cnxnFactory.setAllServers(config.allServers);
             cnxnFactory.setReplicationFactory(config.getReplication_factor());// 设置复制因子
-            cnxnFactory.setNetworkPool(config.getNetworkPool());
             cnxnFactory.setTemporyAdd(config.isTemporyAdd());
             List<QuorumPeer> quorumPeers = new ArrayList<QuorumPeer>();
             long minValue = config.isTemporyAdd() ? 1

@@ -167,6 +167,7 @@ public class FinalRequestProcessor implements RequestProcessor {
 
         zks.serverStats().updateLatency(request.createTime);
         M2mPacket m2mPacket = new M2mPacket(null, hdr, null, rsp);
+        m2mPacket.setFinished(true);
         ctx.writeAndFlush(m2mPacket);
     }
 
