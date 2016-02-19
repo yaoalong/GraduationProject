@@ -64,10 +64,11 @@ public class TcpClient {
             }
         }
         System.out.println("开始发送g");
-        channel.writeAndFlush(msg);
         if (pendingQueue != null) {
+            System.out.println("不为空");
             pendingQueue.add((M2mPacket) msg);
         }
+        channel.writeAndFlush(msg);
 
     }
 
@@ -78,7 +79,7 @@ public class TcpClient {
     }
 
     public static void main(String args[]) {
-        TcpClient tcpClient = new TcpClient();
+        TcpClient tcpClient = new TcpClient(new LinkedList<M2mPacket>());
         try {
             tcpClient.connectionOne("192.168.10.131", 2182);
         } catch (Exception e) {
@@ -86,7 +87,18 @@ public class TcpClient {
         }
 
         try {
-            tcpClient.write(Test.createM2mGetDataPacket());
+            M2mPacket m2mPacket = Test.createM2mGetDataPacket();
+            tcpClient.write(m2mPacket);
+            synchronized (m2mPacket) {
+                while (!m2mPacket.isFinished()) {
+                    try {
+                        m2mPacket.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                System.out.println("正式完成");
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

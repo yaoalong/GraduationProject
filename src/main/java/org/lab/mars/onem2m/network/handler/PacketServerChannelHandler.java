@@ -44,7 +44,6 @@ public class PacketServerChannelHandler extends
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, Object msg) {
-        System.out.println("接收到了消息");
         synchronized (TcpServerConnectionStats.connectionStats) {
             TcpServerConnectionStats.connectionStats.get(ctx);
         }
@@ -52,7 +51,6 @@ public class PacketServerChannelHandler extends
         if (preProcessPacket(m2mPacket, ctx)) {
             NettyServerCnxn nettyServerCnxn = ctx.attr(STATE).get();
             nettyServerCnxn.receiveMessage(ctx, m2mPacket);
-            System.out.println("接收到了恢复");
         } else {// 需要增加对错误的处理
 
         }
@@ -116,15 +114,13 @@ public class PacketServerChannelHandler extends
 
                     tcpClient.write(m2mPacket);
                     synchronized (m2mPacket) {
-                        System.out.println("等待开始");
                         while (!m2mPacket.isFinished()) {
                             m2mPacket.wait();
                         }
-                        System.out.println("等待结束");
                     }
                     ctx.writeAndFlush(m2mPacket);
                     ipAndChannels.put(server, tcpClient.getChannel());
-                    return true;
+                    return false;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

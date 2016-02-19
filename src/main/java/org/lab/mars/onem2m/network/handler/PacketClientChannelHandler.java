@@ -37,7 +37,7 @@ public class PacketClientChannelHandler extends
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, Object msg) {
-        Test.deserialGetDataPacket((M2mPacket) msg);
+        // Test.deserialGetDataPacket((M2mPacket) msg);
         try {
             readResponse((M2mPacket) msg);
         } catch (IOException e) {
@@ -47,6 +47,7 @@ public class PacketClientChannelHandler extends
 
     private void readResponse(M2mPacket m2mPacket) throws IOException {
         M2mPacket packet;
+        System.out.println("收到了");
         synchronized (tcpClient.getPendingQueue()) {
             if (tcpClient.getPendingQueue().size() == 0) {
                 throw new IOException("Nothing in the queue, but got "

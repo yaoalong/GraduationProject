@@ -450,11 +450,11 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
                         currentEpoch);
                 // writeLongToFile(CURRENT_EPOCH_FILENAME, currentEpoch);
             }
-            if (epochOfZxid > currentEpoch) {
-                throw new IOException("The current epoch, "
-                        + ZxidUtils.zxidToString(currentEpoch)
-                        + ", is older than the last zxid, " + lastProcessedZxid);
-            }
+            // if (epochOfZxid > currentEpoch) {
+            // throw new IOException("The current epoch, "
+            // + ZxidUtils.zxidToString(currentEpoch)
+            // + ", is older than the last zxid, " + lastProcessedZxid);
+            // }
             try {
                 acceptedEpoch = readLongFromFile(ACCEPTED_EPOCH_FILENAME);
             } catch (FileNotFoundException e) {
