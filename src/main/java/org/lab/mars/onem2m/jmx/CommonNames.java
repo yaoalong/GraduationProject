@@ -20,10 +20,9 @@ package org.lab.mars.onem2m.jmx;
 
 /**
  * A bunch of constants.
- * TODO: will get rid of it eventually.
  */
 public class CommonNames {
-    public static final String DOMAIN="org.apache.ZooKeeperService";
-    public static final String DATA_TREE_KEY="DataTree";
-    public static final String STANDALONE_SERVER_KEY="StandaloneServer";
+    public static final String DOMAIN = "org.apache.ZooKeeperService";
+    public static final String DATA_TREE_KEY = "DataTree";
+    public static final String STANDALONE_SERVER_KEY = "StandaloneServer";
 }
