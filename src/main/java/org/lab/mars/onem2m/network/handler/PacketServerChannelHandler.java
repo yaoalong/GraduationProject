@@ -77,12 +77,12 @@ public class PacketServerChannelHandler extends
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Channel disconnect caused close:{}", cause);
-        }
+        LOG.info("Channel disconnect caused close:{}", cause);
+
         synchronized (TcpServerConnectionStats.connectionStats) {
             TcpServerConnectionStats.connectionStats.remove(ctx);
         }
+
         ctx.close();
     }
 
@@ -122,7 +122,8 @@ public class PacketServerChannelHandler extends
                     ipAndChannels.put(server, tcpClient.getChannel());
                     return false;
                 } catch (Exception e) {
-                    e.printStackTrace();
+
+                    LOG.error("process packet error:{}", e);
                 }
 
             }

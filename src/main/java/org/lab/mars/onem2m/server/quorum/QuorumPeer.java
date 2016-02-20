@@ -384,7 +384,7 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
                 registerIntoZooKeeper.register(myIp + ":"
                         + (cnxnFactory.getLocalPort()));
             } catch (IOException | KeeperException | InterruptedException e) {
-                e.printStackTrace();
+                LOG.error("register into ZooKeeper error:{}", e);
             }
             registerIntoZooKeeper.start();
             try {
@@ -396,8 +396,8 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
             try {
                 zooKeeper_Monitor.start();
                 cnxnFactory.start();
-            } catch (Exception ex) {
-                ex.printStackTrace();
+            } catch (Exception e) {
+                LOG.error("zookeeper monitor start errror:{}", e);
             }
         }
 
@@ -558,7 +558,6 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
                 new ZooKeeperServer.BasicDataTreeBuilder(), this.zkDb));
     }
 
-    @SuppressWarnings("deprecation")
     protected Election createElectionAlgorithm(int electionAlgorithm) {
         Election le = null;
         switch (electionAlgorithm) {
@@ -582,7 +581,6 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
         return le;
     }
 
-    @SuppressWarnings("deprecation")
     protected Election makeLEStrategy() {
         LOG.debug("Initializing leader election protocol...");
         if (getElectionType() == 0) {
@@ -621,7 +619,6 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
             while (running) {
                 switch (getPeerState()) {
                 case LOOKING:
-                    System.out.println("哈哈");
                     LOG.info("LOOKING");
                     try {
                         setBCVote(null);
@@ -643,7 +640,6 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
                         follower.shutdown();
                         setFollower(null);
                         setPeerState(ServerState.LOOKING);
-                        System.out.println("开始推出" + "Following");
                     }
                     break;
                 case LEADING:
@@ -659,7 +655,6 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
                             leader.shutdown("Forcing shutdown");
                             setLeader(null);
                         }
-                        System.out.println("开始推出" + "Leading");
                         setPeerState(ServerState.LOOKING);
                     }
                     break;

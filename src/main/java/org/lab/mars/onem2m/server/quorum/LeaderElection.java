@@ -35,10 +35,6 @@ import org.lab.mars.onem2m.server.quorum.QuorumPeer.ServerState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @deprecated This class has been deprecated as of release 3.4.0.
- */
-@Deprecated
 public class LeaderElection implements Election {
     private static final Logger LOG = LoggerFactory
             .getLogger(LeaderElection.class);

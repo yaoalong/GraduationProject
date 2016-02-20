@@ -8,13 +8,17 @@ import java.io.IOException;
 import org.lab.mars.onem2m.KeeperException;
 import org.lab.mars.onem2m.network.TcpClient;
 import org.lab.mars.onem2m.proto.M2mPacket;
-import org.lab.mars.onem2m.test.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by Administrator on 2015/12/21.
  */
 public class PacketClientChannelHandler extends
         SimpleChannelInboundHandler<Object> {
+
+    private static final Logger LOG = LoggerFactory
+            .getLogger(PacketClientChannelHandler.class);
     private TcpClient tcpClient;
 
     public PacketClientChannelHandler(TcpClient tcpClient) {
@@ -23,11 +27,6 @@ public class PacketClientChannelHandler extends
 
     public PacketClientChannelHandler() throws KeeperException,
             InterruptedException {
-        try {
-            Test.createM2mCreatePacket();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
@@ -37,17 +36,15 @@ public class PacketClientChannelHandler extends
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, Object msg) {
-        // Test.deserialGetDataPacket((M2mPacket) msg);
         try {
             readResponse((M2mPacket) msg);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error("channel read error:{}", e);
         }
     }
 
     private void readResponse(M2mPacket m2mPacket) throws IOException {
         M2mPacket packet;
-        System.out.println("收到了");
         synchronized (tcpClient.getPendingQueue()) {
             if (tcpClient.getPendingQueue().size() == 0) {
                 throw new IOException("Nothing in the queue, but got "
@@ -56,7 +53,6 @@ public class PacketClientChannelHandler extends
             packet = tcpClient.getPendingQueue().remove();
             packet.setFinished(true);
             synchronized (packet) {
-                System.out.println("是否为空:" + m2mPacket.getResponse() == null);
                 packet.setResponse(m2mPacket.getResponse());
                 packet.notifyAll();
             }
@@ -72,6 +68,7 @@ public class PacketClientChannelHandler extends
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         cause.printStackTrace();
+        LOG.info("close ctx,because of:{}", cause);
         ctx.close();
     }
 }
