@@ -14,8 +14,7 @@ public class NetworkPoolTest {
         for (Integer i = 0; i < 10; i++) {
             servers.add("192.168.10.10" + i);
         }
-        networkPool.setServers(servers.toArray(new String[servers.size()]),
-                true);
+        networkPool.setServers(servers, true);
         networkPool.initialize();
         for (Entry<String, Long> map : networkPool.getServerPosition()
                 .entrySet()) {

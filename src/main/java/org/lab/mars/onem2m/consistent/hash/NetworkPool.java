@@ -12,7 +12,6 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.lab.mars.onem2m.server.quorum.QuorumPeer;
-import org.lab.mars.onem2m.server.quorum.QuorumPeer.LearnerType;
 import org.lab.mars.onem2m.server.quorum.QuorumPeer.QuorumServer;
 import org.lab.mars.onem2m.server.quorum.QuorumPeerOperator;
 import org.lab.mars.onem2m.server.quorum.QuorumPeerStatistics;
@@ -37,7 +36,7 @@ public class NetworkPool {
             }
         }
     };
-    private volatile String[] servers;
+    private volatile List<String> servers;
     private volatile TreeMap<Long, String> consistentBuckets;
 
     private volatile TreeMap<Long, String> allConsistentBuckets;
@@ -103,7 +102,7 @@ public class NetworkPool {
 
             // if servers is not set, or it empty, then
             // throw a runtime exception
-            if (servers == null || servers.length <= 0) {
+            if (servers == null || servers.size() <= 0) {
                 if (log.isErrorEnabled())
                     log.error("++++ trying to initialize with no servers");
                 throw new IllegalStateException(
@@ -126,17 +125,17 @@ public class NetworkPool {
         TreeMap<Long, String> newConsistentBuckets = new TreeMap<Long, String>();
         MessageDigest md5 = MD5.get();
 
-        for (int i = 0; i < servers.length; i++) {
+        for (int i = 0; i < servers.size(); i++) {
             long factor = 1;
             for (long j = 0; j < factor; j++) {
-                byte[] d = md5.digest((servers[i] + "-" + j).getBytes());
+                byte[] d = md5.digest((servers.get(i) + "-" + j).getBytes());
                 for (int h = 0; h < 1; h++) {
                     Long k = ((long) (d[3 + h * 4] & 0xFF) << 24)
                             | ((long) (d[2 + h * 4] & 0xFF) << 16)
                             | ((long) (d[1 + h * 4] & 0xFF) << 8)
                             | ((long) (d[0 + h * 4] & 0xFF));
 
-                    newConsistentBuckets.put(k, servers[i]);
+                    newConsistentBuckets.put(k, servers.get(i));
                 }
             }
         }
@@ -204,7 +203,7 @@ public class NetworkPool {
      * 
      * @param servers
      */
-    public synchronized void setServers(String[] servers, boolean isOk) {
+    public synchronized void setServers(List<String> servers, boolean isOk) {
         this.servers = servers;
         if (isOk) {
             List<String> nowDeadServers = new ArrayList<String>();
@@ -291,8 +290,7 @@ public class NetworkPool {
                     InetSocketAddress secondInetSocketAddress = new InetSocketAddress(
                             address, secondPort - distance);
                     QuorumServer myQuorumServer = new QuorumServer(sid,
-                            firstInetSocketAddress, secondInetSocketAddress,
-                            LearnerType.PARTICIPANT);
+                            firstInetSocketAddress, secondInetSocketAddress);
                     map.put(sid, myQuorumServer);
 
                 }
@@ -335,7 +333,7 @@ public class NetworkPool {
         this.positionToServer = positionToServer;
     }
 
-    public String[] getServers() {
+    public List<String> getServers() {
         return servers;
     }
 

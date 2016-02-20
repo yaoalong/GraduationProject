@@ -234,8 +234,7 @@ public class LeaderElection implements Election {
                             self.setCurrentVote(result.winner);
                             s.close();
                             Vote current = self.getCurrentVote();
-                            LOG.info("Found leader: my type is: "
-                                    + self.getLearnerType());
+                            LOG.info("Found leader: my type is: ");
                             /*
                              * We want to make sure we implement the state
                              * machine correctly. If we are a PARTICIPANT, once

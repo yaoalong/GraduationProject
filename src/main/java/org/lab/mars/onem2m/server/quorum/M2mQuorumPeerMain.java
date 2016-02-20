@@ -134,7 +134,7 @@ public class M2mQuorumPeerMain {
         QuorumPeerOperator.config = config;
         try {
             NetworkPool networkPool = new NetworkPool();
-            networkPool.setAllServers(config.allServersToNetwork);
+            networkPool.setAllServers(config.allServerStrings);
             networkPool.setMySelfIpAndPort(config.myIp + ":"
                     + config.clientPort);
             networkPool.setReplicationFactor(config.replication_factor);
@@ -184,7 +184,6 @@ public class M2mQuorumPeerMain {
                 quorumPeer.setMaxSessionTimeout(config.getMaxSessionTimeout());
                 quorumPeer.setInitLimit(config.getInitLimit());
                 quorumPeer.setSyncLimit(config.getSyncLimit());
-                quorumPeer.setLearnerType(config.getPeerType());
                 quorumPeer.setSyncEnabled(config.getSyncEnabled());
                 RegisterIntoZooKeeper registerIntoZooKeeper = new RegisterIntoZooKeeper();
                 registerIntoZooKeeper.setServer(config.getZooKeeperServer());

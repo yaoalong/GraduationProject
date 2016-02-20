@@ -40,7 +40,6 @@ import org.lab.mars.onem2m.server.ByteBufferInputStream;
 import org.lab.mars.onem2m.server.M2mRequest;
 import org.lab.mars.onem2m.server.ZooTrace;
 import org.lab.mars.onem2m.server.quorum.Leader.Proposal;
-import org.lab.mars.onem2m.server.quorum.QuorumPeer.LearnerType;
 import org.lab.mars.onem2m.server.util.ZxidUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -162,12 +161,6 @@ public class LearnerHandler extends Thread {
      * If this packet is queued, the sender thread will exit
      */
     final QuorumPacket proposalOfDeath = new QuorumPacket();
-
-    private LearnerType learnerType = LearnerType.PARTICIPANT;
-
-    public LearnerType getLearnerType() {
-        return learnerType;
-    }
 
     /**
      * This method will use the thread to send packets added to the
@@ -464,7 +457,7 @@ public class LearnerHandler extends Thread {
                 return;
             }
             LOG.info("Received NEWLEADER-ACK message from " + getSid());
-            leader.waitForNewLeaderAck(getSid(), qp.getZxid(), getLearnerType());// 确认新的Leaer
+            leader.waitForNewLeaderAck(getSid(), qp.getZxid());// 确认新的Leaer
 
             syncLimitCheck.start();
 

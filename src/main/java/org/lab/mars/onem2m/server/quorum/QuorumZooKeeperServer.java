@@ -24,16 +24,14 @@ import org.lab.mars.onem2m.server.ZKDatabase;
 import org.lab.mars.onem2m.server.ZooKeeperServer;
 
 /**
- * Abstract base class for all ZooKeeperServers that participate in
- * a quorum.
+ * Abstract base class for all ZooKeeperServers that participate in a quorum.
  */
 public abstract class QuorumZooKeeperServer extends ZooKeeperServer {
     protected final QuorumPeer self;
 
     protected QuorumZooKeeperServer(FileTxnSnapLog logFactory, int tickTime,
             int minSessionTimeout, int maxSessionTimeout,
-            DataTreeBuilder treeBuilder, ZKDatabase zkDb, QuorumPeer self)
-    {
+            DataTreeBuilder treeBuilder, ZKDatabase zkDb, QuorumPeer self) {
         super(logFactory, tickTime, minSessionTimeout, maxSessionTimeout,
                 treeBuilder, zkDb);
         this.self = self;
@@ -55,6 +53,5 @@ public abstract class QuorumZooKeeperServer extends ZooKeeperServer {
         pwriter.print("quorumPort=");
         pwriter.println(self.quorumPeers.get(self.getId()).addr.getPort());
         pwriter.print("peerType=");
-        pwriter.println(self.getLearnerType().ordinal());
     }
 }

@@ -27,7 +27,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.lab.mars.onem2m.server.quorum.QuorumCnxManager.Message;
-import org.lab.mars.onem2m.server.quorum.QuorumPeer.LearnerType;
 import org.lab.mars.onem2m.server.quorum.QuorumPeer.QuorumServer;
 import org.lab.mars.onem2m.server.quorum.QuorumPeer.ServerState;
 import org.lab.mars.onem2m.server.util.ZxidUtils;
@@ -788,10 +787,9 @@ public class FastLeaderElection implements Election {
      * @return long
      */
     private long getInitId() {
-        if (self.getLearnerType() == LearnerType.PARTICIPANT)
-            return self.getId();
-        else
-            return Long.MIN_VALUE;
+
+        return self.getId();
+
     }
 
     /**
@@ -800,10 +798,9 @@ public class FastLeaderElection implements Election {
      * @return long
      */
     private long getInitLastLoggedZxid() {
-        if (self.getLearnerType() == LearnerType.PARTICIPANT)
-            return self.getLastLoggedZxid();
-        else
-            return Long.MIN_VALUE;
+
+        return self.getLastLoggedZxid();
+
     }
 
     /**
@@ -812,16 +809,15 @@ public class FastLeaderElection implements Election {
      * @return long
      */
     private long getPeerEpoch() {
-        if (self.getLearnerType() == LearnerType.PARTICIPANT)
-            try {
-                return self.getCurrentEpoch();
-            } catch (IOException e) {
-                RuntimeException re = new RuntimeException(e.getMessage());
-                re.setStackTrace(e.getStackTrace());
-                throw re;
-            }
-        else
-            return Long.MIN_VALUE;
+
+        try {
+            return self.getCurrentEpoch();
+        } catch (IOException e) {
+            RuntimeException re = new RuntimeException(e.getMessage());
+            re.setStackTrace(e.getStackTrace());
+            throw re;
+        }
+
     }
 
     /**

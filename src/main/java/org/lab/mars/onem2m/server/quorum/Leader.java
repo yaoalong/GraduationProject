@@ -41,7 +41,6 @@ import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.server.FinalRequestProcessor;
 import org.lab.mars.onem2m.server.M2mRequest;
 import org.lab.mars.onem2m.server.RequestProcessor;
-import org.lab.mars.onem2m.server.quorum.QuorumPeer.LearnerType;
 import org.lab.mars.onem2m.server.quorum.flexible.QuorumVerifier;
 import org.lab.mars.onem2m.server.util.ZxidUtils;
 import org.slf4j.Logger;
@@ -119,12 +118,6 @@ public class Leader {
     public List<LearnerHandler> getObservingLearners() {
         synchronized (observingLearners) {
             return new ArrayList<LearnerHandler>(observingLearners);
-        }
-    }
-
-    private void addObserverLearnerHandler(LearnerHandler lh) {
-        synchronized (observingLearners) {
-            observingLearners.add(lh);
         }
     }
 
@@ -398,8 +391,7 @@ public class Leader {
             // us. We do this by waiting for the NEWLEADER packet to get
             // acknowledged
             try {
-                waitForNewLeaderAck(self.getId(), zk.getZxid(),
-                        LearnerType.PARTICIPANT);// 等待确认新的Leader
+                waitForNewLeaderAck(self.getId(), zk.getZxid());// 等待确认新的Leader
             } catch (InterruptedException e) {
                 shutdown("Waiting for a quorum of followers, only synced with sids: [ "
                         + getSidSetString(newLeaderProposal.ackSet) + " ]");
@@ -469,8 +461,7 @@ public class Leader {
                     // Synced set is used to check we have a supporting quorum,
                     // so only
                     // PARTICIPANT, not OBSERVER, learners should be used
-                    if (f.synced()
-                            && f.getLearnerType() == LearnerType.PARTICIPANT) {
+                    if (f.synced()) {
                         syncedSet.add(f.getSid());
                     }
                     f.ping();
@@ -861,24 +852,20 @@ public class Leader {
                         p.packet.getZxid(), null);
                 handler.queuePacket(qp);
             }
-            // Only participant need to get outstanding proposals
-            if (handler.getLearnerType() == LearnerType.PARTICIPANT) {
-                List<Long> zxids = new ArrayList<Long>(
-                        outstandingProposals.keySet());
-                Collections.sort(zxids);
-                for (Long zxid : zxids) {
-                    if (zxid <= lastSeenZxid) {
-                        continue;
-                    }
-                    handler.queuePacket(outstandingProposals.get(zxid).packet);
+
+            List<Long> zxids = new ArrayList<Long>(
+                    outstandingProposals.keySet());
+            Collections.sort(zxids);
+            for (Long zxid : zxids) {
+                if (zxid <= lastSeenZxid) {
+                    continue;
                 }
+                handler.queuePacket(outstandingProposals.get(zxid).packet);
             }
+
         }
-        if (handler.getLearnerType() == LearnerType.PARTICIPANT) {
-            addForwardingFollower(handler);
-        } else {
-            addObserverLearnerHandler(handler);
-        }
+
+        addForwardingFollower(handler);
 
         return lastProposed;
     }
@@ -1024,7 +1011,7 @@ public class Leader {
      * @param learnerType
      * @throws InterruptedException
      */
-    public void waitForNewLeaderAck(long sid, long zxid, LearnerType learnerType)
+    public void waitForNewLeaderAck(long sid, long zxid)
             throws InterruptedException {
 
         synchronized (newLeaderProposal.ackSet) {
@@ -1042,9 +1029,7 @@ public class Leader {
                 return;
             }
 
-            if (learnerType == LearnerType.PARTICIPANT) {
-                newLeaderProposal.ackSet.add(sid);
-            }
+            newLeaderProposal.ackSet.add(sid);
 
             if (self.getQuorumVerifier().containsQuorum(
                     newLeaderProposal.ackSet)) {

@@ -37,7 +37,6 @@ import org.lab.mars.onem2m.consistent.hash.NetworkPool;
 import org.lab.mars.onem2m.server.ZooKeeperServer;
 import org.lab.mars.onem2m.server.cassandra.impl.M2MDataBaseImpl;
 import org.lab.mars.onem2m.server.cassandra.interface4.M2MDataBase;
-import org.lab.mars.onem2m.server.quorum.QuorumPeer.LearnerType;
 import org.lab.mars.onem2m.server.quorum.QuorumPeer.QuorumServer;
 import org.lab.mars.onem2m.server.quorum.flexible.QuorumHierarchical;
 import org.lab.mars.onem2m.server.quorum.flexible.QuorumMaj;
@@ -67,7 +66,7 @@ public class QuorumPeerConfig {
     protected final HashMap<Long, QuorumServer> servers = new HashMap<Long, QuorumServer>(); // sid、服务器选举的配置信息
 
     /**
-     * 对应的是不同的Zab需要监听的QuorumServer
+     * 将所有机器拆分成不同的zab集群
      */
     protected final HashMap<Long, HashMap<Long, QuorumServer>> positionToServers = new HashMap<>();
 
@@ -80,8 +79,6 @@ public class QuorumPeerConfig {
     protected QuorumVerifier quorumVerifier;
     protected int snapRetainCount = 3;
     protected boolean syncEnabled = true;
-
-    protected LearnerType peerType = LearnerType.PARTICIPANT;
 
     protected M2MDataBase m2mDataBase;
 
@@ -107,14 +104,16 @@ public class QuorumPeerConfig {
     protected List<M2mAddressToId> addressToSid = new ArrayList<>();
 
     M2mQuorumServer m2mQuorumServers = new M2mQuorumServer();
-
+    /**
+     * 不同机器实例对应的客户端端口号
+     */
     private HashMap<Long, Integer> sidToClientPort = new HashMap<>();
 
     private boolean isTemporyAdd = false;
 
     private Integer webPort;
 
-    protected List<String> allServersToNetwork = new ArrayList<String>();
+    protected List<String> allServerStrings = new ArrayList<String>();
 
     @SuppressWarnings("serial")
     public static class ConfigException extends Exception {
@@ -192,12 +191,6 @@ public class QuorumPeerConfig {
                 syncLimit = Integer.parseInt(value);
             } else if (key.equals("electionAlg")) {
                 electionAlg = Integer.parseInt(value);
-            } else if (key.equals("peerType")) {
-                if (value.toLowerCase().equals("participant")) {
-                    peerType = LearnerType.PARTICIPANT;
-                } else {
-                    throw new ConfigException("Unrecognised peertype: " + value);
-                }
             } else if (key.equals("syncEnabled")) {
                 syncEnabled = Boolean.parseBoolean(value);
             } else if (key.equals("autopurge.snapRetainCount")) {
@@ -222,18 +215,6 @@ public class QuorumPeerConfig {
                             parts[0], Integer.parseInt(parts[2]));// 用来选举的信息
                     servers.put(Long.valueOf(sid), new QuorumServer(sid, addr,
                             electionAddr));
-                } else if (parts.length == 4) {
-                    InetSocketAddress electionAddr = new InetSocketAddress(
-                            parts[0], Integer.parseInt(parts[2]));
-                    LearnerType type = LearnerType.PARTICIPANT;
-                    if (parts[3].toLowerCase().equals("participant")) {
-                        type = LearnerType.PARTICIPANT;
-                        servers.put(Long.valueOf(sid), new QuorumServer(sid,
-                                addr, electionAddr, type));
-                    } else {
-                        throw new ConfigException("Unrecognised peertype: "
-                                + value);
-                    }
                 }
             } else if (key.startsWith("group")) {
                 int dot = key.indexOf('.');
@@ -396,14 +377,7 @@ public class QuorumPeerConfig {
             }
 
             myIp = servers.get(serverId).addr.getAddress().getHostAddress();
-            LearnerType roleByServersList = LearnerType.PARTICIPANT;
-            if (roleByServersList != peerType) {
-                LOG.warn("Peer type from servers list (" + roleByServersList
-                        + ") doesn't match peerType (" + peerType
-                        + "). Defaulting to servers list.");
 
-                peerType = roleByServersList;
-            }
         }
         setAllReplicationServers();
     }
@@ -415,30 +389,27 @@ public class QuorumPeerConfig {
     public void setAllReplicationServers() {
         networkPool = new NetworkPool();
 
-        List<String> serversStrings = new ArrayList<String>();
         for (M2mAddressToId m2mAddressToId : addressToSid) {
             Long sid = m2mAddressToId.getSid();
+            Integer port = sidToClientPort.get(sid);
             String address = m2mAddressToId.getAddress();
-            serversStrings.add(address + ":" + sidToClientPort.get(sid));
+            allServerStrings.add(address + ":" + port);
             NetworkPool.webPort.put(address + ":" + sidToClientPort.get(sid),
                     sidAndWebPort.get(sid));
-            allServers.put(address + ":" + sidToClientPort.get(sid), sid);
-            allServersToNetwork.add(address + ":" + sidToClientPort.get(sid));
+            allServers.put(address + ":" + port, sid);
         }
-        networkPool.setServers(
-                serversStrings.toArray(new String[serversStrings.size()]),
-                false);
+        networkPool.setServers(allServerStrings, false);
         networkPool.initialize();
         Long myIdInRing = networkPool.getServerPosition().get(
-                myIp + ":" + clientPort);
-        List<String> list = new ArrayList<>();
+                myIp + ":" + clientPort);// 自己在环中的位置
+        List<String> serversString = new ArrayList<>();
         if (isTemporyAdd) {
 
             HashMap<Long, QuorumServer> map = new HashMap<Long, QuorumServer>();
             for (int j = 0; j < replication_factor + 1; j++) {
                 String leftServer = networkPool.getPositionToServer().get(
-                        ((myIdInRing + j) + serversStrings.size())
-                                % serversStrings.size());// 最左边
+                        ((myIdInRing + j) + allServerStrings.size())
+                                % allServerStrings.size());// 最左边
                 Long sid = allServers.get(leftServer);// 找出对应的sid;
 
                 QuorumServer quorumServer = servers.get(sid);
@@ -452,11 +423,10 @@ public class QuorumPeerConfig {
                 InetSocketAddress secondInetSocketAddress = new InetSocketAddress(
                         address, j == 0 ? secondPort : secondPort - j + 1);
                 QuorumServer myQuorumServer = new QuorumServer(sid,
-                        firstInetSocketAddress, secondInetSocketAddress,
-                        LearnerType.PARTICIPANT);
+                        firstInetSocketAddress, secondInetSocketAddress);
                 map.put(sid, myQuorumServer);
                 if (j == 0) {
-                    list.add(leftServer);
+                    serversString.add(leftServer);
                 }
 
             }
@@ -465,12 +435,12 @@ public class QuorumPeerConfig {
         } else {
             for (long i = 0; i < replication_factor; i++) {
 
-                HashMap<Long, QuorumServer> map = new HashMap<Long, QuorumServer>();
+                HashMap<Long, QuorumServer> map = new HashMap<Long, QuorumServer>();// 存储一个zab协议里面的所有机器实例
                 for (int j = 0; j < replication_factor; j++) {
                     String leftServer = networkPool
                             .getPositionToServer()
-                            .get(((myIdInRing - (replication_factor - 1 - j - i)) + serversStrings
-                                    .size()) % serversStrings.size());// 最左边
+                            .get(((myIdInRing - (replication_factor - 1 - j - i)) + allServerStrings
+                                    .size()) % allServerStrings.size());// 最左边
                     Long sid = allServers.get(leftServer);// 找出对应的sid;
                     QuorumServer quorumServer = servers.get(sid);
                     String address = quorumServer.addr.getAddress()
@@ -483,11 +453,10 @@ public class QuorumPeerConfig {
                     InetSocketAddress secondInetSocketAddress = new InetSocketAddress(
                             address, secondPort - j);
                     QuorumServer myQuorumServer = new QuorumServer(sid,
-                            firstInetSocketAddress, secondInetSocketAddress,
-                            LearnerType.PARTICIPANT);
+                            firstInetSocketAddress, secondInetSocketAddress);
                     map.put(sid, myQuorumServer);
                     if (j == 0) {
-                        list.add(leftServer);
+                        serversString.add(leftServer);
                     }
 
                 }
@@ -498,7 +467,7 @@ public class QuorumPeerConfig {
         }
 
         m2mQuorumServers.setPositionToServers(positionToServers);
-        m2mQuorumServers.setServers(list);
+        m2mQuorumServers.setServers(serversString);
 
     }
 
@@ -568,10 +537,6 @@ public class QuorumPeerConfig {
 
     public boolean isDistributed() {
         return servers.size() > 1;
-    }
-
-    public LearnerType getPeerType() {
-        return peerType;
     }
 
     public String getMyIp() {

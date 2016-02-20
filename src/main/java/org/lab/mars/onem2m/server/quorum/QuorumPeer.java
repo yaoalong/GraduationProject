@@ -112,37 +112,15 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
             this.electionAddr = null;
         }
 
-        public QuorumServer(long id, InetSocketAddress addr,
-                InetSocketAddress electionAddr, LearnerType type) {
-            this.id = id;
-            this.addr = addr;
-            this.electionAddr = electionAddr;
-            this.type = type;
-        }
-
         public InetSocketAddress addr;
 
         public InetSocketAddress electionAddr;
 
         public long id;
-
-        public LearnerType type = LearnerType.PARTICIPANT;
     }
 
     public enum ServerState {
         LOOKING, FOLLOWING, LEADING;
-    }
-
-    /*
-     * A peer can either be participating, which implies that it is willing to
-     * both vote in instances of consensus and to elect or become a Leader, or
-     * it may be observing in which case it isn't.
-     * 
-     * We need this distinction to decide which ServerState to move to when
-     * conditions change (e.g. which state to become after LOOKING).
-     */
-    public enum LearnerType {
-        PARTICIPANT
     }
 
     /*
@@ -155,29 +133,6 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
      * Record leader election time
      */
     public long start_fle, end_fle;
-
-    /*
-     * Default value of peer is participant
-     */
-    private LearnerType learnerType = LearnerType.PARTICIPANT;
-
-    public LearnerType getLearnerType() {
-        return learnerType;
-    }
-
-    /**
-     * Sets the LearnerType both in the QuorumPeer and in the peerMap
-     */
-    public void setLearnerType(LearnerType p) {
-        learnerType = p;
-        if (quorumPeers.containsKey(this.myid)) {
-            this.quorumPeers.get(myid).type = p;
-        } else {
-            LOG.error("Setting LearnerType to " + p + " but " + myid
-                    + " not in QuorumPeers. ");
-        }
-
-    }
 
     /**
      * The servers that make up the cluster
@@ -499,9 +454,7 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
     protected static int countParticipants(Map<Long, QuorumServer> peers) {
         int count = 0;
         for (QuorumServer q : peers.values()) {
-            if (q.type == LearnerType.PARTICIPANT) {
-                count++;
-            }
+            count++;
         }
         return count;
     }
@@ -706,12 +659,7 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
     public Map<Long, QuorumPeer.QuorumServer> getVotingView() {
         Map<Long, QuorumPeer.QuorumServer> ret = new HashMap<Long, QuorumPeer.QuorumServer>();
         Map<Long, QuorumPeer.QuorumServer> view = getView();
-        for (QuorumServer server : view.values()) {
-            if (server.type == LearnerType.PARTICIPANT) {
-                ret.put(server.id, server);
-            }
-        }
-        return ret;
+        return view;
     }
 
     /**
