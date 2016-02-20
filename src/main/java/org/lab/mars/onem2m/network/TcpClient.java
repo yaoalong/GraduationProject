@@ -17,6 +17,8 @@ import org.lab.mars.onem2m.proto.M2mPacket;
 import org.lab.mars.onem2m.reflection.ResourceReflection;
 import org.lab.mars.onem2m.server.M2mDataNode;
 import org.lab.mars.onem2m.test.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by Administrator on 2015/12/21.
@@ -26,6 +28,8 @@ import org.lab.mars.onem2m.test.Test;
  * TCP客户端
  */
 public class TcpClient {
+
+    private static final Logger LOG = LoggerFactory.getLogger(TcpClient.class);
     private Channel channel;
 
     private LinkedList<M2mPacket> pendingQueue;
@@ -61,6 +65,7 @@ public class TcpClient {
                 reentrantLock.lock();
                 condition.await();
             } catch (InterruptedException e) {
+                LOG.info("write error:{}", e);
                 e.printStackTrace();
             } finally {
                 reentrantLock.unlock();
