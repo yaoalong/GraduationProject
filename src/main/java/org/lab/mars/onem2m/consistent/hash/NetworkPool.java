@@ -230,12 +230,14 @@ public class NetworkPool {
 
                 }
             }
-            for (String server : deadServers) {
+            for (int i = 0; i < deadServers.size(); i++) {
+                String server = deadServers.get(i);
                 if (!nowDeadServers.contains(server)) {
                     deadServers.remove(server);
                     stopQuorumPeer(server);
                 }
             }
+
         }
 
     }
