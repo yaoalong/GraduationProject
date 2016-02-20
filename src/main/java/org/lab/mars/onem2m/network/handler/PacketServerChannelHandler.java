@@ -113,11 +113,6 @@ public class PacketServerChannelHandler extends
                             Integer.valueOf(splitStrings[1]));
 
                     tcpClient.write(m2mPacket);
-                    synchronized (m2mPacket) {
-                        while (!m2mPacket.isFinished()) {
-                            m2mPacket.wait();
-                        }
-                    }
                     ctx.writeAndFlush(m2mPacket);
                     ipAndChannels.put(server, tcpClient.getChannel());
                     return false;

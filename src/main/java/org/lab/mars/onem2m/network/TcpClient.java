@@ -75,6 +75,16 @@ public class TcpClient {
             pendingQueue.add((M2mPacket) msg);
         }
         channel.writeAndFlush(msg);
+        synchronized (msg) {
+            while (!((M2mPacket) msg).isFinished()) {
+                try {
+                    ((M2mPacket) msg).wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            System.out.println("正式完成");
+        }
 
     }
 
@@ -95,16 +105,7 @@ public class TcpClient {
         try {
             M2mPacket m2mPacket = Test.createM2mGetDataPacket();
             tcpClient.write(m2mPacket);
-            synchronized (m2mPacket) {
-                while (!m2mPacket.isFinished()) {
-                    try {
-                        m2mPacket.wait();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-                System.out.println("正式完成");
-            }
+
             M2mGetDataResponse m2mGetDataResponse = (M2mGetDataResponse) m2mPacket
                     .getResponse();
             M2mDataNode m2mDataNode = (M2mDataNode) ResourceReflection
