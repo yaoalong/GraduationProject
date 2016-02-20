@@ -47,9 +47,7 @@ public class OneM2m {
         M2mReplyHeader m2mReplyHeader = new M2mReplyHeader();
         m2mCreateRequest.setKey(path);
         M2mDataNode m2mDataNode = new M2mDataNode();
-        m2mDataNode.setId(11411 + "");
-        m2mDataNode.setLabel(0);
-        m2mDataNode.setZxid(999L);
+        m2mDataNode.setId(path);
         m2mDataNode.setData(11);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         M2mBinaryOutputArchive boa = M2mBinaryOutputArchive.getArchive(baos);
@@ -110,9 +108,9 @@ public class OneM2m {
         return m2mDataNode.getData() + "";
     }
 
-    public static void main(String args[]) {
+    public static void main(String args[]) throws IOException {
         OneM2m oneM2m = new OneM2m("192.168.10.131", 2182);
-        System.out.println("result:" + oneM2m.getData("11111"));
-        oneM2m.delete("11411");
+        // oneM2m.create("555555", null);
+        oneM2m.setData("55555", null);
     }
 }
