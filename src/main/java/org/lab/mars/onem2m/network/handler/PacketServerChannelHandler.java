@@ -78,7 +78,7 @@ public class PacketServerChannelHandler extends
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         LOG.info("Channel disconnect caused close:{}", cause);
-
+        cause.printStackTrace();
         synchronized (TcpServerConnectionStats.connectionStats) {
             TcpServerConnectionStats.connectionStats.remove(ctx);
         }

@@ -169,9 +169,11 @@ public class NetworkPool {
         List<String> servers = new ArrayList<String>();
         for (int i = 0; i < replicationFactor; i++) {
             synchronized (deadServers) {
-                if (!deadServers.contains(allConsistentBuckets.get(result + i))) {
-                    servers.add(allConsistentBuckets.get(result + i));
+
+                if (!deadServers.contains(allConsistentBuckets.get(result))) {
+                    servers.add(allConsistentBuckets.get(result));
                 }
+                result = findPointFor(result + 1);
             }
 
         }
@@ -186,7 +188,9 @@ public class NetworkPool {
     }
 
     private final Long findPointFor(Long hv) {
+        synchronized (this.consistentBuckets) {
 
+        }
         SortedMap<Long, String> tmap = this.consistentBuckets.tailMap(hv);
 
         return (tmap.isEmpty()) ? this.consistentBuckets.firstKey() : tmap

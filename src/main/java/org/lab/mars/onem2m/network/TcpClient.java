@@ -110,7 +110,7 @@ public class TcpClient {
                     .getResponse();
             M2mDataNode m2mDataNode = (M2mDataNode) ResourceReflection
                     .deserializeKryo(m2mGetDataResponse.getData());
-            System.out.println(m2mDataNode.getId());
+            System.out.println("id:" + m2mDataNode.getId());
             System.out.println(m2mDataNode.getData());
             System.out.println(m2mDataNode.getLabel());
             System.out.println(m2mDataNode.getZxid());

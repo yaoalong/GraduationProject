@@ -26,7 +26,7 @@ public class TcpServerConnectionStats {
         @Override
         protected boolean removeEldestEntry(
                 Entry<ChannelHandlerContext, Long> eldest) {
-            if (size() > 10) {
+            if (size() > 50) {
                 return true;
             }
             return false;
