@@ -6,6 +6,9 @@ package org.lab.mars.onem2m.web.nework.protol;
  * @Date 2016年1月24日
  * @Email yaoalong@foxmail.com
  */
+/*
+ * 用来向web展示的DO
+ */
 public class M2mServerStatusDO {
 
     private Long id;

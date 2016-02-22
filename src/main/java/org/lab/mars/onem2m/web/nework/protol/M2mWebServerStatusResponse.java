@@ -14,7 +14,6 @@ public class M2mWebServerStatusResponse implements M2mRecord {
      */
     private static final long serialVersionUID = -1163005631887805265L;
     private byte[] data;
-    private org.apache.zookeeper.data.Stat stat;
 
     public M2mWebServerStatusResponse() {
     }
@@ -31,14 +30,6 @@ public class M2mWebServerStatusResponse implements M2mRecord {
         data = m_;
     }
 
-    public org.apache.zookeeper.data.Stat getStat() {
-        return stat;
-    }
-
-    public void setStat(org.apache.zookeeper.data.Stat m_) {
-        stat = m_;
-    }
-
     public void serialize(M2mOutputArchive a_, String tag)
             throws java.io.IOException {
         a_.startRecord(this, tag);
@@ -50,7 +41,6 @@ public class M2mWebServerStatusResponse implements M2mRecord {
             throws java.io.IOException {
         a_.startRecord(tag);
         data = a_.readBuffer("data");
-        stat = new org.apache.zookeeper.data.Stat();
         a_.endRecord(tag);
     }
 
@@ -83,7 +73,6 @@ public class M2mWebServerStatusResponse implements M2mRecord {
         int ret;
         ret = java.util.Arrays.toString(data).hashCode();
         result = 37 * result + ret;
-        ret = stat.hashCode();
         result = 37 * result + ret;
         return result;
     }

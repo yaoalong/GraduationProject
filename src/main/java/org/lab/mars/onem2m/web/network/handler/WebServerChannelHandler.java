@@ -19,6 +19,7 @@ import org.lab.mars.onem2m.server.ZKDatabase;
 import org.lab.mars.onem2m.server.ZooKeeperServer;
 import org.lab.mars.onem2m.web.network.WebTcpClient;
 import org.lab.mars.onem2m.web.network.constant.OperateCode;
+import org.lab.mars.onem2m.web.nework.protol.M2mServerStatus;
 import org.lab.mars.onem2m.web.nework.protol.M2mServerStatusDO;
 import org.lab.mars.onem2m.web.nework.protol.M2mServerStatusDOs;
 import org.lab.mars.onem2m.web.nework.protol.M2mWebPacket;
@@ -140,21 +141,27 @@ public class WebServerChannelHandler extends
                     M2mServerStatusDO m2mServerStatusDO = new M2mServerStatusDO();
                     m2mServerStatusDO.setId(entry.getKey());
                     m2mServerStatusDO.setIp(entry.getValue());
-                    m2mServerStatusDO.setStatus(1);
+                    m2mServerStatusDO.setStatus(M2mServerStatus.STARTED
+                            .getStatus());
                     m2mServerStatusDOs.add(m2mServerStatusDO);
                     return entry.getValue();
                 }).collect(Collectors.toList());
 
-        serverCnxnFactory.getAllServer().entrySet().stream().map(entry -> {
-            if (!serverStrings.contains(entry.getKey())) {
-                M2mServerStatusDO m2mServerStatusDO = new M2mServerStatusDO();
-                m2mServerStatusDO.setId(entry.getValue());
-                m2mServerStatusDO.setIp(entry.getKey());
-                m2mServerStatusDO.setStatus(0);
-                m2mServerStatusDOs.add(m2mServerStatusDO);
-            }
-            return entry.getKey();
-        }).count();
+        serverCnxnFactory
+                .getAllServer()
+                .entrySet()
+                .stream()
+                .map(entry -> {
+                    if (!serverStrings.contains(entry.getKey())) {
+                        M2mServerStatusDO m2mServerStatusDO = new M2mServerStatusDO();
+                        m2mServerStatusDO.setId(entry.getValue());
+                        m2mServerStatusDO.setIp(entry.getKey());
+                        m2mServerStatusDO.setStatus(M2mServerStatus.STOPED
+                                .getStatus());
+                        m2mServerStatusDOs.add(m2mServerStatusDO);
+                    }
+                    return entry.getKey();
+                }).count();
 
         m2mServerStatuses.setM2mServerStatusDOs(m2mServerStatusDOs);
         M2mWebServerStatusResponse m2mWebServerStatusResponse = new M2mWebServerStatusResponse();
