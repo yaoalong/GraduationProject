@@ -3,6 +3,7 @@ package org.lab.mars.onem2m.server.cassandra.impl;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.gt;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.gte;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.lt;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.set;
 
 import java.io.ByteArrayInputStream;
@@ -94,7 +95,6 @@ public class M2MDataBaseImpl implements M2MDataBase {
             if (resultSet == null) {
                 return null;
             }
-
             Map<String, Object> result = new HashMap<String, Object>();
             for (Row row : resultSet.all()) {
                 ColumnDefinitions columnDefinitions = resultSet
@@ -309,6 +309,41 @@ public class M2MDataBaseImpl implements M2MDataBase {
     @Override
     public String getKeyspace() {
         return keyspace;
+    }
+
+    @Override
+    public List<M2mDataNode> getCertainData(Long low, Long high) {
+        try {
+            List<M2mDataNode> arraryList = new ArrayList<M2mDataNode>();
+            Select.Selection selection = query().select();
+            Select select = selection.from(keyspace, table);
+            select.where(eq("label", 0)).and(gt("value", low))
+                    .and(lt("value", high));
+            select.allowFiltering();
+            ResultSet resultSet = session.execute(select);
+            if (resultSet == null) {
+                return null;
+            }
+            Map<String, Object> result = new HashMap<String, Object>();
+            for (Row row : resultSet.all()) {
+                ColumnDefinitions columnDefinitions = resultSet
+                        .getColumnDefinitions();
+                columnDefinitions.forEach(d -> {
+                    String name = d.getName();
+                    Object object = row.getObject(name);
+                    result.put(name, object);
+                });
+                arraryList.add(ResourceReflection.deserialize(
+                        M2mDataNode.class, result));
+                result.clear();
+            }
+
+            return arraryList;
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
     }
 
 }

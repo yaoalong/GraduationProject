@@ -22,6 +22,8 @@ public interface M2MDataBase {
 
     boolean truncate(Long zxid);
 
+    List<M2mDataNode> getCertainData(Long low, Long high);
+
     void close();
 
     public ProcessTxnResult processTxn(M2mTxnHeader header, M2mRecord m2mRecord);

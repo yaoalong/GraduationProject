@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.junit.Test;
 import org.lab.mars.onem2m.ZooDefs.OpCode;
+import org.lab.mars.onem2m.java.TraversalAllFields;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.server.M2mDataNode;
 import org.lab.mars.onem2m.server.cassandra.impl.M2MDataBaseImpl;
@@ -15,8 +16,8 @@ import org.lab.mars.onem2m.txn.M2mSetDataTxn;
 import org.lab.mars.onem2m.txn.M2mTxnHeader;
 
 public class M2mDataBaseTest {
-    M2MDataBaseImpl m2mDataBase = new M2MDataBaseImpl(false, "tests",
-            "student", "192.168.10.133");
+    M2MDataBaseImpl m2mDataBase = new M2MDataBaseImpl(false, "tests", "m2m1",
+            "192.168.10.133");
 
     @Test
     public void test() {
@@ -34,7 +35,7 @@ public class M2mDataBaseTest {
 
     @Test
     public void testDelete() {
-        m2mDataBase.delete("51634");
+        m2mDataBase.delete("3333430");
     }
 
     @Test
@@ -52,17 +53,29 @@ public class M2mDataBaseTest {
     public void testUpdate() {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("data", 100);
-        m2mDataBase.update("51634", map);
+        m2mDataBase.update("3333430", map);
     }
 
     @Test
     public void testCreate() {
-        M2mDataNode m2mDataNode = new M2mDataNode();
-        m2mDataNode.setZxid(Long.valueOf(140200 + ""));
-        m2mDataNode.setData(2);
-        m2mDataNode.setId(3333430 + "");
-        m2mDataNode.setLabel(0);
-        m2mDataBase.create(m2mDataNode);
+        for (int i = 0; i < 10; i++) {
+            M2mDataNode m2mDataNode = new M2mDataNode();
+            m2mDataNode.setZxid(Long.valueOf(140200 + ""));
+            m2mDataNode.setData(2);
+            m2mDataNode.setId((3333430 + i) + "");
+            m2mDataNode.setLabel(0);
+            m2mDataNode.setValue(11L + i);
+            m2mDataBase.create(m2mDataNode);
+        }
+
+    }
+
+    @Test
+    public void testGetCertainValue() {
+        List<M2mDataNode> m2mDataNodes = m2mDataBase.getCertainData(12L, 15L);
+        for (M2mDataNode m2mDataNode : m2mDataNodes) {
+            TraversalAllFields.getObjAttr(m2mDataNode);
+        }
     }
 
     @Test
@@ -71,7 +84,6 @@ public class M2mDataBaseTest {
         m2mTxnHeader.setType(OpCode.setData);
         M2mSetDataTxn m2mSetDataTxn = new M2mSetDataTxn();
         m2mSetDataTxn.setPath("11111");
-        ;
         M2mDataNode m2mDataNode = new M2mDataNode();
         m2mDataNode.setId(11111 + "");
         m2mDataNode.setLabel(0);
