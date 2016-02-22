@@ -44,7 +44,7 @@ public class WebClientChannelHandler extends
     @Override
     public void channelRead0(ChannelHandlerContext ctx, Object msg) {
         if (msg == null) {
-            LOG.error("error because of :nullPoint");
+            LOG.error("error because of :nullPointer");
             return;
         }
         M2mWebPacket m2mPacket = (M2mWebPacket) msg;
@@ -82,6 +82,9 @@ public class WebClientChannelHandler extends
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         cause.printStackTrace();
+        if (LOG.isInfoEnabled()) {
+            LOG.info("ctx will be closed,because of :{}", cause);
+        }
         ctx.close();
     }
 }
