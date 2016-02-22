@@ -151,15 +151,14 @@ public class WebServerChannelHandler extends
                 .getAllServer()
                 .entrySet()
                 .stream()
+                .filter(entry -> (!serverStrings.contains(entry.getKey())))
                 .map(entry -> {
-                    if (!serverStrings.contains(entry.getKey())) {
-                        M2mServerStatusDO m2mServerStatusDO = new M2mServerStatusDO();
-                        m2mServerStatusDO.setId(entry.getValue());
-                        m2mServerStatusDO.setIp(entry.getKey());
-                        m2mServerStatusDO.setStatus(M2mServerStatus.STOPED
-                                .getStatus());
-                        m2mServerStatusDOs.add(m2mServerStatusDO);
-                    }
+                    M2mServerStatusDO m2mServerStatusDO = new M2mServerStatusDO();
+                    m2mServerStatusDO.setId(entry.getValue());
+                    m2mServerStatusDO.setIp(entry.getKey());
+                    m2mServerStatusDO.setStatus(M2mServerStatus.STOPED
+                            .getStatus());
+                    m2mServerStatusDOs.add(m2mServerStatusDO);
                     return entry.getKey();
                 }).count();
 

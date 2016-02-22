@@ -39,7 +39,7 @@ public class WebTcpClient {
     }
 
     public void write(Object msg) {
-        if (channel == null) {
+        while (channel == null) {
             try {
                 reentrantLock.lock();
                 condition.await();

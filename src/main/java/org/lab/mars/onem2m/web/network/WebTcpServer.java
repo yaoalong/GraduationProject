@@ -42,8 +42,4 @@ public class WebTcpServer {
         }
     }
 
-    public static void main(String args[]) throws InterruptedException {
-        WebTcpServer tcpServer = new WebTcpServer(null);
-        tcpServer.bind("localhost", 2182);
-    }
 }
