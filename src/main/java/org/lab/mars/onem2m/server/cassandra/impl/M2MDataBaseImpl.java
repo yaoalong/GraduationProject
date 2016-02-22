@@ -36,7 +36,6 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.Statement;
-import com.datastax.driver.core.querybuilder.Delete;
 import com.datastax.driver.core.querybuilder.Insert;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
@@ -155,8 +154,8 @@ public class M2MDataBaseImpl implements M2MDataBase {
             M2mDataNode m2mDataNode = retrieve(key);
             Update update = query().update(keyspace, table);
             update.with(set("data", updated.get("data")));
-            update.where(eq("id", key)).and(eq("zxid", m2mDataNode.getZxid()))
-                    .and(eq("label", m2mDataNode.getLabel()));
+            update.where(eq("label", m2mDataNode.getLabel())).and(
+                    eq("zxid", m2mDataNode.getZxid()));
             session.execute(update);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -230,7 +229,7 @@ public class M2MDataBaseImpl implements M2MDataBase {
         try {
             Select.Selection selection = query().select();
             Select select = selection.from(keyspace, table);
-            select.where(gte("zxid", zxid));
+            select.where(gte("zxid", zxid)).and(eq("label", 0));
             select.allowFiltering();
             ResultSet resultSet = session.execute(select);
             if (resultSet == null) {
@@ -238,11 +237,8 @@ public class M2MDataBaseImpl implements M2MDataBase {
             }
             for (Row row : resultSet.all()) {
                 String idValue = (String) row.getObject("id");
-                long zxidValue = (Long) row.getObject("zxid");
-                Delete deletion = query().delete().from(keyspace, table);
-                Statement delete = deletion.where(eq("id", idValue)).and(
-                        eq("zxid", zxidValue));
-                session.execute(delete);
+                delete(idValue);
+
             }
 
         } catch (Exception ex) {
@@ -319,7 +315,7 @@ public class M2MDataBaseImpl implements M2MDataBase {
             List<M2mDataNode> arraryList = new ArrayList<M2mDataNode>();
             Select.Selection selection = query().select();
             Select select = selection.from(keyspace, table);
-            select.where(eq("label", 0)).and(gt("value", low))
+            select.where(eq("flag", 0)).and(gt("value", low))
                     .and(lt("value", high));
             select.allowFiltering();
             ResultSet resultSet = session.execute(select);

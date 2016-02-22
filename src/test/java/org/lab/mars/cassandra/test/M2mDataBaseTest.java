@@ -28,13 +28,13 @@ public class M2mDataBaseTest {
     @Test
     public void testRetrieve() {
 
-        M2mDataNode m2mDataNode = m2mDataBase.retrieve("3333430");
+        M2mDataNode m2mDataNode = m2mDataBase.retrieve("3333431");
         TraversalAllFields.getObjAttr(m2mDataNode);
     }
 
     @Test
     public void testDelete() {
-        m2mDataBase.delete("3333430");
+        m2mDataBase.delete("3333431");
     }
 
     @Test
@@ -42,6 +42,7 @@ public class M2mDataBaseTest {
 
         List<M2mDataNode> m2mDataNodes = m2mDataBase.retrieve(634L);
         for (M2mDataNode m2mDataNode : m2mDataNodes) {
+
             TraversalAllFields.getObjAttr(m2mDataNode);
         }
     }
@@ -50,7 +51,7 @@ public class M2mDataBaseTest {
     public void testUpdate() {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("data", 100);
-        m2mDataBase.update("3333430", map);
+        m2mDataBase.update("3333432", map);
     }
 
     @Test
@@ -64,6 +65,7 @@ public class M2mDataBaseTest {
             m2mDataNode.setId((3333430 + i) + "");
             m2mDataNode.setLabel(0);
             m2mDataNode.setValue(11L + i);
+            m2mDataNode.setFlag(0);
             m2mDataBase.create(m2mDataNode);
         }
 

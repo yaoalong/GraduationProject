@@ -19,6 +19,8 @@ public class M2mDataNode implements M2mRecord {
 
     public long value;
 
+    public int flag;
+
     public Integer getLabel() {
         return label;
     }
@@ -82,6 +84,14 @@ public class M2mDataNode implements M2mRecord {
 
     public void setValue(long value) {
         this.value = value;
+    }
+
+    public int getFlag() {
+        return flag;
+    }
+
+    public void setFlag(int flag) {
+        this.flag = flag;
     }
 
 }
