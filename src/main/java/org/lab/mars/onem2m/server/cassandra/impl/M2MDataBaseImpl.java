@@ -137,8 +137,10 @@ public class M2MDataBaseImpl implements M2MDataBase {
     @Override
     public Long delete(String key) {
         try {
+            M2mDataNode m2mDataNode = retrieve(key);
             Statement delete = query().delete().from(keyspace, table)
-                    .where(eq("id", key));
+                    .where(eq("label", 0))
+                    .and(eq("zxid", m2mDataNode.getZxid()));
             session.execute(delete);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -339,6 +341,39 @@ public class M2MDataBaseImpl implements M2MDataBase {
             }
 
             return arraryList;
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public Long getMaxZxid() {
+        try {
+            Select.Selection selection = query().select();
+            Select select = selection.from(keyspace, table);
+            select.where(eq("label", 0)).orderBy(QueryBuilder.desc("zxid"));
+            select.allowFiltering();
+            ResultSet resultSet = session.execute(select);
+            if (resultSet == null) {
+                return null;
+            }
+            List<Long> zxids = new ArrayList<Long>();
+            for (Row row : resultSet.all()) {
+                ColumnDefinitions columnDefinitions = resultSet
+                        .getColumnDefinitions();
+                columnDefinitions.forEach(d -> {
+                    String name = d.getName();
+                    if (name.equals("zxid")) {
+                        zxids.add((Long) row.getObject(name));
+                    }
+
+                });
+
+            }
+
+            return zxids.get(0);
 
         } catch (Exception ex) {
             ex.printStackTrace();

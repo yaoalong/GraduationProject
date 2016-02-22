@@ -24,6 +24,8 @@ public interface M2MDataBase {
 
     List<M2mDataNode> getCertainData(Long low, Long high);
 
+    Long getMaxZxid();
+
     void close();
 
     public ProcessTxnResult processTxn(M2mTxnHeader header, M2mRecord m2mRecord);

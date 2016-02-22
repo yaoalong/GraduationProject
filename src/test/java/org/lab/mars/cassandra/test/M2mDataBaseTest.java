@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.junit.Test;
 import org.lab.mars.onem2m.ZooDefs.OpCode;
@@ -16,8 +17,8 @@ import org.lab.mars.onem2m.txn.M2mSetDataTxn;
 import org.lab.mars.onem2m.txn.M2mTxnHeader;
 
 public class M2mDataBaseTest {
-    M2MDataBaseImpl m2mDataBase = new M2MDataBaseImpl(false, "tests", "m2m1",
-            "192.168.10.133");
+    M2MDataBaseImpl m2mDataBase = new M2MDataBaseImpl(false, "tests",
+            "onem2m1", "192.168.10.133");
 
     @Test
     public void test() {
@@ -28,9 +29,7 @@ public class M2mDataBaseTest {
     public void testRetrieve() {
 
         M2mDataNode m2mDataNode = m2mDataBase.retrieve("3333430");
-        System.out.println(m2mDataNode.getId());
-        System.out.println(m2mDataNode.getLabel());
-        System.out.println(m2mDataNode.getZxid());
+        TraversalAllFields.getObjAttr(m2mDataNode);
     }
 
     @Test
@@ -43,9 +42,7 @@ public class M2mDataBaseTest {
 
         List<M2mDataNode> m2mDataNodes = m2mDataBase.retrieve(634L);
         for (M2mDataNode m2mDataNode : m2mDataNodes) {
-            System.out.println(m2mDataNode.getId());
-            System.out.println(m2mDataNode.getLabel());
-            System.out.println(m2mDataNode.getZxid());
+            TraversalAllFields.getObjAttr(m2mDataNode);
         }
     }
 
@@ -58,9 +55,11 @@ public class M2mDataBaseTest {
 
     @Test
     public void testCreate() {
+        Random random = new Random();
         for (int i = 0; i < 10; i++) {
             M2mDataNode m2mDataNode = new M2mDataNode();
-            m2mDataNode.setZxid(Long.valueOf(140200 + ""));
+
+            m2mDataNode.setZxid(Long.valueOf(140200 + "") + random.nextLong());
             m2mDataNode.setData(2);
             m2mDataNode.setId((3333430 + i) + "");
             m2mDataNode.setLabel(0);
@@ -95,6 +94,11 @@ public class M2mDataBaseTest {
         m2mSetDataTxn.setData(baos.toByteArray());
         m2mDataBase.processTxn(m2mTxnHeader, m2mSetDataTxn);
 
+    }
+
+    @Test
+    public void testGetMaxZxid() {
+        System.out.println(m2mDataBase.getMaxZxid());
     }
 
     @Test
