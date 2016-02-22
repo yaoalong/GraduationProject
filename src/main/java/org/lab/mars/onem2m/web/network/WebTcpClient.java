@@ -57,4 +57,13 @@ public class WebTcpClient {
             channel.close();
         }
     }
+
+    public Channel getChannel() {
+        return channel;
+    }
+
+    public void setChannel(Channel channel) {
+        this.channel = channel;
+    }
+
 }

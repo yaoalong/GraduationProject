@@ -1,5 +1,6 @@
 package org.lab.mars.onem2m.web.network.handler;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -45,6 +46,8 @@ public class WebServerChannelHandler extends
     private AtomicInteger zxid = new AtomicInteger(0);
     static ConcurrentHashMap<Integer, RetriveServerAndCtx> result = new ConcurrentHashMap<Integer, RetriveServerAndCtx>();
     static ConcurrentHashMap<Integer, Integer> serverResult = new ConcurrentHashMap<Integer, Integer>();
+
+    private static final ConcurrentHashMap<String, Channel> webAddressAndPortToChannel = new ConcurrentHashMap<String, Channel>();
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, Object msg) {
@@ -100,13 +103,25 @@ public class WebServerChannelHandler extends
                         OperateCode.retriveLocalKey.getCode());
                 Long position = networkPool.getServerPosition().get(server);
                 for (int i = 0; i < serverCnxnFactory.getReplicationFactor(); i++) {
+
+                    String address = spilitString(networkPool
+                            .getPositionToServer().get(position + i))[0];
+                    Integer webPort = NetworkPool.webPort.get(networkPool
+                            .getPositionToServer().get(position + i));
                     WebTcpClient tcpClient = new WebTcpClient(
                             serverCnxnFactory.getReplicationFactor());
-                    tcpClient.connectionOne(spilitString(networkPool
-                            .getPositionToServer().get(position + i))[0],
-                            NetworkPool.webPort.get(networkPool
-                                    .getPositionToServer().get(position + i)));
-                    tcpClient.write(m2mPacket);
+                    if (webAddressAndPortToChannel.containsKey(address
+                            + webPort)) {
+                        webAddressAndPortToChannel.get(address + webPort)
+                                .writeAndFlush(m2mPacket);
+                    } else {
+                        tcpClient.connectionOne(address, webPort);
+                        tcpClient.write(m2mPacket);
+                        webAddressAndPortToChannel.put(address + webPort,
+                                tcpClient.getChannel());
+
+                    }
+
                 }
 
             } else {
