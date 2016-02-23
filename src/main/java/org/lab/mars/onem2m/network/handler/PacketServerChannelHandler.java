@@ -6,7 +6,6 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.AttributeKey;
 
 import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.lab.mars.onem2m.consistent.hash.NetworkPool;
@@ -95,14 +94,12 @@ public class PacketServerChannelHandler extends
     public boolean preProcessPacket(M2mPacket m2mPacket,
             ChannelHandlerContext ctx) {
         String key = m2mPacket.getM2mRequestHeader().getKey();
-        List<String> servers = networkPool.getAllSock(key);
-        if (servers.contains(self)
-                || (serverCnxnFactory.isTemporyAdd() && networkPool
-                        .getSock(key).equals(self))) {
+
+        String server = networkPool.getSock(key);
+        if (server.equals(self)) {
             return true;
         }
-        for (int i = 0; i < servers.size(); i++) {
-            String server = servers.get(i);// 把server
+        for (int i = 0; i < 3; i++) {
             if (ipAndChannels.containsKey(server)) {
                 ipAndChannels.get(server).writeAndFlush(m2mPacket);
             } else {
@@ -120,10 +117,15 @@ public class PacketServerChannelHandler extends
 
                     LOG.error("process packet error:{}", e);
                 }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    LOG.error("InterruptedException error:{}", e);
+                }
+                server = networkPool.getSock(key);
 
             }
         }
-
         return false;
     }
 
